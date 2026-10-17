@@ -10,323 +10,373 @@
   html, body { margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
     background: #eef1f6; color: #0f172a; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; min-height: 100vh; }
+
+  /* ===== 顶部 ===== */
   .app-header { background: linear-gradient(135deg, #2563eb 0%, #7c3aed 60%, #a855f7 100%);
-    color: #fff; padding: 28px 20px 24px; text-align: center;
-    box-shadow: 0 6px 24px rgba(37,99,235,.28); position: relative; overflow: hidden; }
+    color: #fff; padding: 22px 20px 18px; text-align: center;
+    box-shadow: 0 6px 20px rgba(37,99,235,.25); position: relative; overflow: hidden; }
   .app-header::before { content: ''; position: absolute; inset: 0;
     background: radial-gradient(circle at 20% 20%, rgba(255,255,255,.2), transparent 45%),
                 radial-gradient(circle at 80% 80%, rgba(255,255,255,.12), transparent 45%); pointer-events: none; }
-  .app-header h1 { margin: 0; font-size: 26px; letter-spacing: 1px; font-weight: 800; position: relative; }
-  .app-header .sub { margin: 8px 0 0; font-size: 13px; opacity: .9; position: relative; }
-  .app-header .badges { margin-top: 14px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; position: relative; }
-  .app-header .badges span { font-size: 11px; padding: 4px 10px; background: rgba(255,255,255,.18);
+  .app-header h1 { margin: 0; font-size: 22px; letter-spacing: .8px; font-weight: 800; position: relative; }
+  .app-header .sub { margin: 6px 0 0; font-size: 12px; opacity: .92; position: relative; }
+  .app-header .badges { margin-top: 10px; display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; position: relative; }
+  .app-header .badges span { font-size: 10px; padding: 3px 9px; background: rgba(255,255,255,.18);
     border: 1px solid rgba(255,255,255,.25); border-radius: 999px; }
-  .feature-catalog { max-width: 900px; margin: 0 auto; padding: 22px 16px 0; }
-  .catalog-group { margin-bottom: 22px; }
-  .catalog-title { display: flex; align-items: center; gap: 10px; padding: 0 4px 12px;
-    font-size: 15px; font-weight: 700; color: #334155; }
-  .catalog-title .catalog-icon { font-size: 18px; width: 34px; height: 34px;
-    display: flex; align-items: center; justify-content: center; border-radius: 10px;
+
+  /* ===== 功能目录 ===== */
+  .feature-catalog { max-width: 900px; margin: 0 auto; padding: 16px 16px 0; }
+  .catalog-group { margin-bottom: 14px; }
+  .catalog-title { display: flex; align-items: center; gap: 8px; padding: 0 2px 8px;
+    font-size: 13px; font-weight: 700; color: #475569; letter-spacing: .3px; }
+  .catalog-title .catalog-icon { font-size: 14px; width: 26px; height: 26px;
+    display: flex; align-items: center; justify-content: center; border-radius: 7px;
     background: linear-gradient(135deg, #f1f5f9, #e2e8f0); flex: 0 0 auto; }
   .catalog-title .catalog-line { flex: 1; height: 1px;
     background: linear-gradient(90deg, #cbd5e1, transparent); margin-left: 4px; }
-  .catalog-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
-  .feature-card { display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
-    background: #fff; border: 2px solid #e2e8f0; border-radius: 14px; padding: 14px;
+
+  .catalog-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 6px; }
+  .feature-card { display: flex; flex-direction: row; align-items: center; gap: 10px;
+    background: #fff; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 10px 12px;
     cursor: pointer; transition: all .15s ease; text-align: left; font-family: inherit;
-    box-shadow: 0 1px 3px rgba(15,23,42,.05); position: relative; overflow: hidden;
+    box-shadow: 0 1px 2px rgba(15,23,42,.04); min-height: 54px;
     -webkit-appearance: none; appearance: none; touch-action: manipulation; }
-  .feature-card:hover { border-color: #cbd5e1; box-shadow: 0 4px 12px rgba(15,23,42,.08); transform: translateY(-1px); }
-  .feature-card:active { transform: scale(.98); }
-  .feature-icon { flex: 0 0 auto; font-size: 22px; width: 38px; height: 38px;
-    display: flex; align-items: center; justify-content: center; background: #f8fafc;
-    border-radius: 10px; margin-bottom: 2px; transition: all .15s; }
-  .feature-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; width: 100%; }
-  .feature-name { font-size: 14px; font-weight: 700; color: #0f172a; line-height: 1.3; }
-  .feature-desc { font-size: 11px; color: #64748b; line-height: 1.4; }
+  .feature-card:hover { border-color: #cbd5e1; box-shadow: 0 3px 8px rgba(15,23,42,.07); transform: translateY(-1px); }
+  .feature-card:active { transform: scale(.97); }
+  .feature-icon { flex: 0 0 auto; font-size: 20px; width: 34px; height: 34px;
+    display: flex; align-items: center; justify-content: center;
+    background: #f8fafc; border-radius: 8px; transition: all .15s; }
+  .feature-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; flex: 1; }
+  .feature-name { font-size: 13px; font-weight: 700; color: #0f172a; line-height: 1.25;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .feature-desc { font-size: 10px; color: #94a3b8; line-height: 1.2;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* 分类激活色 */
   .catalog-group[data-category="edit"] .feature-card.active { border-color: #2563eb;
     background: linear-gradient(135deg, #eff6ff, #fff);
-    box-shadow: 0 0 0 3px rgba(37,99,235,.12), 0 4px 12px rgba(37,99,235,.12); }
+    box-shadow: 0 0 0 3px rgba(37,99,235,.1), 0 3px 10px rgba(37,99,235,.1); }
   .catalog-group[data-category="edit"] .feature-card.active .feature-icon { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
   .catalog-group[data-category="convert"] .feature-card.active { border-color: #7c3aed;
     background: linear-gradient(135deg, #f5f3ff, #fff);
-    box-shadow: 0 0 0 3px rgba(124,58,237,.12), 0 4px 12px rgba(124,58,237,.12); }
+    box-shadow: 0 0 0 3px rgba(124,58,237,.1), 0 3px 10px rgba(124,58,237,.1); }
   .catalog-group[data-category="convert"] .feature-card.active .feature-icon { background: linear-gradient(135deg, #ede9fe, #ddd6fe); }
   .catalog-group[data-category="organize"] .feature-card.active { border-color: #059669;
     background: linear-gradient(135deg, #ecfdf5, #fff);
-    box-shadow: 0 0 0 3px rgba(5,150,105,.12), 0 4px 12px rgba(5,150,105,.12); }
+    box-shadow: 0 0 0 3px rgba(5,150,105,.1), 0 3px 10px rgba(5,150,105,.1); }
   .catalog-group[data-category="organize"] .feature-card.active .feature-icon { background: linear-gradient(135deg, #d1fae5, #a7f3d0); }
-  #workspace { max-width: 900px; margin: 0 auto; padding: 8px 16px 80px; scroll-margin-top: 16px; }
-  .workspace-header { display: flex; align-items: center; justify-content: space-between;
-    gap: 12px; padding: 12px 4px 16px; }
-  .workspace-title { font-size: 16px; font-weight: 700; color: #0f172a;
+
+  /* ===== 工作区 ===== */
+  #workspace { max-width: 900px; margin: 0 auto; padding: 4px 16px 80px; scroll-margin-top: 16px; }
+  .workspace-header { display: flex; align-items: center; gap: 10px; padding: 6px 4px 12px; }
+  .workspace-title { font-size: 15px; font-weight: 700; color: #0f172a;
     display: flex; align-items: center; gap: 8px; }
-  .workspace-title .ws-icon { font-size: 20px; width: 36px; height: 36px;
-    display: flex; align-items: center; justify-content: center; border-radius: 10px;
+  .workspace-title .ws-icon { font-size: 18px; width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center; border-radius: 8px;
     background: linear-gradient(135deg, #e0e7ff, #c7d2fe); flex: 0 0 auto; }
+
   main { padding: 0; }
   .panel { display: none; }
-  .panel.active { display: block; animation: fadeIn .25s ease; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-  #envBanner { display: none; margin: 0 0 14px; border-radius: 12px; padding: 14px 16px;
-    font-size: 13px; line-height: 1.7; border: 1px solid; }
+  .panel.active { display: block; animation: fadeIn .22s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+  #envBanner { display: none; margin: 0 0 12px; border-radius: 10px; padding: 12px 14px;
+    font-size: 12px; line-height: 1.65; border: 1px solid; }
   #envBanner.show { display: block; }
   #envBanner.warn { background: #fffbeb; border-color: #fde68a; color: #78350f; }
   #envBanner.err  { background: #fef2f2; border-color: #fecaca; color: #7f1d1d; }
   #envBanner.ok   { background: #f0fdf4; border-color: #bbf7d0; color: #14532d; }
   #envBanner b { font-weight: 700; }
-  #envBanner code { background: rgba(0,0,0,.07); padding: 2px 6px; border-radius: 4px;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
-  .card { background: #fff; border-radius: 16px; padding: 20px; margin-bottom: 16px;
-    box-shadow: 0 1px 3px rgba(15,23,42,.04), 0 6px 20px rgba(15,23,42,.06);
+  #envBanner code { background: rgba(0,0,0,.07); padding: 1px 5px; border-radius: 4px;
+    font-family: ui-monospace, Menlo, monospace; font-size: 11px; }
+
+  /* ===== 卡片 ===== */
+  .card { background: #fff; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px;
+    box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 4px 14px rgba(15,23,42,.05);
     border: 1px solid #f1f5f9; position: relative; overflow: hidden; }
   .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
     background: linear-gradient(90deg, #2563eb, #7c3aed, #059669); opacity: .8; }
-  .card h2 { margin: 0 0 14px; font-size: 15px; font-weight: 700;
-    color: #0f172a; display: flex; align-items: center; gap: 8px; }
-  .card h2::before { content: ''; width: 4px; height: 16px; border-radius: 2px;
-    background: linear-gradient(180deg, #2563eb, #7c3aed); flex: 0 0 auto; }
-  .field { margin-bottom: 14px; }
-  .field label { display: block; font-size: 13px; color: #475569; margin-bottom: 6px; font-weight: 500; }
-  input[type=file] { width: 100%; font-size: 16px; padding: 14px 12px;
-    border: 1.5px dashed #cbd5e1; border-radius: 12px; background: #f8fafc;
-    cursor: pointer; color: #334155; transition: all .2s;
+  .card h2 { margin: 0 0 12px; font-size: 14px; font-weight: 700;
+    color: #0f172a; display: flex; align-items: center; gap: 10px; }
+
+  /* ===== 步骤标签 ===== */
+  .step-label { display: inline-flex; align-items: center; justify-content: center;
+    padding: 4px 10px; background: linear-gradient(135deg, #2563eb, #7c3aed); color: #fff;
+    border-radius: 7px; font-size: 11px; font-weight: 700; letter-spacing: .3px;
+    white-space: nowrap; flex: 0 0 auto; box-shadow: 0 1px 3px rgba(37,99,235,.3); }
+  .step-label.step-ok { background: linear-gradient(135deg, #059669, #10b981);
+    box-shadow: 0 1px 3px rgba(5,150,105,.3); }
+  .step-title { font-size: 14px; font-weight: 700; color: #0f172a; }
+
+  /* ===== 表单 ===== */
+  .field { margin-bottom: 12px; }
+  .field label { display: block; font-size: 12px; color: #475569; margin-bottom: 5px; font-weight: 500; }
+  input[type=file] { width: 100%; font-size: 16px; padding: 12px 10px;
+    border: 1.5px dashed #cbd5e1; border-radius: 10px; background: #f8fafc;
+    cursor: pointer; color: #334155; transition: all .15s;
     -webkit-appearance: none; appearance: none; line-height: 1.4;
-    min-height: 52px; touch-action: manipulation; }
+    min-height: 48px; touch-action: manipulation; }
   input[type=file]:active { background: #eff6ff; border-color: #93c5fd; }
   input[type=file]::-webkit-file-upload-button { border: none;
     background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff;
-    padding: 9px 16px; border-radius: 8px; margin-right: 12px; cursor: pointer;
-    font-size: 14px; font-weight: 500; font-family: inherit; -webkit-appearance: none; }
+    padding: 8px 14px; border-radius: 7px; margin-right: 10px; cursor: pointer;
+    font-size: 13px; font-weight: 600; font-family: inherit; -webkit-appearance: none; }
   input[type=file]::file-selector-button { border: none;
     background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff;
-    padding: 9px 16px; border-radius: 8px; margin-right: 12px; cursor: pointer;
-    font-size: 14px; font-weight: 500; font-family: inherit; }
-  select, input[type=number] { width: 100%; padding: 14px; border: 1.5px solid #e2e8f0;
-    border-radius: 10px; background: #fff; color: #0f172a; font-size: 16px;
-    transition: all .15s; font-family: inherit; -webkit-appearance: none;
-    appearance: none; min-height: 52px; }
+    padding: 8px 14px; border-radius: 7px; margin-right: 10px; cursor: pointer;
+    font-size: 13px; font-weight: 600; font-family: inherit; }
+
+  select, input[type=number] { width: 100%; padding: 12px;
+    border: 1.5px solid #e2e8f0; border-radius: 9px; background: #fff;
+    color: #0f172a; font-size: 16px; transition: all .15s;
+    font-family: inherit; -webkit-appearance: none; appearance: none; min-height: 48px; }
   select:focus, input[type=number]:focus { outline: none; border-color: #2563eb;
     box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
   select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat; background-position: right 14px center; padding-right: 40px; }
+    background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+
+  /* ===== 按钮 ===== */
   .btn { display: inline-flex; align-items: center; justify-content: center;
-    padding: 12px 18px; border: none; border-radius: 10px;
+    padding: 11px 16px; border: none; border-radius: 9px;
     background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff;
-    font-size: 15px; font-weight: 600; cursor: pointer; transition: all .15s ease;
+    font-size: 14px; font-weight: 600; cursor: pointer; transition: all .15s ease;
     white-space: nowrap; -webkit-user-select: none; user-select: none;
-    font-family: inherit; text-decoration: none; box-shadow: 0 2px 6px rgba(37,99,235,.25);
-    -webkit-appearance: none; appearance: none; touch-action: manipulation; min-height: 48px; }
-  .btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(37,99,235,.4); }
+    font-family: inherit; text-decoration: none; box-shadow: 0 2px 5px rgba(37,99,235,.22);
+    -webkit-appearance: none; appearance: none; touch-action: manipulation; min-height: 44px; }
+  .btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,.35); }
   .btn:active:not(:disabled) { transform: scale(.97); }
   .btn:disabled { opacity: .5; cursor: not-allowed; box-shadow: none; }
   .btn.ghost { background: #eff6ff; color: #2563eb; box-shadow: none; border: 1px solid #dbeafe; }
   .btn.gray { background: #f1f5f9; color: #334155; box-shadow: none; border: 1px solid #e2e8f0; }
-  .btn.green { background: linear-gradient(135deg, #059669, #10b981); box-shadow: 0 2px 6px rgba(5,150,105,.25); }
-  .btn.amber { background: linear-gradient(135deg, #d97706, #f59e0b); box-shadow: 0 2px 6px rgba(217,119,6,.25); }
-  .btn.purple { background: linear-gradient(135deg, #7c3aed, #a855f7); box-shadow: 0 2px 6px rgba(124,58,237,.25); }
-  .btn.red { background: linear-gradient(135deg, #dc2626, #ef4444); box-shadow: 0 2px 6px rgba(220,38,38,.25); }
-  .btn.big { width: 100%; padding: 15px 18px; font-size: 16px; }
-  .btn.small { padding: 8px 14px; font-size: 13px; border-radius: 8px; }
-  .hint { font-size: 12px; color: #64748b; line-height: 1.6; margin: 10px 0 0; }
-  .status { font-size: 13px; color: #2563eb; margin-top: 12px; min-height: 18px;
-    line-height: 1.5; padding: 8px 12px; border-radius: 8px; }
+  .btn.green { background: linear-gradient(135deg, #059669, #10b981); box-shadow: 0 2px 5px rgba(5,150,105,.22); }
+  .btn.amber { background: linear-gradient(135deg, #d97706, #f59e0b); box-shadow: 0 2px 5px rgba(217,119,6,.22); }
+  .btn.purple { background: linear-gradient(135deg, #7c3aed, #a855f7); box-shadow: 0 2px 5px rgba(124,58,237,.22); }
+  .btn.red { background: linear-gradient(135deg, #dc2626, #ef4444); box-shadow: 0 2px 5px rgba(220,38,38,.22); }
+  .btn.big { width: 100%; padding: 13px 16px; font-size: 15px; }
+  .btn.small { padding: 7px 12px; font-size: 12px; border-radius: 7px; min-height: 36px; }
+
+  .hint { font-size: 11px; color: #64748b; line-height: 1.55; margin: 8px 0 0; }
+  .status { font-size: 12px; color: #2563eb; margin-top: 10px; min-height: 16px;
+    line-height: 1.45; padding: 7px 10px; border-radius: 7px; }
   .status:not(:empty) { background: #eff6ff; }
   .status.err { color: #dc2626; background: #fef2f2; }
   .status.ok { color: #059669; background: #f0fdf4; }
   .hidden { display: none !important; }
-  .pager { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
-  .pager .info { font-size: 14px; color: #475569; min-width: 80px; text-align: center;
-    font-weight: 600; background: #f8fafc; padding: 6px 12px; border-radius: 8px;
+
+  .pager { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+  .pager .info { font-size: 13px; color: #475569; min-width: 70px; text-align: center;
+    font-weight: 600; background: #f8fafc; padding: 5px 10px; border-radius: 7px;
     border: 1px solid #e2e8f0; }
-  .stage { position: relative; width: 100%; overflow: hidden; border-radius: 12px;
+
+  .stage { position: relative; width: 100%; overflow: hidden; border-radius: 10px;
     background: #f1f5f9; -webkit-user-select: none; user-select: none;
     line-height: 0; border: 1px solid #e2e8f0; touch-action: pan-y; }
   .stage canvas { display: block; width: 100%; touch-action: none; }
   .stage canvas.overlay { position: absolute; left: 0; top: 0; pointer-events: none; }
-  .btn-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .btn-row { display: flex; flex-wrap: wrap; gap: 6px; }
+
   .result-card { border: 1px solid #bbf7d0;
     background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 60%);
-    box-shadow: 0 6px 24px rgba(5,150,105,.1); }
+    box-shadow: 0 5px 20px rgba(5,150,105,.08); }
   .result-card::before { background: linear-gradient(90deg, #059669, #10b981); }
-  .result-card h2 { color: #065f46; }
-  .result-card h2::before { background: linear-gradient(180deg, #059669, #10b981); }
-  .result-file { display: flex; align-items: center; gap: 14px;
-    background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
-    padding: 14px; margin-bottom: 14px; }
-  .result-icon { flex: 0 0 auto; width: 48px; height: 48px; border-radius: 12px;
+  .result-file { display: flex; align-items: center; gap: 12px;
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+    padding: 12px; margin-bottom: 12px; }
+  .result-icon { flex: 0 0 auto; width: 42px; height: 42px; border-radius: 10px;
     background: linear-gradient(135deg, #fee2e2, #fecaca); color: #dc2626;
-    font-size: 12px; font-weight: 800; display: flex; align-items: center;
-    justify-content: center; letter-spacing: .5px; box-shadow: 0 2px 8px rgba(220,38,38,.15); }
+    font-size: 11px; font-weight: 800; display: flex; align-items: center;
+    justify-content: center; letter-spacing: .5px; }
+  .result-icon.zip { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; }
   .result-meta { min-width: 0; flex: 1; }
-  .result-name { font-size: 14px; font-weight: 700; color: #0f172a;
-    word-break: break-all; line-height: 1.4; }
-  .result-sub { font-size: 12px; color: #64748b; margin-top: 4px; }
-  .dirty-tip { font-size: 12px; color: #b45309; background: #fffbeb;
-    border: 1px solid #fde68a; border-radius: 8px; padding: 8px 12px;
-    margin-bottom: 12px; font-weight: 500; }
-  .preview-wrap { margin-top: 14px; border: 1px solid #e2e8f0;
-    border-radius: 12px; background: #f8fafc; padding: 12px;
+  .result-name { font-size: 13px; font-weight: 700; color: #0f172a;
+    word-break: break-all; line-height: 1.35; }
+  .result-sub { font-size: 11px; color: #64748b; margin-top: 3px; }
+  .dirty-tip { font-size: 11px; color: #b45309; background: #fffbeb;
+    border: 1px solid #fde68a; border-radius: 7px; padding: 7px 10px;
+    margin-bottom: 10px; font-weight: 500; }
+
+  .preview-wrap { margin-top: 12px; border: 1px solid #e2e8f0;
+    border-radius: 10px; background: #f8fafc; padding: 10px;
     max-height: 640px; overflow-y: auto; }
-  .preview-page { margin: 0 auto 14px; box-shadow: 0 4px 16px rgba(15,23,42,.12);
-    border-radius: 6px; overflow: hidden; background: #fff;
+  .preview-page { margin: 0 auto 12px; box-shadow: 0 3px 12px rgba(15,23,42,.1);
+    border-radius: 5px; overflow: hidden; background: #fff;
     max-width: 100%; border: 1px solid #f1f5f9; }
   .preview-page canvas { display: block; width: 100%; height: auto; }
   .preview-toolbar { display: flex; justify-content: space-between; align-items: center;
-    font-size: 12px; color: #64748b; padding: 6px 4px 10px;
-    flex-wrap: wrap; gap: 8px; }
-  .preview-toolbar .label { font-weight: 700; color: #334155; font-size: 13px; }
-  .preview-loading { text-align: center; padding: 32px 12px; font-size: 13px; color: #64748b; }
-  details.troubleshoot { margin-top: 16px; background: #f8fafc;
-    border: 1px solid #e2e8f0; border-radius: 12px; }
-  details.troubleshoot summary { padding: 12px 14px; font-size: 13px; font-weight: 600;
+    font-size: 11px; color: #64748b; padding: 4px 2px 8px; flex-wrap: wrap; gap: 6px; }
+  .preview-toolbar .label { font-weight: 700; color: #334155; font-size: 12px; }
+  .preview-loading { text-align: center; padding: 24px 10px; font-size: 12px; color: #64748b; }
+
+  details.troubleshoot { margin-top: 12px; background: #f8fafc;
+    border: 1px solid #e2e8f0; border-radius: 10px; }
+  details.troubleshoot summary { padding: 10px 12px; font-size: 12px; font-weight: 600;
     color: #334155; cursor: pointer; list-style: none;
-    display: flex; align-items: center; gap: 8px;
-    border-radius: 12px; transition: background .15s; }
+    display: flex; align-items: center; gap: 6px; border-radius: 10px; }
   details.troubleshoot summary::-webkit-details-marker { display: none; }
-  details.troubleshoot summary::before { content: '❓'; font-size: 14px; }
+  details.troubleshoot summary::before { content: '❓'; font-size: 13px; }
   details.troubleshoot[open] summary::before { content: '💡'; }
-  details.troubleshoot[open] summary { border-bottom: 1px solid #e2e8f0; border-radius: 12px 12px 0 0; }
-  .troubleshoot-body { padding: 12px 16px 14px; font-size: 12px; color: #475569; line-height: 1.75; }
-  .troubleshoot-body p { margin: 8px 0 4px; }
+  details.troubleshoot[open] summary { border-bottom: 1px solid #e2e8f0; border-radius: 10px 10px 0 0; }
+  .troubleshoot-body { padding: 10px 14px 12px; font-size: 11px; color: #475569; line-height: 1.7; }
+  .troubleshoot-body p { margin: 6px 0 3px; }
   .troubleshoot-body b { color: #0f172a; }
-  .troubleshoot-body code { background: #eef2ff; color: #3730a3; padding: 1px 6px;
-    border-radius: 4px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; }
+  .troubleshoot-body code { background: #eef2ff; color: #3730a3; padding: 1px 5px;
+    border-radius: 4px; font-family: ui-monospace, Menlo, monospace; font-size: 10px; }
+
   .modal { position: fixed; inset: 0; z-index: 1000; background: rgba(15,23,42,.6);
     display: flex; align-items: center; justify-content: center; padding: 16px; }
-  .modal-content { background: #fff; border-radius: 16px; padding: 22px;
+  .modal-content { background: #fff; border-radius: 14px; padding: 18px;
     max-width: 720px; width: 100%; max-height: 90vh; display: flex;
     flex-direction: column; box-shadow: 0 20px 60px rgba(15,23,42,.3); }
-  .modal-content h3 { margin: 0 0 10px; font-size: 17px; color: #0f172a; }
-  .modal-content p { margin: 0 0 14px; font-size: 13px; color: #475569; line-height: 1.6; }
+  .modal-content h3 { margin: 0 0 10px; font-size: 16px; color: #0f172a; }
+  .modal-content p { margin: 0 0 12px; font-size: 12px; color: #475569; line-height: 1.6; }
   #dataTextarea { flex: 1; min-height: 220px; font-family: ui-monospace, monospace;
-    font-size: 12px; padding: 12px; border: 1px solid #e2e8f0;
-    border-radius: 10px; resize: vertical; word-break: break-all;
+    font-size: 11px; padding: 10px; border: 1px solid #e2e8f0;
+    border-radius: 8px; resize: vertical; word-break: break-all;
     background: #f8fafc; color: #334155; -webkit-user-select: text; user-select: text; }
-  .crop-tips { font-size: 12px; color: #334155; line-height: 1.7;
+
+  .crop-tips { font-size: 11px; color: #334155; line-height: 1.65;
     background: linear-gradient(135deg, #eff6ff, #f8fafc);
-    border: 1px solid #dbeafe; border-radius: 10px;
-    padding: 12px 14px; margin-top: 12px; }
+    border: 1px solid #dbeafe; border-radius: 9px;
+    padding: 10px 12px; margin-top: 10px; }
   .crop-tips b { color: #1e40af; }
-  .arrange-toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px;
-    padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; }
-  .arrange-toolbar .btn { padding: 9px 14px; font-size: 13px; border-radius: 8px; min-height: 40px; }
-  .arrange-info { font-size: 13px; color: #475569; margin-left: auto;
-    align-self: center; font-weight: 600; padding: 6px 12px;
-    background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; }
-  .arrange-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
-    gap: 14px; max-height: 620px; overflow-y: auto; padding: 14px;
-    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;
+
+  .arrange-toolbar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;
+    padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; }
+  .arrange-toolbar .btn { padding: 7px 11px; font-size: 12px; border-radius: 7px; min-height: 34px; }
+  .arrange-info { font-size: 12px; color: #475569; margin-left: auto;
+    align-self: center; font-weight: 600; padding: 4px 10px;
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 7px; }
+
+  .arrange-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px; max-height: 600px; overflow-y: auto; padding: 12px;
+    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;
     touch-action: pan-y; -webkit-overflow-scrolling: touch; }
   .page-card { position: relative; background: #fff; border: 2px solid #e2e8f0;
-    border-radius: 10px; padding: 8px; display: flex; flex-direction: column;
-    align-items: center; gap: 6px; cursor: grab;
-    -webkit-user-select: none; user-select: none; transition: all .15s ease;
-    box-shadow: 0 1px 3px rgba(15,23,42,.04); touch-action: manipulation; }
+    border-radius: 9px; padding: 7px; display: flex; flex-direction: column;
+    align-items: center; gap: 5px; cursor: grab;
+    -webkit-user-select: none; user-select: none;
+    box-shadow: 0 1px 2px rgba(15,23,42,.04); touch-action: manipulation; }
   .page-card.selected { border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37,99,235,.15), 0 4px 12px rgba(37,99,235,.2); }
+    box-shadow: 0 0 0 3px rgba(37,99,235,.13); }
   .page-card.dragging { opacity: .35; }
   .page-card.drop-target { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,.2); }
   .page-card .thumb-wrap { position: relative; display: flex; align-items: center;
-    justify-content: center; background: #f1f5f9; border-radius: 6px;
-    overflow: hidden; min-height: 100px; width: 100%; }
+    justify-content: center; background: #f1f5f9; border-radius: 5px;
+    overflow: hidden; min-height: 90px; width: 100%; }
   .page-card canvas { display: block; }
-  .page-card .page-index { position: absolute; top: 8px; left: 8px;
-    background: rgba(15,23,42,.85); color: #fff; font-size: 11px;
-    font-weight: 700; padding: 3px 8px; border-radius: 999px; }
-  .page-card .page-badge { position: absolute; top: 8px; right: 8px;
+  .page-card .page-index { position: absolute; top: 6px; left: 6px;
+    background: rgba(15,23,42,.85); color: #fff; font-size: 10px;
+    font-weight: 700; padding: 2px 7px; border-radius: 999px; }
+  .page-card .page-badge { position: absolute; top: 6px; right: 6px;
     background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff;
-    font-size: 10px; font-weight: 700; padding: 3px 7px; border-radius: 999px; }
-  .page-card .rotation-tag { position: absolute; bottom: 8px; right: 8px;
+    font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 999px; }
+  .page-card .rotation-tag { position: absolute; bottom: 6px; right: 6px;
     background: linear-gradient(135deg, #d97706, #f59e0b); color: #fff;
-    font-size: 10px; font-weight: 700; padding: 3px 7px; border-radius: 999px; }
-  .page-actions { display: flex; gap: 4px; width: 100%; justify-content: center; }
-  .page-actions button { flex: 1; min-width: 0; padding: 6px 0; border: none;
-    border-radius: 6px; background: #f1f5f9; color: #334155; font-size: 13px;
+    font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 999px; }
+  .page-actions { display: flex; gap: 3px; width: 100%; justify-content: center; }
+  .page-actions button { flex: 1; min-width: 0; padding: 5px 0; border: none;
+    border-radius: 5px; background: #f1f5f9; color: #334155; font-size: 12px;
     cursor: pointer; font-family: inherit; display: flex; align-items: center;
-    justify-content: center; font-weight: 600; transition: all .12s;
-    min-height: 34px; -webkit-appearance: none; appearance: none;
+    justify-content: center; font-weight: 600;
+    min-height: 30px; -webkit-appearance: none; appearance: none;
     touch-action: manipulation; }
   .page-actions button.danger { background: #fee2e2; color: #b91c1c; }
   .page-actions button.primary { background: #eff6ff; color: #2563eb; }
-  .img-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-    gap: 10px; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0;
-    border-radius: 12px; max-height: 460px; overflow-y: auto;
+
+  .img-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 8px; padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0;
+    border-radius: 10px; max-height: 440px; overflow-y: auto;
     -webkit-overflow-scrolling: touch; }
-  .img-item { position: relative; background: #fff; border: 2px solid #e2e8f0;
-    border-radius: 10px; padding: 8px; display: flex; flex-direction: column; gap: 5px; }
-  .img-item .thumb { width: 100%; height: 100px; object-fit: contain;
-    background: #f1f5f9; border-radius: 6px; display: block; }
-  .img-item .img-index { position: absolute; top: 12px; left: 12px;
-    background: rgba(15,23,42,.85); color: #fff; font-size: 10px;
-    font-weight: 700; padding: 2px 7px; border-radius: 999px; }
-  .img-item .img-meta { font-size: 11px; color: #64748b; text-align: center;
-    word-break: break-all; line-height: 1.3; max-height: 2.6em; overflow: hidden; }
-  .img-item .actions { display: flex; gap: 3px; }
-  .img-item .actions button { flex: 1; padding: 6px 0; font-size: 13px;
-    border: none; border-radius: 5px; background: #f1f5f9; color: #334155;
-    cursor: pointer; font-family: inherit; font-weight: 600; min-height: 32px;
+  .img-item { position: relative; background: #fff; border: 1.5px solid #e2e8f0;
+    border-radius: 9px; padding: 7px; display: flex; flex-direction: column; gap: 4px; }
+  .img-item .thumb { width: 100%; height: 90px; object-fit: contain;
+    background: #f1f5f9; border-radius: 5px; display: block; }
+  .img-item .img-index { position: absolute; top: 10px; left: 10px;
+    background: rgba(15,23,42,.85); color: #fff; font-size: 9px;
+    font-weight: 700; padding: 2px 6px; border-radius: 999px; }
+  .img-item .img-meta { font-size: 10px; color: #64748b; text-align: center;
+    word-break: break-all; line-height: 1.2; max-height: 2.4em; overflow: hidden; }
+  .img-item .actions { display: flex; gap: 2px; }
+  .img-item .actions button { flex: 1; padding: 5px 0; font-size: 12px;
+    border: none; border-radius: 4px; background: #f1f5f9; color: #334155;
+    cursor: pointer; font-family: inherit; font-weight: 600; min-height: 28px;
     touch-action: manipulation; -webkit-appearance: none; appearance: none; }
   .img-item .actions button.danger { background: #fee2e2; color: #b91c1c; }
-  .file-list { display: flex; flex-direction: column; gap: 8px;
-    max-height: 460px; overflow-y: auto; padding: 12px; background: #f8fafc;
-    border: 1px solid #e2e8f0; border-radius: 12px;
+
+  .file-list { display: flex; flex-direction: column; gap: 6px;
+    max-height: 440px; overflow-y: auto; padding: 10px; background: #f8fafc;
+    border: 1px solid #e2e8f0; border-radius: 10px;
     -webkit-overflow-scrolling: touch; }
-  .file-item { display: flex; align-items: center; gap: 12px; background: #fff;
-    border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; }
-  .file-item .file-icon { flex: 0 0 auto; width: 38px; height: 38px;
-    border-radius: 8px; background: linear-gradient(135deg, #fee2e2, #fecaca);
+  .file-item { display: flex; align-items: center; gap: 10px; background: #fff;
+    border: 1px solid #e2e8f0; border-radius: 9px; padding: 10px; }
+  .file-item .file-icon { flex: 0 0 auto; width: 34px; height: 34px;
+    border-radius: 7px; background: linear-gradient(135deg, #fee2e2, #fecaca);
     color: #dc2626; display: flex; align-items: center; justify-content: center;
-    font-size: 10px; font-weight: 800; letter-spacing: .3px; }
+    font-size: 9px; font-weight: 800; letter-spacing: .3px; }
   .file-item .file-icon.zip { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; }
   .file-item .file-info { flex: 1; min-width: 0; }
-  .file-item .file-name { font-size: 13px; font-weight: 600;
-    word-break: break-all; line-height: 1.3; color: #0f172a; }
-  .file-item .file-meta { font-size: 12px; color: #64748b; margin-top: 3px; }
-  .file-item .file-actions { display: flex; gap: 5px; flex-wrap: wrap; }
-  .file-item .file-actions button { padding: 6px 12px; font-size: 12px;
-    border: none; border-radius: 6px; background: #f1f5f9; color: #334155;
-    cursor: pointer; font-family: inherit; font-weight: 600; min-height: 32px;
+  .file-item .file-name { font-size: 12px; font-weight: 600;
+    word-break: break-all; line-height: 1.25; color: #0f172a; }
+  .file-item .file-meta { font-size: 11px; color: #64748b; margin-top: 2px; }
+  .file-item .file-actions { display: flex; gap: 4px; flex-wrap: wrap; }
+  .file-item .file-actions button { padding: 5px 10px; font-size: 11px;
+    border: none; border-radius: 5px; background: #f1f5f9; color: #334155;
+    cursor: pointer; font-family: inherit; font-weight: 600; min-height: 28px;
     touch-action: manipulation; -webkit-appearance: none; appearance: none; }
   .file-item .file-actions button.danger { background: #fee2e2; color: #b91c1c; }
   .file-item .file-actions button.primary { background: linear-gradient(135deg, #2563eb, #3b82f6);
-    color: #fff; box-shadow: 0 2px 6px rgba(37,99,235,.25); }
-  .zip-result { text-align: center; padding: 24px 12px; }
-  .zip-result .big-icon { font-size: 56px; margin-bottom: 12px; }
-  .zip-result .zip-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; color: #065f46; }
-  .zip-result .zip-sub { font-size: 12px; color: #64748b; margin-bottom: 18px; }
+    color: #fff; box-shadow: 0 1px 4px rgba(37,99,235,.22); }
+
+  .zip-result { text-align: center; padding: 20px 10px; }
+  .zip-result .big-icon { font-size: 48px; margin-bottom: 10px; }
+  .zip-result .zip-title { font-size: 14px; font-weight: 700; margin-bottom: 5px; color: #065f46; }
+  .zip-result .zip-sub { font-size: 11px; color: #64748b; margin-bottom: 16px; }
+
+  /* 面板主题色 */
   .panel[data-theme="edit"] .card::before { background: linear-gradient(90deg, #2563eb, #3b82f6); }
-  .panel[data-theme="edit"] .card h2::before { background: linear-gradient(180deg, #2563eb, #3b82f6); }
+  .panel[data-theme="edit"] .step-label:not(.step-ok) { background: linear-gradient(135deg, #2563eb, #3b82f6); }
   .panel[data-theme="convert"] .card::before { background: linear-gradient(90deg, #7c3aed, #a855f7); }
-  .panel[data-theme="convert"] .card h2::before { background: linear-gradient(180deg, #7c3aed, #a855f7); }
+  .panel[data-theme="convert"] .step-label:not(.step-ok) { background: linear-gradient(135deg, #7c3aed, #a855f7); }
   .panel[data-theme="convert"] input[type=file]::file-selector-button { background: linear-gradient(135deg, #7c3aed, #a855f7); }
   .panel[data-theme="convert"] input[type=file]::-webkit-file-upload-button { background: linear-gradient(135deg, #7c3aed, #a855f7); }
   .panel[data-theme="organize"] .card::before { background: linear-gradient(90deg, #059669, #10b981); }
-  .panel[data-theme="organize"] .card h2::before { background: linear-gradient(180deg, #059669, #10b981); }
+  .panel[data-theme="organize"] .step-label:not(.step-ok) { background: linear-gradient(135deg, #059669, #10b981); }
   .panel[data-theme="organize"] input[type=file]::file-selector-button { background: linear-gradient(135deg, #059669, #10b981); }
   .panel[data-theme="organize"] input[type=file]::-webkit-file-upload-button { background: linear-gradient(135deg, #059669, #10b981); }
+
+  /* 手机适配 */
   @media (max-width: 640px) {
-    .app-header { padding: 22px 16px 20px; } .app-header h1 { font-size: 22px; }
-    .app-header .sub { font-size: 12px; }
-    .feature-catalog { padding: 18px 12px 0; }
-    .catalog-items { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-    .catalog-title { font-size: 14px; padding-bottom: 10px; }
-    .catalog-title .catalog-icon { width: 30px; height: 30px; font-size: 16px; }
-    .feature-card { padding: 10px; gap: 4px; min-height: 88px; }
-    .feature-icon { font-size: 20px; width: 34px; height: 34px; }
-    .feature-name { font-size: 13px; } .feature-desc { font-size: 10px; }
-    #workspace { padding: 0 12px 80px; } .workspace-header { padding: 10px 0 12px; }
-    .workspace-title { font-size: 15px; }
-    .workspace-title .ws-icon { width: 32px; height: 32px; font-size: 18px; }
-    .card { padding: 16px; border-radius: 14px; } .card h2 { font-size: 14px; }
-    .pager { gap: 6px; } .pager .btn { padding: 9px 12px; font-size: 13px; }
-    .pager .info { font-size: 13px; min-width: 70px; padding: 5px 10px; }
-    .btn.big { padding: 14px 16px; font-size: 15px; }
+    .app-header { padding: 18px 16px 16px; }
+    .app-header h1 { font-size: 20px; }
+    .app-header .sub { font-size: 11px; }
+    .app-header .badges { margin-top: 8px; }
+    .feature-catalog { padding: 12px 12px 0; }
+    .catalog-items { grid-template-columns: 1fr 1fr; gap: 5px; }
+    .catalog-group { margin-bottom: 12px; }
+    .catalog-title { font-size: 12px; padding-bottom: 6px; }
+    .catalog-title .catalog-icon { width: 24px; height: 24px; font-size: 12px; }
+    .feature-card { padding: 9px 10px; gap: 8px; min-height: 50px; border-radius: 9px; }
+    .feature-icon { font-size: 18px; width: 30px; height: 30px; border-radius: 7px; }
+    .feature-name { font-size: 12px; }
+    .feature-desc { font-size: 9px; }
+    #workspace { padding: 4px 12px 80px; }
+    .workspace-header { padding: 4px 2px 10px; }
+    .workspace-title { font-size: 14px; }
+    .workspace-title .ws-icon { width: 28px; height: 28px; font-size: 16px; }
+    .card { padding: 12px 13px; border-radius: 11px; margin-bottom: 8px; }
+    .card h2 { font-size: 13px; gap: 8px; margin-bottom: 10px; }
+    .step-label { font-size: 10px; padding: 3px 8px; border-radius: 6px; }
+    .step-title { font-size: 13px; }
+    .pager { gap: 5px; }
+    .pager .btn { padding: 8px 10px; font-size: 12px; }
+    .pager .info { font-size: 12px; min-width: 60px; padding: 4px 8px; }
+    .btn.big { padding: 12px 14px; font-size: 14px; }
     .preview-wrap { max-height: 480px; }
-    .arrange-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; padding: 10px; }
-    .page-actions button { font-size: 12px; padding: 5px 0; }
-    .img-list { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; padding: 10px; }
-    .img-item .thumb { height: 80px; }
+    .arrange-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; padding: 8px; }
+    .page-actions button { font-size: 11px; padding: 4px 0; }
+    .img-list { grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); gap: 6px; padding: 8px; }
+    .img-item .thumb { height: 70px; }
   }
   @supports (padding: env(safe-area-inset-bottom)) {
     #workspace { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
@@ -345,6 +395,7 @@
   </div>
 </header>
 
+<!-- 功能目录 -->
 <div class="feature-catalog">
   <div class="catalog-group" data-category="edit">
     <div class="catalog-title">
@@ -357,25 +408,26 @@
         <span class="feature-icon">📝</span>
         <span class="feature-text">
           <span class="feature-name">试卷拆分</span>
-          <span class="feature-desc">A3 试卷拆成 2/3 页</span>
+          <span class="feature-desc">A3 拆 2/3 页</span>
         </span>
       </button>
       <button class="feature-card" data-tab="crop" type="button">
         <span class="feature-icon">✂️</span>
         <span class="feature-text">
           <span class="feature-name">PDF 裁剪</span>
-          <span class="feature-desc">去白边、装订线，可统一 A4</span>
+          <span class="feature-desc">去白边 · 统一 A4</span>
         </span>
       </button>
       <button class="feature-card" data-tab="arrange" type="button">
         <span class="feature-icon">📄</span>
         <span class="feature-text">
           <span class="feature-name">页面调整</span>
-          <span class="feature-desc">排序、旋转、插空白页</span>
+          <span class="feature-desc">排序 · 旋转 · 插页</span>
         </span>
       </button>
     </div>
   </div>
+
   <div class="catalog-group" data-category="convert">
     <div class="catalog-title">
       <span class="catalog-icon">🔄</span>
@@ -387,25 +439,26 @@
         <span class="feature-icon">🖼️</span>
         <span class="feature-text">
           <span class="feature-name">图片转 PDF</span>
-          <span class="feature-desc">多张图片合成 PDF</span>
+          <span class="feature-desc">多图合成 PDF</span>
         </span>
       </button>
       <button class="feature-card" data-tab="pdf2img" type="button">
         <span class="feature-icon">📷</span>
         <span class="feature-text">
           <span class="feature-name">PDF 转图片</span>
-          <span class="feature-desc">每页导出为 PNG/JPG</span>
+          <span class="feature-desc">PNG / JPG 导出</span>
         </span>
       </button>
       <button class="feature-card" data-tab="word2pdf" type="button">
         <span class="feature-icon">📘</span>
         <span class="feature-text">
           <span class="feature-name">Word 转 PDF</span>
-          <span class="feature-desc">.docx 通过打印转 PDF</span>
+          <span class="feature-desc">.docx 打印转 PDF</span>
         </span>
       </button>
     </div>
   </div>
+
   <div class="catalog-group" data-category="organize">
     <div class="catalog-title">
       <span class="catalog-icon">📁</span>
@@ -424,13 +477,14 @@
         <span class="feature-icon">📑</span>
         <span class="feature-text">
           <span class="feature-name">PDF 拆分</span>
-          <span class="feature-desc">按页数拆成多个 PDF</span>
+          <span class="feature-desc">按页数拆分</span>
         </span>
       </button>
     </div>
   </div>
 </div>
 
+<!-- 工作区 -->
 <div id="workspace">
   <div class="workspace-header">
     <div class="workspace-title">
@@ -438,16 +492,19 @@
       <span id="workspaceName">试卷拆分</span>
     </div>
   </div>
+
   <div id="envBanner"></div>
+
   <main>
+    <!-- 1. 试卷拆分 -->
     <section class="panel active" id="panel-split" data-theme="edit">
       <div class="card">
-        <h2>① 选择试卷 PDF</h2>
+        <h2><span class="step-label">第 1 步</span><span class="step-title">选择试卷 PDF</span></h2>
         <input type="file" id="splitFile" accept=".pdf,application/pdf" />
         <p class="hint">适用于「一张 A3 大纸上印了 2 页 / 3 页试卷」的扫描件。</p>
       </div>
       <div class="card hidden" id="splitCard">
-        <h2>② 预览与调整拆分线</h2>
+        <h2><span class="step-label">第 2 步</span><span class="step-title">预览与调整拆分线</span></h2>
         <div class="pager">
           <button class="btn gray" id="splitPrev" type="button">上一页</button>
           <span class="info" id="splitPageInfo">1 / 1</span>
@@ -458,13 +515,13 @@
           <canvas class="overlay" id="splitOverlay"></canvas>
         </div>
         <p class="hint"><b>触摸或拖动</b>蓝色虚线上的圆形手柄，即可调整拆分位置。</p>
-        <div class="btn-row" style="margin-top:12px">
+        <div class="btn-row" style="margin-top:10px">
           <button class="btn ghost" id="splitResetPage" type="button">重置本页</button>
           <button class="btn ghost" id="splitApplyAll" type="button">应用到全部页</button>
         </div>
       </div>
       <div class="card hidden" id="splitOptCard">
-        <h2>③ 拆分设置并生成</h2>
+        <h2><span class="step-label">第 3 步</span><span class="step-title">设置拆分份数并生成</span></h2>
         <div class="field">
           <label>每页拆成几份</label>
           <select id="splitParts"><option value="2">拆 2 页（对半）</option><option value="3">拆 3 页（三等分）</option></select>
@@ -477,28 +534,21 @@
         <div class="status" id="splitStatus"></div>
       </div>
       <div class="card result-card hidden" id="splitResultCard">
-        <h2>④ 文件已生成</h2>
+        <h2><span class="step-label step-ok">✓ 完成</span><span class="step-title">文件已生成</span></h2>
         <div id="splitResultBody"></div>
         <div class="status" id="splitStatus2"></div>
-        <details class="troubleshoot">
-          <summary>「此页面已被 Chrome 屏蔽」怎么办？</summary>
-          <div class="troubleshoot-body">
-            <p><b>原因：</b>页面用 <code>file://</code> 打开时，Chrome 会屏蔽普通下载。</p>
-            <p><b>方案一：用「🖨 打印 / 存为 PDF」</b> —— 在打印对话框里选「另存为 PDF」。</p>
-            <p><b>方案二：用「📋 复制 PDF 数据」</b> —— 粘贴到新标签地址栏回车，再右键另存。</p>
-            <p><b>方案三：用本地服务器（推荐）</b> —— <code>python -m http.server 8000</code>，然后访问 <code>http://localhost:8000</code>。</p>
-          </div>
-        </details>
       </div>
     </section>
+
+    <!-- 2. PDF 裁剪 -->
     <section class="panel" id="panel-crop" data-theme="edit">
       <div class="card">
-        <h2>① 选择 PDF</h2>
+        <h2><span class="step-label">第 1 步</span><span class="step-title">选择 PDF</span></h2>
         <input type="file" id="cropFile" accept=".pdf,application/pdf" />
         <p class="hint">适用于去掉试卷扫描件四周的白边、黑边、装订线等无关区域。</p>
       </div>
       <div class="card hidden" id="cropCard">
-        <h2>② 调整裁剪框（每页可独立设置）</h2>
+        <h2><span class="step-label">第 2 步</span><span class="step-title">调整裁剪框（每页可独立设置）</span></h2>
         <div class="pager">
           <button class="btn gray" id="cropPrev" type="button">上一页</button>
           <span class="info" id="cropPageInfo">1 / 1</span>
@@ -509,17 +559,16 @@
           <canvas class="overlay" id="cropOverlay"></canvas>
         </div>
         <div class="crop-tips">
-          <b>操作方法：</b>拖动框内可移动；拖动 <b>8 个白色控制点</b>可调整大小；
-          点击「应用到全部页」会把当前页的裁剪框复制到所有页。
+          <b>操作方法：</b>拖动框内可移动；拖动 <b>8 个白色控制点</b>可调整大小；点击「应用到全部页」把当前页裁剪框复制到所有页。
         </div>
-        <div class="btn-row" style="margin-top:12px">
+        <div class="btn-row" style="margin-top:10px">
           <button class="btn ghost" id="cropResetPage" type="button">重置本页</button>
           <button class="btn ghost" id="cropApplyAll" type="button">应用到全部页</button>
           <button class="btn ghost" id="cropFullPage" type="button">恢复整页</button>
         </div>
       </div>
       <div class="card hidden" id="cropOptCard">
-        <h2>③ 生成裁剪后的 PDF</h2>
+        <h2><span class="step-label">第 3 步</span><span class="step-title">选择输出尺寸并生成</span></h2>
         <div class="field">
           <label>输出页面尺寸</label>
           <select id="cropUnifySize">
@@ -530,60 +579,64 @@
           </select>
         </div>
         <p class="hint" id="cropUnifyHint">
-          选择 A4 / Letter 时，裁剪结果会缩放到统一的页面上，适合多页打印或装订。<br>
-          选择「保持原裁剪尺寸」时，会保留每页裁剪后的原始大小，内容仍是矢量（不损失清晰度）。
+          选择 A4 / Letter 时，裁剪结果会缩放到统一的页面上。<br>
+          选择「保持原裁剪尺寸」时，保留每页原始大小，内容仍是矢量。
         </p>
         <button class="btn big" id="cropBtn" type="button">生成 PDF</button>
         <div class="status" id="cropStatus"></div>
       </div>
       <div class="card result-card hidden" id="cropResultCard">
-        <h2>④ 文件已生成</h2>
+        <h2><span class="step-label step-ok">✓ 完成</span><span class="step-title">文件已生成</span></h2>
         <div id="cropResultBody"></div>
         <div class="status" id="cropStatus2"></div>
       </div>
     </section>
+
+    <!-- 3. 页面调整 -->
     <section class="panel" id="panel-arrange" data-theme="edit">
       <div class="card">
-        <h2>① 选择 PDF</h2>
+        <h2><span class="step-label">第 1 步</span><span class="step-title">选择 PDF</span></h2>
         <input type="file" id="arrangeFile" accept=".pdf,application/pdf" />
-        <p class="hint">加载后可以调整页面顺序、旋转页面、插入空白页、删除页面。旋转只影响当前页，其他页保持原样。</p>
+        <p class="hint">加载后可调整页面顺序、旋转页面、插入空白页、删除页面。</p>
       </div>
       <div class="card hidden" id="arrangeCard">
-        <h2>② 页面管理</h2>
+        <h2><span class="step-label">第 2 步</span><span class="step-title">管理页面</span></h2>
         <div class="arrange-toolbar">
-          <button class="btn ghost" id="arrangeAddBlank" type="button">＋ 末尾添加空白页</button>
+          <button class="btn ghost" id="arrangeAddBlank" type="button">＋ 末尾加空白页</button>
           <button class="btn ghost" id="arrangeRotateAllLeft" type="button">↺ 全部左转</button>
           <button class="btn ghost" id="arrangeRotateAllRight" type="button">↻ 全部右转</button>
           <button class="btn ghost" id="arrangeReverse" type="button">⇅ 反转顺序</button>
           <button class="btn gray" id="arrangeReset" type="button">↺ 重置全部</button>
           <span class="arrange-info" id="arrangeInfo">共 0 页</span>
         </div>
-        <p class="hint" style="margin-top:0;margin-bottom:12px">
-          <b>拖拽</b>缩略图可调整顺序；用卡片下方的按钮可 <b>旋转</b>、<b>插入空白页</b>、<b>删除</b>。
+        <p class="hint" style="margin-top:0;margin-bottom:10px">
+          <b>拖拽</b>缩略图可调整顺序；卡片下方按钮可 <b>旋转</b>、<b>插入空白页</b>、<b>删除</b>。
         </p>
         <div id="arrangeGrid" class="arrange-grid"></div>
       </div>
       <div class="card hidden" id="arrangeOptCard">
-        <h2>③ 生成调整后的 PDF</h2>
+        <h2><span class="step-label">第 3 步</span><span class="step-title">生成调整后的 PDF</span></h2>
         <button class="btn big" id="arrangeBtn" type="button">生成 PDF</button>
         <div class="status" id="arrangeStatus"></div>
       </div>
       <div class="card result-card hidden" id="arrangeResultCard">
-        <h2>④ 文件已生成</h2>
+        <h2><span class="step-label step-ok">✓ 完成</span><span class="step-title">文件已生成</span></h2>
         <div id="arrangeResultBody"></div>
         <div class="status" id="arrangeStatus2"></div>
       </div>
     </section>
+
+    <!-- 4. 图片转 PDF -->
     <section class="panel" id="panel-img2pdf" data-theme="convert">
       <div class="card">
-        <h2>① 选择图片</h2>
+        <h2><span class="step-label">第 1 步</span><span class="step-title">选择图片</span></h2>
         <input type="file" id="img2pdfFile" accept="image/*" multiple />
-        <p class="hint">支持 JPG / PNG / WebP 等常见格式。可一次选择多张，按顺序每张生成一页。</p>
+        <p class="hint">支持 JPG / PNG / WebP 等。可一次选择多张，按顺序每张生成一页。</p>
       </div>
       <div class="card hidden" id="img2pdfListCard">
-        <h2>② 图片列表与页面设置</h2>
+        <h2><span class="step-label">第 2 步</span><span class="step-title">图片列表与页面设置</span></h2>
         <div id="img2pdfList" class="img-list"></div>
-        <div class="field" style="margin-top:14px">
+        <div class="field" style="margin-top:12px">
           <label>页面尺寸</label>
           <select id="img2pdfSize">
             <option value="a4">A4 纵向（每张图片占一页）</option>
@@ -607,26 +660,28 @@
         <div class="status" id="img2pdfStatus"></div>
       </div>
       <div class="card result-card hidden" id="img2pdfResultCard">
-        <h2>③ 文件已生成</h2>
+        <h2><span class="step-label step-ok">✓ 完成</span><span class="step-title">文件已生成</span></h2>
         <div id="img2pdfResultBody"></div>
         <div class="status" id="img2pdfStatus2"></div>
       </div>
     </section>
+
+    <!-- 5. PDF 转图片 -->
     <section class="panel" id="panel-pdf2img" data-theme="convert">
       <div class="card">
-        <h2>① 选择 PDF</h2>
+        <h2><span class="step-label">第 1 步</span><span class="step-title">选择 PDF</span></h2>
         <input type="file" id="pdf2imgFile" accept=".pdf,application/pdf" />
         <p class="hint">把 PDF 的每一页导出为图片。多页会自动打包成 ZIP 下载。</p>
       </div>
       <div class="card hidden" id="pdf2imgOptCard">
-        <h2>② 导出设置</h2>
+        <h2><span class="step-label">第 2 步</span><span class="step-title">导出设置</span></h2>
         <div class="field">
           <label>图片格式</label>
-          <select id="pdf2imgFormat"><option value="png">PNG（无损，透明背景支持好）</option><option value="jpeg">JPEG（体积小）</option></select>
+          <select id="pdf2imgFormat"><option value="png">PNG（无损）</option><option value="jpeg">JPEG（体积小）</option></select>
         </div>
         <div class="field">
           <label>清晰度（缩放倍率）</label>
-          <select id="pdf2imgScale"><option value="1">1x（约 72 DPI，适合预览）</option><option value="2" selected>2x（约 144 DPI，推荐）</option><option value="3">3x（约 216 DPI，高清）</option></select>
+          <select id="pdf2imgScale"><option value="1">1x（约 72 DPI）</option><option value="2" selected>2x（约 144 DPI，推荐）</option><option value="3">3x（约 216 DPI，高清）</option></select>
         </div>
         <div class="field">
           <label>JPEG 质量（仅 JPEG 有效）</label>
@@ -636,19 +691,21 @@
         <div class="status" id="pdf2imgStatus"></div>
       </div>
       <div class="card result-card hidden" id="pdf2imgResultCard">
-        <h2>③ 导出完成</h2>
+        <h2><span class="step-label step-ok">✓ 完成</span><span class="step-title">导出完成</span></h2>
         <div id="pdf2imgResultBody"></div>
         <div class="status" id="pdf2imgStatus2"></div>
       </div>
     </section>
+
+    <!-- 6. Word 转 PDF -->
     <section class="panel" id="panel-word2pdf" data-theme="convert">
       <div class="card">
-        <h2>① 选择 Word 文档</h2>
+        <h2><span class="step-label">第 1 步</span><span class="step-title">选择 Word 文档</span></h2>
         <input type="file" id="word2pdfFile" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
-        <p class="hint">支持 <b>.docx</b> 文件（不支持旧版 .doc）。转换后会打开一个新窗口显示文档内容，请在打印对话框里选择「<b>另存为 PDF</b>」完成保存。</p>
+        <p class="hint">支持 <b>.docx</b>（不支持旧版 .doc）。转换后会打开新窗口，在打印对话框里选「另存为 PDF」即可。</p>
       </div>
       <div class="card hidden" id="word2pdfOptCard">
-        <h2>② 转换设置</h2>
+        <h2><span class="step-label">第 2 步</span><span class="step-title">转换设置</span></h2>
         <div class="field">
           <label>纸张大小</label>
           <select id="word2pdfPageSize"><option value="a4">A4</option><option value="letter">Letter</option></select>
@@ -659,38 +716,41 @@
         </div>
         <button class="btn big" id="word2pdfBtn" type="button">打开并打印为 PDF</button>
         <div class="status" id="word2pdfStatus"></div>
-        <div class="hint" style="margin-top:14px"><b>工作方式：</b>先在浏览器里把 Word 文档还原成网页，再通过浏览器的打印功能输出为 PDF。</div>
       </div>
     </section>
+
+    <!-- 7. PDF 合并 -->
     <section class="panel" id="panel-merge" data-theme="organize">
       <div class="card">
-        <h2>① 选择要合并的 PDF</h2>
+        <h2><span class="step-label">第 1 步</span><span class="step-title">选择要合并的 PDF</span></h2>
         <input type="file" id="mergeFile" accept=".pdf,application/pdf" multiple />
-        <p class="hint">可一次选择多个 PDF，按列表中的顺序合并。可调整顺序、删除不需要的文件。</p>
+        <p class="hint">可一次选择多个 PDF，按列表顺序合并。可调整顺序、删除文件。</p>
       </div>
       <div class="card hidden" id="mergeListCard">
-        <h2>② 文件列表</h2>
+        <h2><span class="step-label">第 2 步</span><span class="step-title">调整文件顺序</span></h2>
         <div id="mergeList" class="file-list"></div>
-        <div class="btn-row" style="margin-top:14px">
+        <div class="btn-row" style="margin-top:12px">
           <button class="btn ghost" id="mergeClear" type="button">清空列表</button>
           <button class="btn big" id="mergeBtn" type="button" style="flex:1">合并 PDF</button>
         </div>
         <div class="status" id="mergeStatus"></div>
       </div>
       <div class="card result-card hidden" id="mergeResultCard">
-        <h2>③ 文件已生成</h2>
+        <h2><span class="step-label step-ok">✓ 完成</span><span class="step-title">文件已生成</span></h2>
         <div id="mergeResultBody"></div>
         <div class="status" id="mergeStatus2"></div>
       </div>
     </section>
+
+    <!-- 8. PDF 拆分 -->
     <section class="panel" id="panel-extract" data-theme="organize">
       <div class="card">
-        <h2>① 选择 PDF</h2>
+        <h2><span class="step-label">第 1 步</span><span class="step-title">选择 PDF</span></h2>
         <input type="file" id="extractFile" accept=".pdf,application/pdf" />
         <p class="hint">把一个 PDF 拆分成多个小 PDF。可设置每个 PDF 包含几页。</p>
       </div>
       <div class="card hidden" id="extractOptCard">
-        <h2>② 拆分设置</h2>
+        <h2><span class="step-label">第 2 步</span><span class="step-title">设置每份页数</span></h2>
         <div class="field">
           <label>每个 PDF 包含几页</label>
           <input type="number" id="extractPages" value="1" min="1" step="1" inputmode="numeric" />
@@ -700,7 +760,7 @@
         <div class="status" id="extractStatus"></div>
       </div>
       <div class="card result-card hidden" id="extractResultCard">
-        <h2>③ 拆分完成</h2>
+        <h2><span class="step-label step-ok">✓ 完成</span><span class="step-title">拆分完成</span></h2>
         <div id="extractResultBody"></div>
         <div class="status" id="extractStatus2"></div>
       </div>
@@ -713,7 +773,7 @@
     <h3>📋 复制 PDF 数据</h3>
     <p>请复制下方全部文本，粘贴到浏览器新标签页的地址栏并回车，就会看到 PDF，然后右键另存为即可保存原始 PDF 文件。</p>
     <textarea id="dataTextarea" readonly spellcheck="false"></textarea>
-    <div class="btn-row" style="margin-top:14px">
+    <div class="btn-row" style="margin-top:12px">
       <button class="btn" id="dataSelectAll" type="button">📋 复制全部</button>
       <button class="btn ghost" id="dataClose" type="button">关闭</button>
     </div>
@@ -727,16 +787,14 @@
 (function () {
   'use strict';
 
-  /* ---------- 本地路径（支持 libs/ 子目录和根目录两种布局） ---------- */
   const LOCAL = {
-    pdfLib:      ['./libs/pdf-lib.min.js',         './pdf-lib.min.js'],
-    pdfJs:       ['./libs/pdf.min.js',             './pdf.min.js'],
-    pdfWorker:   ['./libs/pdf.worker.min.js',      './pdf.worker.min.js'],
-    jszip:       ['./libs/jszip.min.js',           './jszip.min.js'],
-    mammoth:     ['./libs/mammoth.browser.min.js', './mammoth.browser.min.js']
+    pdfLib:    ['./libs/pdf-lib.min.js',         './pdf-lib.min.js'],
+    pdfJs:     ['./libs/pdf.min.js',             './pdf.min.js'],
+    pdfWorker: ['./libs/pdf.worker.min.js',      './pdf.worker.min.js'],
+    jszip:     ['./libs/jszip.min.js',           './jszip.min.js'],
+    mammoth:   ['./libs/mammoth.browser.min.js', './mammoth.browser.min.js']
   };
 
-  /* ---------- CDN 回退（主库） ---------- */
   const CDN = {
     pdfLib: [
       'https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js',
@@ -762,9 +820,7 @@
     ]
   };
 
-  /* ---------- 加载进度 UI ---------- */
-  let loadingEl = null;
-  let progressValue = 0;
+  let loadingEl = null, progressValue = 0;
 
   function updateLoading(text, inc) {
     if (!loadingEl) {
@@ -775,13 +831,12 @@
         'z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;' +
         'font-family:-apple-system,"PingFang SC",sans-serif;color:#0f172a;padding:24px';
       loadingEl.innerHTML =
-        '<div style="font-size:64px;margin-bottom:16px;animation:pulse 1.5s infinite">📄</div>' +
-        '<div style="font-size:20px;font-weight:800;letter-spacing:.5px;margin-bottom:6px">PDF 工具箱</div>' +
-        '<div id="pdfLoadingText" style="font-size:14px;color:#64748b;margin-bottom:24px;text-align:center;min-height:20px">正在加载…</div>' +
-        '<div style="width:220px;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,.05)">' +
+        '<div style="font-size:56px;margin-bottom:14px;animation:pulse 1.5s infinite">📄</div>' +
+        '<div style="font-size:18px;font-weight:800;letter-spacing:.5px;margin-bottom:6px">PDF 工具箱</div>' +
+        '<div id="pdfLoadingText" style="font-size:13px;color:#64748b;margin-bottom:22px;text-align:center;min-height:20px">正在加载…</div>' +
+        '<div style="width:200px;height:5px;background:#e2e8f0;border-radius:3px;overflow:hidden">' +
         '<div id="pdfLoadingBar" style="width:0%;height:100%;background:linear-gradient(90deg,#2563eb,#7c3aed,#a855f7);transition:width .4s ease"></div>' +
-        '</div>' +
-        '<style>@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}</style>';
+        '</div><style>@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}</style>';
       document.body.appendChild(loadingEl);
     }
     const t = document.getElementById('pdfLoadingText');
@@ -816,12 +871,10 @@
     }
   }
 
-  /* ---------- 单脚本加载（带超时） ---------- */
   function loadScript(url, globalName, timeout) {
     return new Promise((resolve, reject) => {
       const script = document.createElement('script');
-      script.src = url;
-      script.async = true;
+      script.src = url; script.async = true;
       let done = false;
       const timer = setTimeout(() => {
         if (done) return;
@@ -832,18 +885,15 @@
       }, timeout || 15000);
       script.onload = () => {
         if (done) return;
-        done = true;
-        clearTimeout(timer);
+        done = true; clearTimeout(timer);
         if (globalName && typeof window[globalName] === 'undefined') {
-          reject(new Error('已加载但未生效'));
-          return;
+          reject(new Error('已加载但未生效')); return;
         }
         resolve();
       };
       script.onerror = () => {
         if (done) return;
-        done = true;
-        clearTimeout(timer);
+        done = true; clearTimeout(timer);
         try { script.parentNode && script.parentNode.removeChild(script); } catch (_) {}
         reject(new Error('请求失败'));
       };
@@ -851,23 +901,16 @@
     });
   }
 
-  /* ---------- 本地优先 + CDN 回退 ---------- */
   async function loadFirstAvailable(localPaths, cdnPaths, globalName, label, timeout) {
     const tried = [];
-
-    // 1. 先试本地文件
     for (const path of localPaths) {
       updateLoading(label + ' · 本地加载', 0);
       try {
         await loadScript(path, globalName, 5000);
-        console.log('[加载] ✅ 本地文件:', path);
+        console.log('[加载] ✅ 本地:', path);
         return { url: path, source: 'local' };
-      } catch (e) {
-        tried.push(path + '（' + e.message + '）');
-      }
+      } catch (e) { tried.push(path + '（' + e.message + '）'); }
     }
-
-    // 2. 本地都不行，回退 CDN
     for (const url of cdnPaths) {
       const host = (url.match(/^https?:\/\/([^\/]+)/) || [])[1] || 'CDN';
       updateLoading(label + ' · CDN (' + host + ')', 0);
@@ -875,35 +918,23 @@
         await loadScript(url, globalName, timeout || 15000);
         console.log('[加载] ✅ CDN:', host);
         return { url, source: 'cdn' };
-      } catch (e) {
-        tried.push(host + '（' + e.message + '）');
-      }
+      } catch (e) { tried.push(host + '（' + e.message + '）'); }
     }
-
     throw new Error(tried.join('\n'));
   }
 
-  /* ---------- 探测 worker 路径是否可用 ---------- */
   async function probeWorkerPath(localPaths, mainLibUrl) {
-    // 先试本地 worker（用 fetch HEAD 探测是否存在）
     for (const p of localPaths) {
       try {
         const res = await fetch(p, { method: 'HEAD', cache: 'no-cache' });
-        if (res.ok) {
-          console.log('[pdf.js] ✅ 本地 worker:', p);
-          return p;
-        }
-      } catch (e) {
-        // file:// 下 fetch 会失败，继续尝试下一个
-      }
+        if (res.ok) { console.log('[pdf.js] ✅ 本地 worker:', p); return p; }
+      } catch (e) {}
     }
-    // 回退：跟随主库 CDN 的同目录 worker
     const workerUrl = mainLibUrl.replace(/\/pdf(\.min)?\.js(\?.*)?$/, '/pdf.worker$1.js');
     console.log('[pdf.js] ⚠️ 使用 CDN worker:', workerUrl);
     return workerUrl;
   }
 
-  /* ---------- 加载失败页面 ---------- */
   function showLoadError(title, detail) {
     hideLoadingNow();
     const ua = navigator.userAgent || '';
@@ -913,22 +944,21 @@
     if (isWeChat || isQQ) {
       wechatTip = '<div style="background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:12px 16px;margin:14px 0;color:#92400e;font-size:13px;line-height:1.7;text-align:left">'
         + '<b>📱 检测到微信 / QQ 内置浏览器</b><br>'
-        + '内置浏览器对外部资源的加载限制较多。<br>'
-        + '请点击右上角 <b>···</b> 菜单 → 选择 <b>在浏览器打开</b>，再重试。'
+        + '内置浏览器对外部资源加载有限制。<br>'
+        + '请点右上角 <b>···</b> 菜单 → 选 <b>在浏览器打开</b>，再试。'
         + '</div>';
     }
     document.body.innerHTML =
       '<div style="min-height:100vh;padding:40px 20px;background:linear-gradient(135deg,#f8fafc,#eef1f6);font-family:-apple-system,\'PingFang SC\',sans-serif">'
       + '<div style="max-width:520px;margin:0 auto;background:#fff;border-radius:20px;padding:32px 24px;box-shadow:0 10px 40px rgba(15,23,42,.1)">'
-      +   '<div style="font-size:64px;text-align:center;margin-bottom:16px">⚠️</div>'
-      +   '<h2 style="margin:0 0 12px;color:#0f172a;font-size:20px;text-align:center">' + title + '</h2>'
+      +   '<div style="font-size:56px;text-align:center;margin-bottom:14px">⚠️</div>'
+      +   '<h2 style="margin:0 0 12px;color:#0f172a;font-size:19px;text-align:center">' + title + '</h2>'
       +   '<p style="margin:0 0 8px;color:#475569;font-size:14px;line-height:1.7;text-align:center">无法加载所需的 PDF 处理库。</p>'
       +   wechatTip
       +   '<div style="margin:20px 0;color:#475569;font-size:13px;line-height:1.9;text-align:left">'
       +   '<b style="color:#0f172a;font-size:14px">解决办法：</b><br><br>'
       +   '<b>1. 下载库文件到本地（推荐）</b><br>'
-      +   '在网页目录新建 <code style="background:#eef2ff;color:#3730a3;padding:1px 6px;border-radius:4px">libs</code> 文件夹，'
-      +   '下载以下 5 个文件放进去，然后刷新页面：<br>'
+      +   '在网页目录新建 <code style="background:#eef2ff;color:#3730a3;padding:1px 6px;border-radius:4px">libs</code> 文件夹，下载以下 5 个文件，然后刷新页面：<br>'
       +   '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;margin:8px 0;font-family:monospace;font-size:11px;line-height:1.9;word-break:break-all">'
       +   'pdf-lib.min.js ← https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js<br>'
       +   'pdf.min.js ← https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js<br>'
@@ -944,49 +974,30 @@
       + '</div></div>';
   }
 
-  /* ---------- 主加载流程 ---------- */
   async function boot() {
     updateLoading('正在加载 PDF 处理库…', 15);
-
     let pdfLibResult, pdfJsResult;
-
-    // pdf-lib
     try {
       pdfLibResult = await loadFirstAvailable(LOCAL.pdfLib, CDN.pdfLib, 'PDFLib', 'PDF 处理库', 15000);
     } catch (e) {
-      showLoadError('PDF 处理库加载失败', 'pdf-lib 无法加载：\n' + e.message);
-      return;
+      showLoadError('PDF 处理库加载失败', 'pdf-lib 无法加载：\n' + e.message); return;
     }
-
     updateLoading('正在加载 PDF 预览库…', 25);
-
-    // pdf.js
     try {
       pdfJsResult = await loadFirstAvailable(LOCAL.pdfJs, CDN.pdfJs, 'pdfjsLib', 'PDF 预览库', 15000);
     } catch (e) {
-      showLoadError('PDF 预览库加载失败', 'pdf.js 无法加载：\n' + e.message);
-      return;
+      showLoadError('PDF 预览库加载失败', 'pdf.js 无法加载：\n' + e.message); return;
     }
-
-    // 设置 pdf.js worker
     try {
       const workerSrc = await probeWorkerPath(LOCAL.pdfWorker, pdfJsResult.url);
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
-    } catch (e) {
-      console.warn('[pdf.js] worker 设置失败，将使用主线程渲染', e);
-    }
-
+    } catch (e) { console.warn('[pdf.js] worker 设置失败', e); }
     updateLoading('正在初始化…', 15);
-
-    // 启动应用
-    try {
-      startApp();
-    } catch (e) {
+    try { startApp(); }
+    catch (e) {
       console.error('[startApp 失败]', e);
-      showLoadError('应用初始化失败', e.message || String(e));
-      return;
+      showLoadError('应用初始化失败', e.message || String(e)); return;
     }
-
     finishLoading();
   }
 
@@ -996,7 +1007,6 @@
   function startApp() {
     const { PDFDocument, degrees } = window.PDFLib;
     const pdfjsLib = window.pdfjsLib;
-
     const $ = (s) => document.querySelector(s);
     const $$ = (s) => Array.prototype.slice.call(document.querySelectorAll(s));
     const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -1021,21 +1031,17 @@
       if (!el) return;
       if (env.isFile) {
         el.className = 'envBanner show err';
-        el.innerHTML =
-          '⚠️ <b>当前以本地文件方式打开（file://），Chrome 会屏蔽普通下载。</b><br>'
+        el.innerHTML = '⚠️ <b>当前以本地文件方式打开（file://），Chrome 会屏蔽普通下载。</b><br>'
           + '请用下面任一方式保存 PDF：<br>'
-          + '<b>① 「🖨 打印 / 存为 PDF」</b>——通过打印对话框另存为 PDF；<br>'
-          + '<b>② 「📋 复制 PDF 数据」</b>——粘贴到新标签地址栏打开，再右键另存；<br>'
-          + '<b>③ 本地服务器</b>——执行 <code>python -m http.server 8000</code>，'
-          + '访问 <code>http://localhost:8000</code>。';
-        el.classList.add('show');
-        return;
+          + '<b>①「🖨 打印 / 存为 PDF」</b>——通过打印对话框另存为 PDF；<br>'
+          + '<b>②「📋 复制 PDF 数据」</b>——粘贴到新标签地址栏打开，再右键另存；<br>'
+          + '<b>③ 本地服务器</b>——执行 <code>python -m http.server 8000</code>，访问 <code>http://localhost:8000</code>。';
+        el.classList.add('show'); return;
       }
       if (!env.isSecure && !env.isHttps && !env.isLocalhost) {
         el.className = 'envBanner show warn';
         el.innerHTML = '⚠️ <b>当前页面不是安全上下文（非 HTTPS 且非 localhost）。</b><br>推荐使用「🖨 打印 / 存为 PDF」或「📋 复制 PDF 数据」保存。';
-        el.classList.add('show');
-        return;
+        el.classList.add('show'); return;
       }
       el.className = 'envBanner show ok';
       el.innerHTML = '✅ 当前环境正常，所有保存方式均可用。';
@@ -1043,7 +1049,6 @@
     }
     renderEnvBanner();
 
-    /* ---------- 功能切换 ---------- */
     const toolNames = {
       split: '试卷拆分', crop: 'PDF 裁剪', arrange: '页面调整',
       img2pdf: '图片转 PDF', pdf2img: 'PDF 转图片', word2pdf: 'Word 转 PDF',
@@ -1081,9 +1086,7 @@
             } catch (e) {}
           }, 80);
         }
-      } catch (e) {
-        console.error('[showTool]', e);
-      }
+      } catch (e) { console.error('[showTool]', e); }
     }
 
     $$('.feature-card').forEach(btn => {
@@ -1093,7 +1096,6 @@
       });
     });
 
-    /* ---------- 通用工具 ---------- */
     function say(sel, text, isErr, isOk) {
       const node = typeof sel === 'string' ? $(sel) : sel;
       if (!node) return;
@@ -1152,15 +1154,11 @@
     }
     async function ensureJSZip() {
       if (window.JSZip) return window.JSZip;
-      // 本地优先 + CDN 回退
       const all = LOCAL.jszip.concat(CDN.jszip);
       for (const url of all) {
         try {
           await loadScriptOnce(url);
-          if (window.JSZip) {
-            console.log('[JSZip] ✅', url);
-            return window.JSZip;
-          }
+          if (window.JSZip) { console.log('[JSZip] ✅', url); return window.JSZip; }
         } catch (e) {}
       }
       throw new Error('JSZip 加载失败，请检查网络或下载 jszip.min.js 到 libs/ 目录');
@@ -1171,10 +1169,7 @@
       for (const url of all) {
         try {
           await loadScriptOnce(url);
-          if (window.mammoth) {
-            console.log('[mammoth] ✅', url);
-            return window.mammoth;
-          }
+          if (window.mammoth) { console.log('[mammoth] ✅', url); return window.mammoth; }
         } catch (e) {}
       }
       throw new Error('Word 解析库加载失败，请检查网络或下载 mammoth.browser.min.js 到 libs/ 目录');
@@ -1191,7 +1186,6 @@
       }, 3000);
     }
 
-    /* ---------- 保存逻辑 ---------- */
     const sharedSave = {
       async saveAsPdf(bytes, filename, sayFn) {
         if (hasSavePicker) {
@@ -1207,7 +1201,6 @@
             return;
           } catch (err) {
             if (err && err.name === 'AbortError') { sayFn('已取消保存'); return; }
-            console.warn('[save] showSaveFilePicker 失败：', err);
           }
         }
         try {
@@ -1219,7 +1212,6 @@
           setTimeout(() => { try { document.body.removeChild(a); } catch (_) {} }, 3000);
           sayFn('已尝试下载。如未成功，请用「🖨 打印 / 存为 PDF」或「📋 复制 PDF 数据」。', false, true);
         } catch (err) {
-          console.warn('[save] data URL 下载失败：', err);
           showDataModalFor(bytes, sayFn);
         }
       },
@@ -1276,12 +1268,8 @@
           if (navigator.clipboard && navigator.clipboard.writeText) {
             await navigator.clipboard.writeText(dataUrl);
             sayFn('✅ 已复制 PDF 数据。请打开新标签页，粘贴到地址栏并回车，即可看到 PDF 并另存。', false, true);
-          } else {
-            showDataModalDirect(dataUrl);
-          }
-        } catch (e) {
-          showDataModalDirect(dataUrl);
-        }
+          } else { showDataModalDirect(dataUrl); }
+        } catch (e) { showDataModalDirect(dataUrl); }
       }
     };
 
@@ -1319,7 +1307,6 @@
       });
     }
 
-    /* ---------- 统一结果卡片 ---------- */
     function buildResultCardHtml(prefix) {
       return ''
         + '<div id="' + prefix + 'DirtyTip" class="dirty-tip hidden">设置已修改，当前文件仍是旧版本，请重新生成。</div>'
@@ -1331,11 +1318,11 @@
         +   '</div>'
         + '</div>'
         + '<button class="btn big green" id="' + prefix + 'SaveBtn" type="button">💾 另存为 PDF 文件</button>'
-        + '<div class="btn-row" style="margin-top:10px">'
+        + '<div class="btn-row" style="margin-top:8px">'
         +   '<button class="btn amber" id="' + prefix + 'PrintBtn" type="button">🖨 打印 / 存为 PDF</button>'
         +   '<button class="btn purple" id="' + prefix + 'CopyBtn" type="button">📋 复制 PDF 数据</button>'
         + '</div>'
-        + '<div class="btn-row" style="margin-top:8px">'
+        + '<div class="btn-row" style="margin-top:6px">'
         +   '<button class="btn ghost" id="' + prefix + 'PreviewToggle" type="button">👁 页面内预览</button>'
         +   '<button class="btn ghost" id="' + prefix + 'OpenBtn" type="button">↗ 新窗口打开</button>'
         + '</div>'
@@ -1777,9 +1764,9 @@
     $('#cropUnifySize').addEventListener('change', function () {
       const hint = $('#cropUnifyHint');
       if (this.value === 'none') {
-        hint.innerHTML = '选择「<b>保持原裁剪尺寸</b>」时，每一页的裁剪结果尺寸可能不同，内容仍是矢量。<br>适合后续需要保持原始分辨率或矢量内容的场景。';
+        hint.innerHTML = '选择「<b>保持原裁剪尺寸</b>」时，每一页的裁剪结果尺寸可能不同，内容仍是矢量。<br>适合需要保留原始分辨率或矢量内容的场景。';
       } else {
-        hint.innerHTML = '选择 A4 / Letter 时，裁剪结果会<b>缩放到统一的页面上</b>，适合多页打印或装订。<br>缩放到页面时内容会转为图片，清晰度由渲染分辨率决定。';
+        hint.innerHTML = '选择 A4 / Letter 时，裁剪结果会<b>缩放到统一页面上</b>，适合多页打印或装订。<br>缩放到页面时内容会转为图片，清晰度由渲染分辨率决定。';
       }
       markCropDirty();
     });
@@ -2267,7 +2254,7 @@
       const actions = document.createElement('div');
       actions.className = 'page-actions';
       const btnLeft = document.createElement('button');
-      btnLeft.title = '左转 90°（仅此页）';
+      btnLeft.title = '左转 90°';
       btnLeft.textContent = '↺';
       btnLeft.type = 'button';
       btnLeft.addEventListener('click', async (e) => {
@@ -2277,7 +2264,7 @@
         await updateArrangeCard(item);
       });
       const btnRight = document.createElement('button');
-      btnRight.title = '右转 90°（仅此页）';
+      btnRight.title = '右转 90°';
       btnRight.textContent = '↻';
       btnRight.type = 'button';
       btnRight.addEventListener('click', async (e) => {
@@ -2354,7 +2341,7 @@
       const rotated = (totalRot % 180) !== 0;
       const dispW = rotated ? srcH : srcW;
       const dispH = rotated ? srcW : srcH;
-      const maxW = isMobile ? 116 : 148;
+      const maxW = isMobile ? 110 : 140;
       const scale = maxW / dispW;
       const thumbW = Math.max(60, dispW * scale);
       const thumbH = Math.max(60, dispH * scale);
@@ -2759,7 +2746,7 @@
         +   '<div class="zip-sub">' + escapeHtml(pdf2img.resultZipName) + ' · ' + fmtSize(pdf2img.resultZipBlob.size) + '</div>'
         +   '<button class="btn big green" id="pdf2imgZipBtn" type="button">💾 下载 ZIP 压缩包</button>'
         + '</div>'
-        + '<div class="file-list" style="margin-top:14px">'
+        + '<div class="file-list" style="margin-top:12px">'
         +   pdf2img.resultFiles.map((f, i) =>
             '<div class="file-item" data-idx="' + i + '">'
             + '<div class="file-icon">' + (f.name.endsWith('.png') ? 'PNG' : 'JPG') + '</div>'
@@ -3065,7 +3052,7 @@
         +   '<div class="zip-sub">' + escapeHtml(extract.resultZipName) + ' · ' + fmtSize(extract.resultZipBlob.size) + '</div>'
         +   '<button class="btn big green" id="extractZipBtn" type="button">💾 下载 ZIP 压缩包</button>'
         + '</div>'
-        + '<div class="file-list" style="margin-top:14px">'
+        + '<div class="file-list" style="margin-top:12px">'
         +   extract.resultFiles.map((f, i) =>
             '<div class="file-item" data-idx="' + i + '">'
             + '<div class="file-icon">PDF</div>'
@@ -3124,7 +3111,6 @@
     });
   }
 
-  /* ---------- 启动 ---------- */
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', boot);
   } else {
