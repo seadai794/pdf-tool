@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
-<title>PDF 工具箱 · 9 合 11</title>
+<title>PDF 工具箱 · 9 合 1</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; padding: 0; }
@@ -3187,102 +3187,95 @@
 
     /* ---------- 关键：按取景框位置从视频帧裁剪（以 wrap 为统一参考系，绝不偏移） ---------- */
     function captureVideoWithFrame(videoEl) {
-      const vw = videoEl.videoWidth;
-      const vh = videoEl.videoHeight;
-      if (!vw || !vh) throw new Error('视频尚未就绪');
+  const vw = videoEl.videoWidth;
+  const vh = videoEl.videoHeight;
+  if (!vw || !vh) throw new Error('视频尚未就绪');
 
-      // 以 video 的父容器（wrap）作为统一参考系
-      const wrap = $('#scanFsVideoWrap');
-      const wrapRect = wrap.getBoundingClientRect();
-      const displayW = wrapRect.width;
-      const displayH = wrapRect.height;
-      if (displayW <= 0 || displayH <= 0) throw new Error('显示区域异常');
+  const wrap = $('#scanFsVideoWrap');
+  const wrapRect = wrap.getBoundingClientRect();
+  const displayW = wrapRect.width;
+  const displayH = wrapRect.height;
+  if (displayW <= 0 || displayH <= 0) throw new Error('显示区域异常');
 
-      // 取景框在屏幕上的位置
-      const frameRect = $('#scanFsFrame').getBoundingClientRect();
+  const frameRect = $('#scanFsFrame').getBoundingClientRect();
 
-      // 取景框相对 wrap 的像素坐标（wrap 就是 video 的显示框，两者同尺寸同位置）
-      let fx = frameRect.left - wrapRect.left;
-      let fy = frameRect.top - wrapRect.top;
-      let fw = frameRect.width;
-      let fh = frameRect.height;
+  let fx = frameRect.left - wrapRect.left;
+  let fy = frameRect.top - wrapRect.top;
+  let fw = frameRect.width;
+  let fh = frameRect.height;
+  fx = clamp(fx, 0, displayW);
+  fy = clamp(fy, 0, displayH);
+  fw = clamp(fw, 1, displayW - fx);
+  fh = clamp(fh, 1, displayH - fy);
 
-      // 限制在显示区域内
-      fx = clamp(fx, 0, displayW);
-      fy = clamp(fy, 0, displayH);
-      fw = clamp(fw, 1, displayW - fx);
-      fh = clamp(fh, 1, displayH - fy);
+  // object-fit: cover 映射：display 坐标 → video 原始像素坐标
+  const videoRatio = vw / vh;
+  const displayRatio = displayW / displayH;
+  let drawW, drawH, drawX, drawY;
+  if (videoRatio > displayRatio) {
+    drawH = displayH;
+    drawW = displayH * videoRatio;
+    drawX = (displayW - drawW) / 2;
+    drawY = 0;
+  } else {
+    drawW = displayW;
+    drawH = displayW / videoRatio;
+    drawX = 0;
+    drawY = (displayH - drawH) / 2;
+  }
 
-      // 用一个与 wrap 等大的 canvas，把视频帧按 object-fit: cover 画上去
-      const stageCv = document.createElement('canvas');
-      stageCv.width = Math.max(1, Math.round(displayW));
-      stageCv.height = Math.max(1, Math.round(displayH));
-      const sctx = stageCv.getContext('2d');
+  // 取景框 → video 原始像素的源矩形
+  const sx = clamp((fx - drawX) / drawW * vw, 0, vw);
+  const sy = clamp((fy - drawY) / drawH * vh, 0, vh);
+  const sw = clamp(fw / drawW * vw, 1, vw - sx);
+  const sh = clamp(fh / drawH * vh, 1, vh - sy);
 
-      const videoRatio = vw / vh;
-      const displayRatio = displayW / displayH;
-      let drawW, drawH, drawX, drawY;
-      if (videoRatio > displayRatio) {
-        drawH = displayH;
-        drawW = displayH * videoRatio;
-        drawX = (displayW - drawW) / 2;
-        drawY = 0;
-      } else {
-        drawW = displayW;
-        drawH = displayW / videoRatio;
-        drawX = 0;
-        drawY = (displayH - drawH) / 2;
-      }
-      sctx.drawImage(videoEl, drawX, drawY, drawW, drawH);
+  const outW = Math.max(1, Math.round(sw));
+  const outH = Math.max(1, Math.round(sh));
+  const outCv = document.createElement('canvas');
+  outCv.width = outW;
+  outCv.height = outH;
+  outCv.getContext('2d').drawImage(videoEl, sx, sy, sw, sh, 0, 0, outW, outH);
 
-      // 按取景框坐标从 stageCv 裁剪
-      const cropX = Math.max(0, Math.round(fx));
-      const cropY = Math.max(0, Math.round(fy));
-      const cropW = Math.max(1, Math.round(fw));
-      const cropH = Math.max(1, Math.round(fh));
-
-      const outCv = document.createElement('canvas');
-      outCv.width = cropW;
-      outCv.height = cropH;
-      const octx = outCv.getContext('2d');
-      octx.drawImage(stageCv, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
-
-      const maxDim = 2400;
-      if (Math.max(outCv.width, outCv.height) > maxDim) {
-        const k = maxDim / Math.max(outCv.width, outCv.height);
-        const scaled = document.createElement('canvas');
-        scaled.width = Math.max(1, Math.round(outCv.width * k));
-        scaled.height = Math.max(1, Math.round(outCv.height * k));
-        const sctx2 = scaled.getContext('2d');
-        sctx2.drawImage(outCv, 0, 0, scaled.width, scaled.height);
-        return scaled;
-      }
-      return outCv;
-    }
+  // 限制尺寸
+  const maxDim = 2400;
+  if (Math.max(outW, outH) > maxDim) {
+    const k = maxDim / Math.max(outW, outH);
+    const scaled = document.createElement('canvas');
+    scaled.width = Math.max(1, Math.round(outW * k));
+    scaled.height = Math.max(1, Math.round(outH * k));
+    scaled.getContext('2d').drawImage(outCv, 0, 0, scaled.width, scaled.height);
+    return scaled;
+  }
+  return outCv;
+}
 
     /* ---------- 拍照 ---------- */
     async function takePhoto() {
-      const v = $('#scanFsVideo');
-      if (!v || !v.videoWidth) {
-        say('#scanStatus', '摄像头尚未准备好', true);
-        return;
-      }
-      flashScreen();
-      shutterPulse();
-      showProcessing(true);
-      try {
-        await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-        const cv = captureVideoWithFrame(v);
-        scan.currentCanvas = cv;
-        applyScanMode();
-        openScanEditOverlay();
-        showToast('已拍照，请确认或调整处理模式');
-      } catch (err) {
-        say('#scanStatus', '拍照失败：' + (err && err.message ? err.message : err), true);
-      } finally {
-        showProcessing(false);
-      }
-    }
+  const v = $('#scanFsVideo');
+  if (!v || !v.videoWidth) {
+    say('#scanStatus', '摄像头尚未准备好', true);
+    return;
+  }
+  flashScreen();
+  shutterPulse();
+  showProcessing(true);
+  try {
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    const cv = captureVideoWithFrame(v);
+    scan.currentCanvas = cv;
+    scan.currentProcessed = cv;   // 默认先用原图，保证预览有内容
+    // 先打开弹层（display:flex），再渲染预览，确保 canvas 在可见容器里
+    openScanEditOverlay();
+    // 弹层打开后再按当前模式处理一次（applyScanMode 内部会重绘预览）
+    applyScanMode();
+    showToast('已拍照，请确认或调整处理模式');
+  } catch (err) {
+    say('#scanStatus', '拍照失败：' + (err && err.message ? err.message : err), true);
+  } finally {
+    showProcessing(false);
+  }
+}
 
     $('#scanFsShutter').addEventListener('click', takePhoto);
 
@@ -3297,11 +3290,16 @@
 
     /* ---------- 照片处理弹层 ---------- */
     function openScanEditOverlay() {
-      const overlay = $('#scanEditOverlay');
-      if (!overlay) return;
-      overlay.classList.add('show');
+  const overlay = $('#scanEditOverlay');
+  if (!overlay) return;
+  overlay.classList.add('show');
+  // 等布局完成后重绘一次，保证 canvas 在可见容器里尺寸正确
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
       renderScanEditPreview();
-    }
+    });
+  });
+}
 
     function closeScanEditOverlay() {
       const overlay = $('#scanEditOverlay');
@@ -3310,16 +3308,17 @@
     }
 
     function renderScanEditPreview() {
-      const canvas = $('#scanEditPreview');
-      const src = scan.currentProcessed || scan.currentCanvas;
-      if (!canvas || !src) return;
-      // 直接把 canvas 固有尺寸设为原图尺寸，CSS 用 width:100%;height:auto 等比缩放
-      canvas.width = src.width;
-      canvas.height = src.height;
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(src, 0, 0, canvas.width, canvas.height);
-    }
+  const canvas = $('#scanEditPreview');
+  const src = scan.currentProcessed || scan.currentCanvas;
+  if (!canvas || !src || !src.width || !src.height) return;
+  canvas.width = src.width;
+  canvas.height = src.height;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(src, 0, 0, canvas.width, canvas.height);
+}
 
     function processImageForScan(srcCanvas, mode) {
       if (mode === 'original') {
