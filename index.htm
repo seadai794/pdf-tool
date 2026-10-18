@@ -1400,6 +1400,12 @@
     const $$ = (s) => Array.prototype.slice.call(document.querySelectorAll(s));
     const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
+    // ★★★ 新增：安全绑定事件的方法，如果元素不存在则跳过，防止崩溃 ★★★
+    const bind = (sel, event, fn) => {
+      const el = typeof sel === 'string' ? $(sel) : sel;
+      if (el) el.addEventListener(event, fn);
+    };
+
     const env = {
       protocol: location.protocol,
       isFile: location.protocol === 'file:',
@@ -1481,7 +1487,7 @@
     }
 
     $$('.feature-card').forEach(btn => {
-      btn.addEventListener('click', function (e) {
+      bind(btn, 'click', function (e) {
         e.preventDefault();
         showTool(btn.dataset.tab, true);
         if (btn.dataset.tab !== 'scan' && scan.stream) closeScanCamera();
@@ -1910,7 +1916,7 @@
       if (split._refresh) split._refresh();
     }
 
-    $('#splitFile').addEventListener('change', async (e) => {
+    bind('#splitFile', 'change', async (e) => {
       const f = e.target.files[0]; if (!f) return;
       say('#splitStatus', '');
       $('#splitOptCard').classList.add('hidden');
@@ -2017,6 +2023,7 @@
 
     (function bindSplitDrag() {
       const stage = $('#splitStage');
+      if (!stage) return;
       const getPos = (e) => {
         const rect = stage.getBoundingClientRect();
         return { x: e.clientX - rect.left, y: e.clientY - rect.top, w: rect.width, h: rect.height };
@@ -2064,34 +2071,34 @@
       stage.addEventListener('contextmenu', (e) => e.preventDefault());
     })();
 
-    $('#splitPrev').addEventListener('click', async () => {
+    bind('#splitPrev', 'click', async () => {
       if (!split.doc || split.pageNum <= 1) return;
       split.pageNum--; await splitRender();
     });
-    $('#splitNext').addEventListener('click', async () => {
+    bind('#splitNext', 'click', async () => {
       if (!split.doc || split.pageNum >= split.doc.numPages) return;
       split.pageNum++; await splitRender();
     });
-    $('#splitResetPage').addEventListener('click', () => {
+    bind('#splitResetPage', 'click', () => {
       split.ratios[split.pageNum] = splitDefaultRatios(split.parts);
       drawSplitLines(); markSplitDirty();
       say('#splitStatus', '本页已重置为均匀拆分');
     });
-    $('#splitApplyAll').addEventListener('click', () => {
+    bind('#splitApplyAll', 'click', () => {
       if (!split.doc) return;
       const cur = getSplitRatios(split.pageNum).slice();
       for (let p = 1; p <= split.doc.numPages; p++) split.ratios[p] = cur.slice();
       markSplitDirty();
       say('#splitStatus', '已把本页拆分位置应用到全部 ' + split.doc.numPages + ' 页');
     });
-    $('#splitParts').addEventListener('change', async () => {
+    bind('#splitParts', 'change', async () => {
       split.parts = parseInt($('#splitParts').value, 10);
       split.ratios = {};
       if (split.doc) await splitRender();
       markSplitDirty();
       say('#splitStatus', '拆分份数已改为 ' + split.parts + '，拆分线已重置为均匀分布');
     });
-    $('#splitDir').addEventListener('change', async () => {
+    bind('#splitDir', 'change', async () => {
       split.dir = $('#splitDir').value;
       split.ratios = {};
       if (split.doc) await splitRender();
@@ -2099,7 +2106,7 @@
       say('#splitStatus', '切分方向已更新，拆分线已重置');
     });
 
-    $('#splitBtn').addEventListener('click', async () => {
+    bind('#splitBtn', 'click', async () => {
       if (!split.doc || !split.buf) { say('#splitStatus', '请先选择 PDF 文件', true); return; }
       const btn = $('#splitBtn'); btn.disabled = true;
       say('#splitStatus', '正在拆分…');
@@ -2198,11 +2205,11 @@
       if (crop._refresh) crop._refresh();
     }
 
-    $('#cropUnifySize').addEventListener('change', function () {
+    bind('#cropUnifySize', 'change', function () {
       markCropDirty();
     });
 
-    $('#cropFile').addEventListener('change', async (e) => {
+    bind('#cropFile', 'change', async (e) => {
       const f = e.target.files[0]; if (!f) return;
       say('#cropStatus', '');
       $('#cropCard').classList.add('hidden');
@@ -2327,6 +2334,7 @@
 
     (function bindCropDrag() {
       const stage = $('#cropStage');
+      if (!stage) return;
       const getPos = (e) => {
         const rect = stage.getBoundingClientRect();
         return { x: e.clientX - rect.left, y: e.clientY - rect.top, w: rect.width, h: rect.height };
@@ -2385,25 +2393,25 @@
       stage.addEventListener('contextmenu', (e) => e.preventDefault());
     })();
 
-    $('#cropPrev').addEventListener('click', async () => {
+    bind('#cropPrev', 'click', async () => {
       if (!crop.doc || crop.pageNum <= 1) return;
       crop.pageNum--; await cropRender();
     });
-    $('#cropNext').addEventListener('click', async () => {
+    bind('#cropNext', 'click', async () => {
       if (!crop.doc || crop.pageNum >= crop.doc.numPages) return;
       crop.pageNum++; await cropRender();
     });
-    $('#cropResetPage').addEventListener('click', () => {
+    bind('#cropResetPage', 'click', () => {
       crop.crops[crop.pageNum] = defaultCrop();
       drawCropBox(); markCropDirty();
       say('#cropStatus', '本页已重置（留出 5% 边距）');
     });
-    $('#cropFullPage').addEventListener('click', () => {
+    bind('#cropFullPage', 'click', () => {
       crop.crops[crop.pageNum] = { x: 0, y: 0, w: 1, h: 1 };
       drawCropBox(); markCropDirty();
       say('#cropStatus', '本页已恢复为整页');
     });
-    $('#cropApplyAll').addEventListener('click', () => {
+    bind('#cropApplyAll', 'click', () => {
       if (!crop.doc) return;
       const cur = getCrop(crop.pageNum);
       const copied = { x: cur.x, y: cur.y, w: cur.w, h: cur.h };
@@ -2412,7 +2420,7 @@
       say('#cropStatus', '已把本页裁剪框应用到全部 ' + crop.doc.numPages + ' 页');
     });
 
-    $('#cropBtn').addEventListener('click', async () => {
+    bind('#cropBtn', 'click', async () => {
       if (!crop.doc || !crop.buf) { say('#cropStatus', '请先选择 PDF 文件', true); return; }
       const btn = $('#cropBtn'); btn.disabled = true;
       const unifyMode = $('#cropUnifySize').value;
@@ -2575,7 +2583,7 @@
       return originalSizeCache[idx];
     }
 
-    $('#arrangeFile').addEventListener('change', async (e) => {
+    bind('#arrangeFile', 'change', async (e) => {
       const f = e.target.files[0]; if (!f) return;
       say('#arrangeStatus', '');
       $('#arrangeCard').classList.add('hidden');
@@ -2688,7 +2696,7 @@
       btnLeft.title = '左转 90°';
       btnLeft.textContent = '↺';
       btnLeft.type = 'button';
-      btnLeft.addEventListener('click', async (e) => {
+      bind(btnLeft, 'click', async (e) => {
         e.stopPropagation();
         item.rotation = ((item.rotation - 90) % 360 + 360) % 360;
         markArrangeDirty();
@@ -2698,7 +2706,7 @@
       btnRight.title = '右转 90°';
       btnRight.textContent = '↻';
       btnRight.type = 'button';
-      btnRight.addEventListener('click', async (e) => {
+      bind(btnRight, 'click', async (e) => {
         e.stopPropagation();
         item.rotation = (item.rotation + 90) % 360;
         markArrangeDirty();
@@ -2709,7 +2717,7 @@
       btnInsert.title = '在此页后插入空白页';
       btnInsert.textContent = '＋';
       btnInsert.type = 'button';
-      btnInsert.addEventListener('click', async (e) => {
+      bind(btnInsert, 'click', async (e) => {
         e.stopPropagation();
         const realIdx = arrange.pages.findIndex(p => p.id === item.id);
         if (realIdx < 0) return;
@@ -2725,7 +2733,7 @@
       btnDelete.title = '删除此页';
       btnDelete.textContent = '✕';
       btnDelete.type = 'button';
-      btnDelete.addEventListener('click', (e) => {
+      bind(btnDelete, 'click', (e) => {
         e.stopPropagation();
         const realIdx = arrange.pages.findIndex(p => p.id === item.id);
         if (realIdx < 0) return;
@@ -2740,7 +2748,7 @@
       actions.appendChild(btnInsert);
       actions.appendChild(btnDelete);
       card.appendChild(actions);
-      card.addEventListener('pointerdown', (e) => {
+      bind(card, 'pointerdown', (e) => {
         if (e.target.closest('.page-actions')) return;
         if (e.pointerType === 'mouse' && e.button !== 0) return;
         arrange.selectedId = item.id;
@@ -2810,6 +2818,7 @@
     }
     (function bindArrangeDrag() {
       const grid = $('#arrangeGrid');
+      if (!grid) return;
       document.addEventListener('pointermove', (e) => {
         const d = arrange.dragging;
         if (!d || e.pointerId !== d.pointerId) return;
@@ -2848,7 +2857,7 @@
       grid.addEventListener('contextmenu', (e) => e.preventDefault());
     })();
 
-    $('#arrangeAddBlank').addEventListener('click', async () => {
+    bind('#arrangeAddBlank', 'click', async () => {
       if (!arrange.doc) return;
       let size;
       if (arrange.pages.length > 0 && arrange.pages[0].type === 'original') {
@@ -2859,28 +2868,28 @@
       renderArrangeGrid();
       say('#arrangeStatus', '已在末尾添加一页空白页');
     });
-    $('#arrangeRotateAllLeft').addEventListener('click', async () => {
+    bind('#arrangeRotateAllLeft', 'click', async () => {
       if (!arrange.doc) return;
       arrange.pages.forEach(p => { p.rotation = ((p.rotation - 90) % 360 + 360) % 360; });
       markArrangeDirty();
       for (const item of arrange.pages) await updateArrangeCard(item);
       say('#arrangeStatus', '所有页面已左转 90°');
     });
-    $('#arrangeRotateAllRight').addEventListener('click', async () => {
+    bind('#arrangeRotateAllRight', 'click', async () => {
       if (!arrange.doc) return;
       arrange.pages.forEach(p => { p.rotation = (p.rotation + 90) % 360; });
       markArrangeDirty();
       for (const item of arrange.pages) await updateArrangeCard(item);
       say('#arrangeStatus', '所有页面已右转 90°');
     });
-    $('#arrangeReverse').addEventListener('click', () => {
+    bind('#arrangeReverse', 'click', () => {
       if (!arrange.doc) return;
       arrange.pages.reverse();
       markArrangeDirty();
       renderArrangeGrid();
       say('#arrangeStatus', '页面顺序已反转');
     });
-    $('#arrangeReset').addEventListener('click', async () => {
+    bind('#arrangeReset', 'click', async () => {
       if (!arrange.doc) return;
       if (!confirm('确定要恢复为原始 PDF 的顺序和方向吗？')) return;
       arrange.pages = [];
@@ -2892,7 +2901,7 @@
       renderArrangeGrid();
       say('#arrangeStatus', '已恢复原始顺序');
     });
-    $('#arrangeBtn').addEventListener('click', async () => {
+    bind('#arrangeBtn', 'click', async () => {
       if (!arrange.doc || !arrange.buf) { say('#arrangeStatus', '请先选择 PDF 文件', true); return; }
       if (arrange.pages.length === 0) { say('#arrangeStatus', '至少保留一页', true); return; }
       const btn = $('#arrangeBtn'); btn.disabled = true;
@@ -3034,24 +3043,24 @@
       if (infoEl) infoEl.textContent = '共 ' + scan.items.length + ' 页';
     }
 
-    $('#scanStartBtn').addEventListener('click', openScanCamera);
-    $('#scanStopBtn').addEventListener('click', () => {
+    bind('#scanStartBtn', 'click', openScanCamera);
+    bind('#scanStopBtn', 'click', () => {
       closeScanCamera();
       say('#scanStatus', '摄像头已关闭');
     });
-    $('#scanFsClose').addEventListener('click', () => {
+    bind('#scanFsClose', 'click', () => {
       closeScanCamera();
       say('#scanStatus', '摄像头已关闭');
     });
-    $('#scanSwitchBtn').addEventListener('click', async () => {
+    bind('#scanSwitchBtn', 'click', async () => {
       scan.facingMode = scan.facingMode === 'environment' ? 'user' : 'environment';
       await openScanCamera();
     });
-    $('#scanFsSwitch').addEventListener('click', async () => {
+    bind('#scanFsSwitch', 'click', async () => {
       scan.facingMode = scan.facingMode === 'environment' ? 'user' : 'environment';
       await openScanCamera();
     });
-    $('#scanAddMoreBtn').addEventListener('click', () => {
+    bind('#scanAddMoreBtn', 'click', () => {
       openScanCamera();
     });
 
@@ -3185,9 +3194,9 @@
       }
     }
 
-    $('#scanFsShutter').addEventListener('click', takePhoto);
+    bind('#scanFsShutter', 'click', takePhoto);
 
-    $('#scanFsThumb').addEventListener('click', () => {
+    bind('#scanFsThumb', 'click', () => {
       closeScanCamera();
       const card = $('#scanListCard');
       if (card) {
@@ -3294,12 +3303,12 @@
           +   '<button class="danger" data-act="del" type="button" title="删除">✕</button>'
           + '</div>';
 
-        div.querySelector('.thumb').addEventListener('click', (e) => {
+        bind(div.querySelector('.thumb'), 'click', (e) => {
           e.stopPropagation();
           openScanImageEditor(idx);
         });
 
-        div.querySelector('[data-act="up"]').addEventListener('click', (e) => {
+        bind(div.querySelector('[data-act="up"]'), 'click', (e) => {
           e.stopPropagation();
           if (idx === 0) return;
           const [x] = scan.items.splice(idx, 1);
@@ -3307,7 +3316,7 @@
           renderScanResultGrid(); markScanDirty();
           updateScanThumbnail(); updateScanCountBadge();
         });
-        div.querySelector('[data-act="down"]').addEventListener('click', (e) => {
+        bind(div.querySelector('[data-act="down"]'), 'click', (e) => {
           e.stopPropagation();
           if (idx === scan.items.length - 1) return;
           const [x] = scan.items.splice(idx, 1);
@@ -3315,15 +3324,15 @@
           renderScanResultGrid(); markScanDirty();
           updateScanThumbnail();
         });
-        div.querySelector('[data-act="rotL"]').addEventListener('click', async (e) => {
+        bind(div.querySelector('[data-act="rotL"]'), 'click', async (e) => {
           e.stopPropagation();
           await rotateScanItem(idx, -90);
         });
-        div.querySelector('[data-act="rotR"]').addEventListener('click', async (e) => {
+        bind(div.querySelector('[data-act="rotR"]'), 'click', async (e) => {
           e.stopPropagation();
           await rotateScanItem(idx, 90);
         });
-        div.querySelector('[data-act="del"]').addEventListener('click', (e) => {
+        bind(div.querySelector('[data-act="del"]'), 'click', (e) => {
           e.stopPropagation();
           scan.items.splice(idx, 1);
           renderScanResultGrid(); markScanDirty();
@@ -3521,17 +3530,17 @@
       drawEditorCanvas();
     }
 
-    $('#scanIeRotateLeft').addEventListener('click', () => rotateEditor(-90));
-    $('#scanIeRotateRight').addEventListener('click', () => rotateEditor(90));
+    bind('#scanIeRotateLeft', 'click', () => rotateEditor(-90));
+    bind('#scanIeRotateRight', 'click', () => rotateEditor(90));
 
-    $('#scanIeCrop').addEventListener('click', () => {
+    bind('#scanIeCrop', 'click', () => {
       editor.cropMode = !editor.cropMode;
       editor.crop = editor.cropMode ? { x: 0.1, y: 0.1, w: 0.8, h: 0.8 } : null;
       $('#scanIeCrop').classList.toggle('active', editor.cropMode);
       drawEditorCanvas();
     });
 
-    $('#scanIeReset').addEventListener('click', async () => {
+    bind('#scanIeReset', 'click', async () => {
       const item = scan.items[scan.editIndex];
       if (!item) return;
       try {
@@ -3547,6 +3556,7 @@
 
     (function bindEditorCropDrag() {
       const stage = $('#scanIeStage');
+      if (!stage) return;
 
       function getStagePos(e) {
         const canvas = $('#scanIeCanvas');
@@ -3579,7 +3589,6 @@
       }
 
       stage.addEventListener('pointerdown', (e) => {
-        // 滑动切换逻辑初始化
         editor.swipeStartX = e.clientX;
         editor.swipeStartY = e.clientY;
         editor.swipeMoved = false;
@@ -3606,7 +3615,6 @@
       }, { passive: false });
 
       stage.addEventListener('pointermove', (e) => {
-        // 如果正在拖拽裁剪框，直接处理，不计算滑动
         if (editor.drag) {
           const p = getStagePos(e);
           const d = editor.drag;
@@ -3657,7 +3665,6 @@
           return;
         }
 
-        // 计算滑动距离
         if (editor.swipeStartX !== null) {
           const dx = e.clientX - editor.swipeStartX;
           const dy = e.clientY - editor.swipeStartY;
@@ -3678,14 +3685,11 @@
           return;
         }
 
-        // 处理左右滑动切换
         if (editor.swipeStartX !== null && !editor.cropMode && editor.swipeMoved) {
           const dx = e.clientX - editor.swipeStartX;
           const dy = e.clientY - editor.swipeStartY;
-          // 横向滑动距离大于 50 且 水平角度大于垂直角度
           if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
             if (dx > 0) {
-              // 向右滑 -> 上一张
               if (scan.editIndex > 0) {
                 openScanImageEditor(scan.editIndex - 1);
                 showToast('← 上一张');
@@ -3693,7 +3697,6 @@
                 showToast('已经是第一张了');
               }
             } else {
-              // 向左滑 -> 下一张
               if (scan.editIndex < scan.items.length - 1) {
                 openScanImageEditor(scan.editIndex + 1);
                 showToast('下一张 →');
@@ -3712,7 +3715,7 @@
       stage.addEventListener('pointercancel', endDrag);
     })();
 
-    $('#scanIeSave').addEventListener('click', async () => {
+    bind('#scanIeSave', 'click', async () => {
       const idx = scan.editIndex;
       const item = scan.items[idx];
       if (!item || !editor.baseCanvas) return;
@@ -3747,7 +3750,6 @@
         markScanDirty();
         showToast('✓ 第 ' + (idx + 1) + ' 张修改已保存');
         
-        // 保存后可以自动跳到下一张（如果存在）
         if (idx < scan.items.length - 1) {
             openScanImageEditor(idx + 1);
         } else {
@@ -3759,14 +3761,14 @@
       }
     });
 
-    $('#scanIeCancel').addEventListener('click', () => {
+    bind('#scanIeCancel', 'click', () => {
       $('#scanImgEditor').classList.remove('show');
     });
-    $('#scanIeClose').addEventListener('click', () => {
+    bind('#scanIeClose', 'click', () => {
       $('#scanImgEditor').classList.remove('show');
     });
 
-    $('#scanClearBtn').addEventListener('click', () => {
+    bind('#scanClearBtn', 'click', () => {
       if (scan.items.length === 0) return;
       if (!confirm('确定要清空全部扫描页吗？')) return;
       scan.items = [];
@@ -3778,7 +3780,7 @@
       markScanDirty();
     });
 
-    $('#scanPdfBtn').addEventListener('click', async () => {
+    bind('#scanPdfBtn', 'click', async () => {
       if (scan.items.length === 0) { say('#scanListStatus', '请先拍照并添加到扫描列表', true); return; }
       const btn = $('#scanPdfBtn'); btn.disabled = true;
       const mode = $('#scanPdfSize').value;
@@ -3847,7 +3849,7 @@
     let ocrResultText = '';
     let ocrWorker = null;
 
-    $('#ocrFile').addEventListener('change', async (e) => {
+    bind('#ocrFile', 'change', async (e) => {
       const f = e.target.files[0]; if (!f) return;
       $('#ocrResultCard').classList.remove('hidden');
       const statusEl = $('#ocrStatus');
@@ -3886,7 +3888,7 @@
       }
     });
 
-    $('#ocrCopyBtn').addEventListener('click', async () => {
+    bind('#ocrCopyBtn', 'click', async () => {
       if (!ocrResultText) return;
       try {
         await navigator.clipboard.writeText(ocrResultText);
@@ -3898,9 +3900,8 @@
       }
     });
 
-    $('#ocrExportWordBtn').addEventListener('click', () => {
+    bind('#ocrExportWordBtn', 'click', () => {
       if (!ocrResultText) return;
-      // 使用简单的 HTML 包裹，使 Word 能够识别段落
       const html = `
         <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
         <head><meta charset="utf-8"><title>识别结果</title>
@@ -3913,9 +3914,8 @@
       downloadBlob(blob, '识别结果_' + Date.now() + '.doc');
     });
 
-    $('#ocrExportExcelBtn').addEventListener('click', () => {
+    bind('#ocrExportExcelBtn', 'click', () => {
       if (!ocrResultText) return;
-      // 将每一行转成 tr/td，以便在 Excel 中显示为不同行
       const lines = ocrResultText.split('\n');
       let trs = '';
       lines.forEach(line => {
@@ -3940,7 +3940,7 @@
     let idcardFrontImg = null;
     let idcardBackImg = null;
 
-    $('#idcardFrontFile').addEventListener('change', async (e) => {
+    bind('#idcardFrontFile', 'change', async (e) => {
       const f = e.target.files[0];
       if (f) {
         idcardFrontImg = await loadImage(await readDataUrl(f));
@@ -3948,7 +3948,7 @@
       }
     });
 
-    $('#idcardBackFile').addEventListener('change', async (e) => {
+    bind('#idcardBackFile', 'change', async (e) => {
       const f = e.target.files[0];
       if (f) {
         idcardBackImg = await loadImage(await readDataUrl(f));
@@ -3956,7 +3956,7 @@
       }
     });
 
-    $('#idcardGenBtn').addEventListener('click', async () => {
+    bind('#idcardGenBtn', 'click', async () => {
       if (!idcardFrontImg || !idcardBackImg) {
         say('#idcardStatus', '请先选择正反面两张图片', true);
         return;
@@ -4021,7 +4021,7 @@
           <button class="btn big green" id="idcardSaveBtn" type="button">💾 保存为 PDF</button>
         `;
         $('#idcardPdfResultCard').classList.remove('hidden');
-        $('#idcardSaveBtn').addEventListener('click', () => sharedSave.saveAsPdf(bytes, filename, t => say('#idcardStatus', t)));
+        bind('#idcardSaveBtn', 'click', () => sharedSave.saveAsPdf(bytes, filename, t => say('#idcardStatus', t)));
         
         say('#idcardStatus', '✅ 生成成功，已生成真实物理尺寸 A4 排版', false, true);
         $('#idcardPdfResultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -4043,7 +4043,7 @@
       'small2': { w: 413, h: 531 }  // 35x45mm
     };
 
-    $('#idphotoFile').addEventListener('change', async (e) => {
+    bind('#idphotoFile', 'change', async (e) => {
       const f = e.target.files[0];
       if (!f) return;
       try {
@@ -4154,19 +4154,19 @@
       $('#idphotoDownloadRow').classList.remove('hidden');
     }
 
-    $('#idphotoSize').addEventListener('change', () => {
+    bind('#idphotoSize', 'change', () => {
       idphotoState.x = 0; idphotoState.y = 0;
       drawIdPhoto();
     });
-    $('#idphotoBg').addEventListener('change', drawIdPhoto);
-    $('#idphotoLayout').addEventListener('change', () => {
+    bind('#idphotoBg', 'change', drawIdPhoto);
+    bind('#idphotoLayout', 'change', () => {
       idphotoState.x = 0; idphotoState.y = 0;
       if($('#idphotoPreviewWrap').classList.contains('hidden') === false) {
           drawIdPhoto();
       }
     });
     
-    $('#idphotoGenBtn').addEventListener('click', () => {
+    bind('#idphotoGenBtn', 'click', () => {
       if (!idphotoImg) {
         say('#idphotoStatus', '请先上传人像照片', true);
         return;
@@ -4179,6 +4179,7 @@
     // 证件照拖拽调整
     (function bindIdPhotoDrag() {
       const canvas = $('#idphotoCanvas');
+      if (!canvas) return;
       
       canvas.addEventListener('pointerdown', (e) => {
         if (!idphotoImg || $('#idphotoLayout').value !== 'single') return;
@@ -4215,7 +4216,7 @@
       canvas.addEventListener('pointercancel', endDrag);
     })();
 
-    $('#idphotoDownloadBtn').addEventListener('click', () => {
+    bind('#idphotoDownloadBtn', 'click', () => {
       const canvas = $('#idphotoCanvas');
       canvas.toBlob((blob) => {
         downloadBlob(blob, '证件照_' + Date.now() + '.jpg');
@@ -4244,7 +4245,7 @@
       if (img2pdf._refresh) img2pdf._refresh();
     }
 
-    $('#img2pdfFile').addEventListener('change', async (e) => {
+    bind('#img2pdfFile', 'change', async (e) => {
       const files = Array.from(e.target.files || []);
       e.target.value = '';
       if (!files.length) return;
@@ -4282,19 +4283,19 @@
           +   '<button data-act="down" type="button">↓</button>'
           +   '<button class="danger" data-act="del" type="button">✕</button>'
           + '</div>';
-        div.querySelector('[data-act="up"]').addEventListener('click', () => {
+        bind(div.querySelector('[data-act="up"]'), 'click', () => {
           if (idx === 0) return;
           const [x] = img2pdf.items.splice(idx, 1);
           img2pdf.items.splice(idx - 1, 0, x);
           renderImg2PdfList(); markImg2PdfDirty();
         });
-        div.querySelector('[data-act="down"]').addEventListener('click', () => {
+        bind(div.querySelector('[data-act="down"]'), 'click', () => {
           if (idx === img2pdf.items.length - 1) return;
           const [x] = img2pdf.items.splice(idx, 1);
           img2pdf.items.splice(idx + 1, 0, x);
           renderImg2PdfList(); markImg2PdfDirty();
         });
-        div.querySelector('[data-act="del"]').addEventListener('click', () => {
+        bind(div.querySelector('[data-act="del"]'), 'click', () => {
           img2pdf.items.splice(idx, 1);
           renderImg2PdfList(); markImg2PdfDirty();
           if (img2pdf.items.length === 0) $('#img2pdfListCard').classList.add('hidden');
@@ -4303,7 +4304,7 @@
       });
     }
 
-    $('#img2pdfClear').addEventListener('click', () => {
+    bind('#img2pdfClear', 'click', () => {
       img2pdf.items = [];
       renderImg2PdfList();
       $('#img2pdfListCard').classList.add('hidden');
@@ -4311,7 +4312,7 @@
       markImg2PdfDirty();
     });
 
-    $('#img2pdfBtn').addEventListener('click', async () => {
+    bind('#img2pdfBtn', 'click', async () => {
       if (img2pdf.items.length === 0) { say('#img2pdfStatus', '请先选择图片', true); return; }
       const btn = $('#img2pdfBtn'); btn.disabled = true;
       const mode = 'a4'; // 固定 A4
@@ -4379,7 +4380,7 @@
       resultFiles: [], resultZipBlob: null, resultZipName: '', hasResult: false
     };
 
-    $('#pdf2imgFile').addEventListener('change', async (e) => {
+    bind('#pdf2imgFile', 'change', async (e) => {
       const f = e.target.files[0]; if (!f) return;
       say('#pdf2imgStatus', '');
       $('#pdf2imgOptCard').classList.add('hidden');
@@ -4396,7 +4397,7 @@
       }
     });
 
-    $('#pdf2imgBtn').addEventListener('click', async () => {
+    bind('#pdf2imgBtn', 'click', async () => {
       if (!pdf2img.doc) { say('#pdf2imgStatus', '请先选择 PDF', true); return; }
       const btn = $('#pdf2imgBtn'); btn.disabled = true;
       const format = $('#pdf2imgFormat').value;
@@ -4461,7 +4462,7 @@
           ).join('')
         + '</div>';
 
-      $('#pdf2imgZipBtn').addEventListener('click', () => {
+      bind('#pdf2imgZipBtn', 'click', () => {
         downloadBlob(pdf2img.resultZipBlob, pdf2img.resultZipName);
         say('#pdf2imgStatus2', '✅ 已开始下载 ZIP', false, true);
       });
@@ -4469,7 +4470,7 @@
       body.querySelectorAll('.file-item').forEach(item => {
         const idx = parseInt(item.dataset.idx, 10);
         const file = pdf2img.resultFiles[idx];
-        item.querySelector('[data-act="dl"]').addEventListener('click', () => {
+        bind(item.querySelector('[data-act="dl"]'), 'click', () => {
           downloadBlob(file.blob, file.name);
         });
       });
@@ -4480,7 +4481,7 @@
     /* ===== 模块 7：Word 转 PDF ===== */
     let word2pdfFile = null;
 
-    $('#word2pdfFile').addEventListener('change', (e) => {
+    bind('#word2pdfFile', 'change', (e) => {
       const f = e.target.files[0];
       if (!f) return;
       if (!/\.docx$/i.test(f.name)) {
@@ -4492,7 +4493,7 @@
       say('#word2pdfStatus', '已选择：' + f.name);
     });
 
-    $('#word2pdfBtn').addEventListener('click', async () => {
+    bind('#word2pdfBtn', 'click', async () => {
       if (!word2pdfFile) { say('#word2pdfStatus', '请先选择 Word 文档', true); return; }
       const btn = $('#word2pdfBtn'); btn.disabled = true;
       say('#word2pdfStatus', '正在读取文档…');
@@ -4557,7 +4558,7 @@
       if (merge._refresh) merge._refresh();
     }
 
-    $('#mergeFile').addEventListener('change', async (e) => {
+    bind('#mergeFile', 'change', async (e) => {
       const files = Array.from(e.target.files || []);
       e.target.value = '';
       if (!files.length) return;
@@ -4598,19 +4599,19 @@
           +   '<button data-act="down" type="button">↓</button>'
           +   '<button class="danger" data-act="del" type="button">✕</button>'
           + '</div>';
-        div.querySelector('[data-act="up"]').addEventListener('click', () => {
+        bind(div.querySelector('[data-act="up"]'), 'click', () => {
           if (idx === 0) return;
           const [x] = merge.files.splice(idx, 1);
           merge.files.splice(idx - 1, 0, x);
           renderMergeList(); markMergeDirty();
         });
-        div.querySelector('[data-act="down"]').addEventListener('click', () => {
+        bind(div.querySelector('[data-act="down"]'), 'click', () => {
           if (idx === merge.files.length - 1) return;
           const [x] = merge.files.splice(idx, 1);
           merge.files.splice(idx + 1, 0, x);
           renderMergeList(); markMergeDirty();
         });
-        div.querySelector('[data-act="del"]').addEventListener('click', () => {
+        bind(div.querySelector('[data-act="del"]'), 'click', () => {
           merge.files.splice(idx, 1);
           renderMergeList(); markMergeDirty();
           if (merge.files.length === 0) $('#mergeListCard').classList.add('hidden');
@@ -4619,7 +4620,7 @@
       });
     }
 
-    $('#mergeClear').addEventListener('click', () => {
+    bind('#mergeClear', 'click', () => {
       merge.files = [];
       renderMergeList();
       $('#mergeListCard').classList.add('hidden');
@@ -4627,7 +4628,7 @@
       markMergeDirty();
     });
 
-    $('#mergeBtn').addEventListener('click', async () => {
+    bind('#mergeBtn', 'click', async () => {
       if (merge.files.length < 1) { say('#mergeStatus', '请至少选择一个 PDF', true); return; }
       const btn = $('#mergeBtn'); btn.disabled = true;
       say('#mergeStatus', '正在合并…');
@@ -4675,7 +4676,7 @@
       resultFiles: [], resultZipBlob: null, resultZipName: '', hasResult: false
     };
 
-    $('#extractFile').addEventListener('change', async (e) => {
+    bind('#extractFile', 'change', async (e) => {
       const f = e.target.files[0]; if (!f) return;
       say('#extractStatus', '');
       $('#extractOptCard').classList.add('hidden');
@@ -4701,9 +4702,9 @@
       const count = Math.ceil(total / per);
       $('#extractPreviewHint').textContent = '将拆分为 ' + count + ' 个文件（每份 ' + per + ' 页）';
     }
-    $('#extractPages').addEventListener('input', updateExtractPreview);
+    bind('#extractPages', 'input', updateExtractPreview);
 
-    $('#extractBtn').addEventListener('click', async () => {
+    bind('#extractBtn', 'click', async () => {
       if (!extract.doc || !extract.buf) { say('#extractStatus', '请先选择 PDF', true); return; }
       const per = Math.max(1, parseInt($('#extractPages').value, 10) || 1);
       const btn = $('#extractBtn'); btn.disabled = true;
@@ -4766,7 +4767,7 @@
           ).join('')
         + '</div>';
 
-      $('#extractZipBtn').addEventListener('click', () => {
+      bind('#extractZipBtn', 'click', () => {
         downloadBlob(extract.resultZipBlob, extract.resultZipName);
         say('#extractStatus2', '✅ 已开始下载 ZIP', false, true);
       });
@@ -4774,7 +4775,7 @@
       body.querySelectorAll('.file-item').forEach(item => {
         const idx = parseInt(item.dataset.idx, 10);
         const f = extract.resultFiles[idx];
-        item.querySelector('[data-act="dl"]').addEventListener('click', () => {
+        bind(item.querySelector('[data-act="dl"]'), 'click', () => {
           const blob = new Blob([f.bytes], { type: 'application/pdf' });
           downloadBlob(blob, f.name);
         });
