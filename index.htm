@@ -148,6 +148,7 @@
   .btn.small { padding: 7px 12px; font-size: 12px; border-radius: 7px; min-height: 36px; }
 
   .hint { font-size: 11px; color: #64748b; line-height: 1.55; margin: 8px 0 0; }
+  .hint b { color: #334155; }
   .status { font-size: 12px; color: #2563eb; margin-top: 10px; min-height: 16px;
     line-height: 1.45; padding: 7px 10px; border-radius: 7px; }
   .status:not(:empty) { background: #eff6ff; }
@@ -328,26 +329,43 @@
     object-fit: cover; background: #000;
   }
 
-  /* ===== 取景框 (身份证专用 1.585 比例) ===== */
+  /* ===== 身份证取景框（圆角 + 人像/国徽示意） ===== */
   .scan-fs-frame {
     position: absolute;
     width: 90%; aspect-ratio: 1.585;
     pointer-events: none;
-    border: 1px solid rgba(255,255,255,.25);
-    border-radius: 8px;
-    box-shadow: 0 0 0 4000px rgba(0,0,0,0.5);
+    border: 1.5px solid rgba(255,255,255,.5);
+    border-radius: 14px;
+    box-shadow: 0 0 0 4000px rgba(0,0,0,0.55), inset 0 0 40px rgba(96,165,250,.08);
     display: none;
+    overflow: hidden;
   }
   .scan-fs-frame.show { display: block; }
-  .scan-fs-corner {
-    position: absolute; width: 44px; height: 44px;
-    border-color: #60a5fa; border-style: solid; border-width: 0;
-    filter: drop-shadow(0 0 6px rgba(0,0,0,.6));
+  .scan-fs-frame .frame-hint {
+    position: absolute;
+    left: 50%; top: -30px; transform: translateX(-50%);
+    background: rgba(37,99,235,.92); color: #fff;
+    font-size: 12px; font-weight: 600; padding: 5px 12px;
+    border-radius: 999px; white-space: nowrap;
+    letter-spacing: .3px;
   }
-  .scan-fs-corner.tl { top: -2px; left: -2px; border-top-width: 4px; border-left-width: 4px; border-top-left-radius: 8px; }
-  .scan-fs-corner.tr { top: -2px; right: -2px; border-top-width: 4px; border-right-width: 4px; border-top-right-radius: 8px; }
-  .scan-fs-corner.bl { bottom: -2px; left: -2px; border-bottom-width: 4px; border-left-width: 4px; border-bottom-left-radius: 8px; }
-  .scan-fs-corner.br { bottom: -2px; right: -2px; border-bottom-width: 4px; border-right-width: 4px; border-bottom-right-radius: 8px; }
+  .scan-fs-frame .frame-guide {
+    position: absolute; inset: 8%;
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,.18);
+    pointer-events: none;
+  }
+  .scan-fs-frame .frame-guide svg { width: 100%; height: 100%; }
+  .scan-fs-corner {
+    position: absolute; width: 40px; height: 40px;
+    border-color: #60a5fa; border-style: solid; border-width: 0;
+    filter: drop-shadow(0 0 6px rgba(0,0,0,.5));
+    z-index: 2;
+  }
+  .scan-fs-corner.tl { top: -2px; left: -2px; border-top-width: 4px; border-left-width: 4px; border-top-left-radius: 14px; }
+  .scan-fs-corner.tr { top: -2px; right: -2px; border-top-width: 4px; border-right-width: 4px; border-top-right-radius: 14px; }
+  .scan-fs-corner.bl { bottom: -2px; left: -2px; border-bottom-width: 4px; border-left-width: 4px; border-bottom-left-radius: 14px; }
+  .scan-fs-corner.br { bottom: -2px; right: -2px; border-bottom-width: 4px; border-right-width: 4px; border-bottom-right-radius: 14px; }
 
   /* 对焦框 */
   .scan-fs-focus {
@@ -590,6 +608,12 @@
   .panel[data-theme="organize"] input[type=file]::file-selector-button { background: linear-gradient(135deg, #059669, #10b981); }
   .panel[data-theme="organize"] input[type=file]::-webkit-file-upload-button { background: linear-gradient(135deg, #059669, #10b981); }
 
+  /* ===== 证件照 AI 进度条 ===== */
+  .ai-progress-wrap { margin-bottom: 0; }
+  .ai-progress-wrap .ai-status-text { font-size: 11px; color: #64748b; margin-bottom: 6px; }
+  .ai-progress-wrap .ai-progress-track { width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
+  .ai-progress-wrap .ai-progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #7c3aed, #a855f7); transition: width .3s; }
+
   @media (max-width: 640px) {
     .app-header { padding: 18px 16px 16px; }
     .app-header h1 { font-size: 20px; }
@@ -673,15 +697,15 @@
       <button class="feature-card" data-tab="idcard" type="button">
         <span class="feature-icon">🪪</span>
         <span class="feature-text">
-          <span class="feature-name">证件 A4 合成</span>
-          <span class="feature-desc">正反面同页打印</span>
+          <span class="feature-name">身份证复印件</span>
+          <span class="feature-desc">正反面同页 · A4 打印</span>
         </span>
       </button>
       <button class="feature-card" data-tab="idphoto" type="button">
         <span class="feature-icon">👤</span>
         <span class="feature-text">
           <span class="feature-name">证件照制作</span>
-          <span class="feature-desc">换底色 · 尺寸裁剪</span>
+          <span class="feature-desc">AI 抠图 · 换底色</span>
         </span>
       </button>
     </div>
@@ -859,7 +883,7 @@
       </div>
     </section>
 
-    <!-- 模块 4 -->
+    <!-- 模块 4：扫描文档 -->
     <section class="panel" id="panel-scan" data-theme="edit">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">打开全屏相机</span></h2>
@@ -899,10 +923,10 @@
       </div>
     </section>
 
-    <!-- 身份证 -->
+    <!-- 身份证复印件 -->
     <section class="panel" id="panel-idcard" data-theme="organize">
       <div class="card">
-        <h2><span class="step-label">第 1 步</span><span class="step-title">选择/拍摄身份证图片</span></h2>
+        <h2><span class="step-label">第 1 步</span><span class="step-title">选择/拍摄身份证</span></h2>
         <div class="field">
           <label>身份证正面（人像面）</label>
           <div class="btn-row" style="margin-bottom:8px;">
@@ -928,8 +952,8 @@
       </div>
       <div class="card hidden" id="idcardResultCard">
         <h2><span class="step-label">第 2 步</span><span class="step-title">生成并导出 A4</span></h2>
-        <p class="hint">将严格按照身份证原件物理尺寸（85.6mm × 54mm）排版，A4纸上打印出来即与原复印尺寸完全一致。</p>
-        <button class="btn big" id="idcardGenBtn" type="button">生成身份证 A4 拼图</button>
+        <p class="hint">将严格按照身份证原件物理尺寸（85.6mm × 54mm）排版，A4 纸上打印出来即与原复印尺寸完全一致。</p>
+        <button class="btn big" id="idcardGenBtn" type="button">生成身份证复印件</button>
         <div class="status" id="idcardStatus"></div>
         <div class="preview-wrap hidden" id="idcardPreviewWrap">
           <canvas id="idcardPreviewCanvas" style="display:block; width:100%; height:auto;"></canvas>
@@ -941,12 +965,15 @@
       </div>
     </section>
 
-    <!-- 证件照 -->
+    <!-- 证件照制作 -->
     <section class="panel" id="panel-idphoto" data-theme="convert">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">上传人像照片</span></h2>
         <input type="file" id="idphotoFile" accept="image/*" />
-        <p class="hint">选一张正面清晰的人像照片（纯前端无法完美抠图，如果原图背景较杂乱，结果会有背景保留）。</p>
+        <p class="hint">
+          支持 <b>AI 抠图（首次下载约 44MB 模型，之后完全离线）</b>；也可使用快速颜色抠图或直接铺底。
+          纯色背景（白/蓝/红）效果最好。
+        </p>
       </div>
       <div class="card hidden" id="idphotoOptCard">
         <h2><span class="step-label">第 2 步</span><span class="step-title">尺寸与排版</span></h2>
@@ -969,6 +996,20 @@
           </select>
         </div>
         <div class="field">
+          <label>抠图引擎</label>
+          <select id="idphotoMatteMode">
+            <option value="ai" selected>🤖 AI 抠图（RMBG-1.4，首次需下载 ~44MB）</option>
+            <option value="color">🎨 快速抠图（纯色背景估计）</option>
+            <option value="none">➖ 不抠图（直接铺底）</option>
+          </select>
+        </div>
+        <div class="field hidden ai-progress-wrap" id="idphotoAIStatusWrap">
+          <div class="ai-status-text" id="idphotoAIStatusText">模型未加载</div>
+          <div class="ai-progress-track">
+            <div class="ai-progress-bar" id="idphotoAIProgressBar"></div>
+          </div>
+        </div>
+        <div class="field">
           <label>排版模式</label>
           <select id="idphotoLayout">
             <option value="single">单张导出</option>
@@ -988,7 +1029,7 @@
       </div>
     </section>
 
-    <!-- 模块 5 -->
+    <!-- 图片转 PDF -->
     <section class="panel" id="panel-img2pdf" data-theme="convert">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择图片</span></h2>
@@ -1009,7 +1050,7 @@
       </div>
     </section>
 
-    <!-- 模块 6 -->
+    <!-- PDF 转图片 -->
     <section class="panel" id="panel-pdf2img" data-theme="convert">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择 PDF</span></h2>
@@ -1032,7 +1073,7 @@
       </div>
     </section>
 
-    <!-- 模块 7 -->
+    <!-- Word 转 PDF -->
     <section class="panel" id="panel-word2pdf" data-theme="convert">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择 Word 文档</span></h2>
@@ -1045,7 +1086,7 @@
       </div>
     </section>
 
-    <!-- 模块 8 -->
+    <!-- PDF 合并 -->
     <section class="panel" id="panel-merge" data-theme="organize">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择要合并的 PDF</span></h2>
@@ -1066,7 +1107,7 @@
       </div>
     </section>
 
-    <!-- 模块 9 -->
+    <!-- PDF 拆分 -->
     <section class="panel" id="panel-extract" data-theme="organize">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择 PDF</span></h2>
@@ -1101,12 +1142,27 @@
     <video id="scanFsVideo" playsinline autoplay muted></video>
     <!-- 身份证专用取景框 -->
     <div class="scan-fs-frame" id="scanFsFrame">
+      <div class="frame-hint" id="scanFsFrameHint">请将身份证放入框内</div>
+      <div class="frame-guide" id="scanFsFrameGuide">
+        <svg viewBox="0 0 158 100" preserveAspectRatio="xMidYMid meet" id="scanFsGuideFront">
+          <ellipse cx="42" cy="38" rx="15" ry="18" fill="currentColor"/>
+          <path d="M20 78 Q20 56 42 56 Q64 56 64 78 Z" fill="currentColor"/>
+          <rect x="82" y="26" width="60" height="5" rx="2.5" fill="currentColor"/>
+          <rect x="82" y="40" width="52" height="5" rx="2.5" fill="currentColor"/>
+          <rect x="82" y="54" width="44" height="5" rx="2.5" fill="currentColor"/>
+          <rect x="82" y="70" width="56" height="5" rx="2.5" fill="currentColor"/>
+        </svg>
+        <svg viewBox="0 0 158 100" preserveAspectRatio="xMidYMid meet" id="scanFsGuideBack" style="display:none">
+          <circle cx="79" cy="38" r="18" fill="currentColor"/>
+          <rect x="40" y="70" width="78" height="5" rx="2.5" fill="currentColor"/>
+          <rect x="48" y="82" width="62" height="5" rx="2.5" fill="currentColor"/>
+        </svg>
+      </div>
       <div class="scan-fs-corner tl"></div>
       <div class="scan-fs-corner tr"></div>
       <div class="scan-fs-corner bl"></div>
       <div class="scan-fs-corner br"></div>
     </div>
-    <!-- 点击对焦框 -->
     <div class="scan-fs-focus" id="scanFsFocus"></div>
     
     <div id="scanFsProcessing" class="scan-fs-processing hidden">
@@ -1183,7 +1239,9 @@
     pdfJs:     ['./libs/pdf.min.js',             './pdf.min.js'],
     pdfWorker: ['./libs/pdf.worker.min.js',      './pdf.worker.min.js'],
     jszip:     ['./libs/jszip.min.js',           './jszip.min.js'],
-    mammoth:   ['./libs/mammoth.browser.min.js', './mammoth.browser.min.js']
+    mammoth:   ['./libs/mammoth.browser.min.js', './mammoth.browser.min.js'],
+    ort:       ['./libs/ort.min.js',             './ort.min.js'],
+    rmbg:      ['./libs/rmbg-1.4.onnx',          './rmbg-1.4.onnx']
   };
 
   const CDN = {
@@ -1204,6 +1262,15 @@
     mammoth: [
       'https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js',
       'https://unpkg.com/mammoth@1.6.0/mammoth.browser.min.js'
+    ],
+    ort: [
+      'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.3/dist/ort.min.js',
+      'https://fastly.jsdelivr.net/npm/onnxruntime-web@1.17.3/dist/ort.min.js',
+      'https://unpkg.com/onnxruntime-web@1.17.3/dist/ort.min.js'
+    ],
+    rmbg: [
+      'https://huggingface.co/briaai/RMBG-1.4/resolve/main/onnx/model.onnx',
+      'https://hf-mirror.com/briaai/RMBG-1.4/resolve/main/onnx/model.onnx'
     ]
   };
 
@@ -1440,7 +1507,7 @@
 
     const toolNames = {
       split: '试卷拆分', crop: 'PDF 裁剪', arrange: '页面调整', scan: '扫描文档',
-      idcard: '证件 A4 合成', idphoto: '证件照制作',
+      idcard: '身份证复印件', idphoto: '证件照制作',
       img2pdf: '图片转 PDF', pdf2img: 'PDF 转图片', word2pdf: 'Word 转 PDF',
       merge: 'PDF 合并', extract: 'PDF 拆分'
     };
@@ -2067,18 +2134,6 @@
       if (!split.doc || split.pageNum >= split.doc.numPages) return;
       split.pageNum++; await splitRender();
     });
-    bind('#splitResetPage', 'click', () => {
-      split.ratios[split.pageNum] = splitDefaultRatios(split.parts);
-      drawSplitLines(); markSplitDirty();
-      say('#splitStatus', '本页已重置为均匀拆分');
-    });
-    bind('#splitApplyAll', 'click', () => {
-      if (!split.doc) return;
-      const cur = getSplitRatios(split.pageNum).slice();
-      for (let p = 1; p <= split.doc.numPages; p++) split.ratios[p] = cur.slice();
-      markSplitDirty();
-      say('#splitStatus', '已把本页拆分位置应用到全部 ' + split.doc.numPages + ' 页');
-    });
     bind('#splitParts', 'change', async () => {
       split.parts = parseInt($('#splitParts').value, 10);
       split.ratios = {};
@@ -2193,9 +2248,7 @@
       if (crop._refresh) crop._refresh();
     }
 
-    bind('#cropUnifySize', 'change', function () {
-      markCropDirty();
-    });
+    bind('#cropUnifySize', 'change', function () { markCropDirty(); });
 
     bind('#cropFile', 'change', async (e) => {
       const f = e.target.files[0]; if (!f) return;
@@ -2389,24 +2442,6 @@
       if (!crop.doc || crop.pageNum >= crop.doc.numPages) return;
       crop.pageNum++; await cropRender();
     });
-    bind('#cropResetPage', 'click', () => {
-      crop.crops[crop.pageNum] = defaultCrop();
-      drawCropBox(); markCropDirty();
-      say('#cropStatus', '本页已重置（留出 5% 边距）');
-    });
-    bind('#cropFullPage', 'click', () => {
-      crop.crops[crop.pageNum] = { x: 0, y: 0, w: 1, h: 1 };
-      drawCropBox(); markCropDirty();
-      say('#cropStatus', '本页已恢复为整页');
-    });
-    bind('#cropApplyAll', 'click', () => {
-      if (!crop.doc) return;
-      const cur = getCrop(crop.pageNum);
-      const copied = { x: cur.x, y: cur.y, w: cur.w, h: cur.h };
-      for (let p = 1; p <= crop.doc.numPages; p++) crop.crops[p] = { ...copied };
-      markCropDirty();
-      say('#cropStatus', '已把本页裁剪框应用到全部 ' + crop.doc.numPages + ' 页');
-    });
 
     bind('#cropBtn', 'click', async () => {
       if (!crop.doc || !crop.buf) { say('#cropStatus', '请先选择 PDF 文件', true); return; }
@@ -2451,8 +2486,7 @@
         } else {
           const targetSize =
             unifyMode === 'a4' ? [595.28, 841.89] :
-            unifyMode === 'a4l' ? [841.89, 595.28] :
-            unifyMode === 'letter' ? [612, 792] : [595.28, 841.89];
+            unifyMode === 'a4l' ? [841.89, 595.28] : [595.28, 841.89];
           const out = await PDFDocument.create();
           const pageCount = crop.doc.numPages;
           const MAX_PIXEL = 3500;
@@ -2499,7 +2533,7 @@
           }
           const bytes = await out.save();
           const filename = baseName(crop.file.name) + '_裁剪_' +
-            (unifyMode === 'a4' ? 'A4纵向' : unifyMode === 'a4l' ? 'A4横向' : 'Letter') + '.pdf';
+            (unifyMode === 'a4' ? 'A4纵向' : 'A4横向') + '.pdf';
           await showCropResult(bytes, filename, pageCount, pageCount);
         }
         say('#cropStatus', '裁剪完成！请选择一种保存方式', false, true);
@@ -2870,13 +2904,6 @@
       for (const item of arrange.pages) await updateArrangeCard(item);
       say('#arrangeStatus', '所有页面已右转 90°');
     });
-    bind('#arrangeReverse', 'click', () => {
-      if (!arrange.doc) return;
-      arrange.pages.reverse();
-      markArrangeDirty();
-      renderArrangeGrid();
-      say('#arrangeStatus', '页面顺序已反转');
-    });
     bind('#arrangeReset', 'click', async () => {
       if (!arrange.doc) return;
       if (!confirm('确定要恢复为原始 PDF 的顺序和方向吗？')) return;
@@ -2983,11 +3010,7 @@
       try {
         if (scan.stream) { scan.stream.getTracks().forEach(t => t.stop()); scan.stream = null; }
         scan.stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: scan.facingMode,
-            width: { ideal: 1920 },
-            height: { ideal: 1080 }
-          },
+          video: { facingMode: scan.facingMode, width: { ideal: 1920 }, height: { ideal: 1080 } },
           audio: false
         });
         const v = $('#scanFsVideo');
@@ -3048,9 +3071,7 @@
       scan.facingMode = scan.facingMode === 'environment' ? 'user' : 'environment';
       await openScanCamera();
     });
-    bind('#scanAddMoreBtn', 'click', () => {
-      openScanCamera();
-    });
+    bind('#scanAddMoreBtn', 'click', () => { openScanCamera(); });
 
     function flashScreen() {
       const el = $('#scanFlash');
@@ -3059,7 +3080,6 @@
       void el.offsetWidth;
       el.classList.add('animate');
     }
-
     function shutterPulse() {
       const btn = $('#scanFsShutter');
       if (!btn) return;
@@ -3067,7 +3087,6 @@
       void btn.offsetWidth;
       btn.classList.add('flash');
     }
-
     function showToast(text) {
       const el = $('#scanToast');
       const txt = $('#scanToastText');
@@ -3075,11 +3094,8 @@
       txt.textContent = text;
       el.classList.add('show');
       clearTimeout(showToast._timer);
-      showToast._timer = setTimeout(() => {
-        el.classList.remove('show');
-      }, 1500);
+      showToast._timer = setTimeout(() => { el.classList.remove('show'); }, 1500);
     }
-
     function showProcessing(show) {
       const el = $('#scanFsProcessing');
       if (!el) return;
@@ -3090,25 +3106,20 @@
       const vw = videoEl.videoWidth;
       const vh = videoEl.videoHeight;
       if (!vw || !vh) throw new Error('视频尚未就绪');
-
       const wrap = $('#scanFsVideoWrap');
       const wrapRect = wrap.getBoundingClientRect();
       const displayW = wrapRect.width;
       const displayH = wrapRect.height;
       if (displayW <= 0 || displayH <= 0) throw new Error('显示区域异常');
-
       const frameRect = $('#scanFsFrame').getBoundingClientRect();
-
       let fx = frameRect.left - wrapRect.left;
       let fy = frameRect.top - wrapRect.top;
       let fw = frameRect.width;
       let fh = frameRect.height;
-
       fx = clamp(fx, 0, displayW);
       fy = clamp(fy, 0, displayH);
       fw = clamp(fw, 1, displayW - fx);
       fh = clamp(fh, 1, displayH - fy);
-
       const videoRatio = vw / vh;
       const displayRatio = displayW / displayH;
       let drawW, drawH, drawX, drawY;
@@ -3119,19 +3130,16 @@
         drawW = displayW; drawH = displayW / videoRatio;
         drawX = 0; drawY = (displayH - drawH) / 2;
       }
-
       const sx = clamp((fx - drawX) / drawW * vw, 0, vw);
       const sy = clamp((fy - drawY) / drawH * vh, 0, vh);
       const sw = clamp(fw / drawW * vw, 1, vw - sx);
       const sh = clamp(fh / drawH * vh, 1, vh - sy);
-
       const outW = Math.max(1, Math.round(sw));
       const outH = Math.max(1, Math.round(sh));
       const outCv = document.createElement('canvas');
       outCv.width = outW;
       outCv.height = outH;
       outCv.getContext('2d').drawImage(videoEl, sx, sy, sw, sh, 0, 0, outW, outH);
-
       const maxDim = 2400;
       if (Math.max(outW, outH) > maxDim) {
         const k = maxDim / Math.max(outW, outH);
@@ -3156,19 +3164,15 @@
       try {
         await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
         const cv = captureVideoWithFrame(v);
-        
-        // 采用默认处理模式：增强去底色
         const mode = 'enhance';
         const processed = processImageForScan(cv, mode);
         const dataUrl = processed.toDataURL('image/jpeg', 0.92);
-
         scan.items.push({
           id: 's' + (++scan.idCounter),
           dataUrl,
           width: processed.width,
           height: processed.height
         });
-
         updateScanCountBadge();
         updateScanThumbnail();
         $('#scanListCard').classList.remove('hidden');
@@ -3182,7 +3186,13 @@
       }
     }
 
-    bind('#scanFsShutter', 'click', takePhoto);
+    bind('#scanFsShutter', 'click', async () => {
+      if (idcardCurrentMode) {
+        await idcardShutter();
+      } else {
+        await takePhoto();
+      }
+    });
 
     bind('#scanFsThumb', 'click', () => {
       closeScanCamera();
@@ -3200,7 +3210,6 @@
         cv.getContext('2d').drawImage(srcCanvas, 0, 0);
         return cv;
       }
-
       const cv = document.createElement('canvas');
       cv.width = srcCanvas.width; cv.height = srcCanvas.height;
       const ctx = cv.getContext('2d');
@@ -3208,15 +3217,12 @@
       const imgData = ctx.getImageData(0, 0, cv.width, cv.height);
       const d = imgData.data;
       const n = d.length / 4;
-
       const gray = new Uint8ClampedArray(n);
       for (let i = 0, j = 0; i < d.length; i += 4, j++) {
         gray[j] = (d[i] * 0.299 + d[i + 1] * 0.587 + d[i + 2] * 0.114) | 0;
       }
-
       const hist = new Uint32Array(256);
       for (let j = 0; j < n; j++) hist[gray[j]]++;
-
       const lowCut = n * 0.02, highCut = n * 0.02;
       let acc = 0, lo = 0, hi = 255;
       for (let i = 0; i < 256; i++) { acc += hist[i]; if (acc >= lowCut) { lo = i; break; } }
@@ -3226,7 +3232,6 @@
       const range = hi - lo;
       const LUT = new Uint8ClampedArray(256);
       for (let i = 0; i < 256; i++) LUT[i] = clamp((i - lo) * 255 / range, 0, 255);
-
       let threshold = -1;
       if (mode === 'bw') {
         const hist2 = new Uint32Array(256);
@@ -3247,7 +3252,6 @@
         }
         if (threshold < 0) threshold = 128;
       }
-
       for (let i = 0, j = 0; i < d.length; i += 4, j++) {
         let v = LUT[gray[j]];
         if (mode === 'bw') v = v > threshold ? 255 : 0;
@@ -3290,12 +3294,10 @@
           +   '<button data-act="down" type="button" title="下移">↓</button>'
           +   '<button class="danger" data-act="del" type="button" title="删除">✕</button>'
           + '</div>';
-
         bind(div.querySelector('.thumb'), 'click', (e) => {
           e.stopPropagation();
           openScanImageEditor(idx);
         });
-
         bind(div.querySelector('[data-act="up"]'), 'click', (e) => {
           e.stopPropagation();
           if (idx === 0) return;
@@ -3326,7 +3328,6 @@
           renderScanResultGrid(); markScanDirty();
           updateScanThumbnail(); updateScanCountBadge();
         });
-
         grid.appendChild(div);
       });
     }
@@ -3338,12 +3339,7 @@
         const img = await loadImage(item.dataUrl);
         const rotatedCanvas = drawRotatedCanvas(img, ((delta % 360) + 360) % 360);
         const dataUrl = rotatedCanvas.toDataURL('image/jpeg', 0.92);
-        scan.items[idx] = {
-          ...item,
-          dataUrl,
-          width: rotatedCanvas.width,
-          height: rotatedCanvas.height
-        };
+        scan.items[idx] = { ...item, dataUrl, width: rotatedCanvas.width, height: rotatedCanvas.height };
         renderScanResultGrid(); markScanDirty();
         updateScanThumbnail();
         showToast('已旋转');
@@ -3371,19 +3367,10 @@
       return cv;
     }
 
-    /* ============================================================
-     * 新增模块：图片编辑器（支持左右滑动切换）
-     * ============================================================ */
+    /* ===== 扫描图片编辑器（支持左右滑动切换） ===== */
     const editor = {
-      baseCanvas: null,
-      crop: null,
-      cropMode: false,
-      drag: null,
-      cssW: 0,
-      cssH: 0,
-      swipeStartX: 0,
-      swipeStartY: 0,
-      swipeMoved: false
+      baseCanvas: null, crop: null, cropMode: false, drag: null,
+      cssW: 0, cssH: 0, swipeStartX: 0, swipeStartY: 0, swipeMoved: false
     };
 
     async function openScanImageEditor(idx) {
@@ -3395,15 +3382,12 @@
       editor.drag = null;
       $('#scanIeTitle').textContent = '编辑扫描图 #' + (idx + 1) + ' / 共 ' + scan.items.length + ' 张';
       $('#scanIeCrop').classList.remove('active');
-
       try {
         const img = await loadImage(item.dataUrl);
         editor.baseCanvas = drawRotatedCanvas(img, 0);
         $('#scanImgEditor').classList.add('show');
         requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            drawEditorCanvas();
-          });
+          requestAnimationFrame(() => { drawEditorCanvas(); });
         });
       } catch (err) {
         say('#scanListStatus', '打开编辑失败：' + (err && err.message ? err.message : err), true);
@@ -3415,24 +3399,20 @@
       const canvas = $('#scanIeCanvas');
       const overlay = $('#scanIeOverlay');
       if (!editor.baseCanvas) return;
-
       const stageW = stage.clientWidth;
       const stageH = stage.clientHeight;
       if (stageW <= 10 || stageH <= 10) {
         requestAnimationFrame(() => drawEditorCanvas());
         return;
       }
-
       const maxW = stageW - 16;
       const maxH = stageH - 16;
       const scale = Math.min(maxW / editor.baseCanvas.width, maxH / editor.baseCanvas.height);
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-
       const cssW = Math.round(editor.baseCanvas.width * scale);
       const cssH = Math.round(editor.baseCanvas.height * scale);
       editor.cssW = cssW;
       editor.cssH = cssH;
-
       [canvas, overlay].forEach((cv) => {
         cv.width = Math.round(cssW * dpr);
         cv.height = Math.round(cssH * dpr);
@@ -3442,13 +3422,11 @@
         cv.style.top = '50%';
         cv.style.transform = 'translate(-50%, -50%)';
       });
-
       const ctx = canvas.getContext('2d');
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.fillStyle = '#fff';
       ctx.fillRect(0, 0, cssW, cssH);
       ctx.drawImage(editor.baseCanvas, 0, 0, cssW, cssH);
-
       drawEditorCropOverlay(cssW, cssH);
     }
 
@@ -3458,9 +3436,7 @@
       const ctx = overlay.getContext('2d');
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, cssW, cssH);
-
       if (!editor.cropMode) return;
-
       if (!editor.crop) {
         ctx.fillStyle = 'rgba(0,0,0,0.55)';
         ctx.fillRect(0, 0, cssW, cssH);
@@ -3470,23 +3446,17 @@
         ctx.fillText('拖动框选要保留的区域', cssW / 2, cssH / 2);
         return;
       }
-
       const c = editor.crop;
       const cx = c.x * cssW, cy = c.y * cssH;
       const cw = c.w * cssW, ch = c.h * cssH;
-
       ctx.fillStyle = 'rgba(0,0,0,0.55)';
       ctx.fillRect(0, 0, cssW, cy);
       ctx.fillRect(0, cy + ch, cssW, cssH - cy - ch);
       ctx.fillRect(0, cy, cx, ch);
       ctx.fillRect(cx + cw, cy, cssW - cx - cw, ch);
-
-      ctx.strokeStyle = '#60a5fa';
-      ctx.lineWidth = 2;
-      ctx.setLineDash([8, 6]);
-      ctx.strokeRect(cx, cy, cw, ch);
+      ctx.strokeStyle = '#60a5fa'; ctx.lineWidth = 2;
+      ctx.setLineDash([8, 6]); ctx.strokeRect(cx, cy, cw, ch);
       ctx.setLineDash([]);
-
       const HIT = isMobile ? 20 : 16;
       const positions = [
         [cx, cy], [cx + cw / 2, cy], [cx + cw, cy],
@@ -3496,11 +3466,8 @@
       positions.forEach(([x, y]) => {
         ctx.beginPath();
         ctx.rect(x - HIT / 2, y - HIT / 2, HIT, HIT);
-        ctx.fillStyle = '#fff';
-        ctx.fill();
-        ctx.strokeStyle = '#2563eb';
-        ctx.lineWidth = 2;
-        ctx.stroke();
+        ctx.fillStyle = '#fff'; ctx.fill();
+        ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 2; ctx.stroke();
       });
     }
 
@@ -3520,22 +3487,19 @@
 
     bind('#scanIeRotateLeft', 'click', () => rotateEditor(-90));
     bind('#scanIeRotateRight', 'click', () => rotateEditor(90));
-
     bind('#scanIeCrop', 'click', () => {
       editor.cropMode = !editor.cropMode;
       editor.crop = editor.cropMode ? { x: 0.1, y: 0.1, w: 0.8, h: 0.8 } : null;
       $('#scanIeCrop').classList.toggle('active', editor.cropMode);
       drawEditorCanvas();
     });
-
     bind('#scanIeReset', 'click', async () => {
       const item = scan.items[scan.editIndex];
       if (!item) return;
       try {
         const img = await loadImage(item.dataUrl);
         editor.baseCanvas = drawRotatedCanvas(img, 0);
-        editor.crop = null;
-        editor.cropMode = false;
+        editor.crop = null; editor.cropMode = false;
         $('#scanIeCrop').classList.remove('active');
         drawEditorCanvas();
         showToast('已重置');
@@ -3545,7 +3509,6 @@
     (function bindEditorCropDrag() {
       const stage = $('#scanIeStage');
       if (!stage) return;
-
       function getStagePos(e) {
         const canvas = $('#scanIeCanvas');
         const cRect = canvas.getBoundingClientRect();
@@ -3556,7 +3519,6 @@
             && e.clientY >= cRect.top && e.clientY <= cRect.bottom
         };
       }
-
       function hitTest(px, py) {
         if (!editor.crop) return null;
         const c = editor.crop;
@@ -3575,12 +3537,10 @@
         if (px > c.x && px < c.x + c.w && py > c.y && py < c.y + c.h) return 'move';
         return null;
       }
-
       stage.addEventListener('pointerdown', (e) => {
         editor.swipeStartX = e.clientX;
         editor.swipeStartY = e.clientY;
         editor.swipeMoved = false;
-
         if (!editor.cropMode || !editor.crop) return;
         const p = getStagePos(e);
         if (!p.inside) return;
@@ -3592,31 +3552,22 @@
           e.preventDefault();
           return;
         }
-        editor.drag = {
-          mode,
-          startX: p.x,
-          startY: p.y,
-          origCrop: { ...editor.crop }
-        };
+        editor.drag = { mode, startX: p.x, startY: p.y, origCrop: { ...editor.crop } };
         try { stage.setPointerCapture(e.pointerId); } catch (_) {}
         e.preventDefault();
       }, { passive: false });
-
       stage.addEventListener('pointermove', (e) => {
         if (editor.drag) {
           const p = getStagePos(e);
           const d = editor.drag;
-
           if (d.mode === 'new') {
             const x = Math.min(d.startX, p.x);
             const y = Math.min(d.startY, p.y);
             const w = Math.abs(p.x - d.startX);
             const h = Math.abs(p.y - d.startY);
             editor.crop = {
-              x: clamp(x, 0, 1),
-              y: clamp(y, 0, 1),
-              w: clamp(w, 0, 1 - x),
-              h: clamp(h, 0, 1 - y)
+              x: clamp(x, 0, 1), y: clamp(y, 0, 1),
+              w: clamp(w, 0, 1 - x), h: clamp(h, 0, 1 - y)
             };
           } else {
             const dx = p.x - d.startX;
@@ -3624,27 +3575,20 @@
             const o = d.origCrop;
             let x = o.x, y = o.y, w = o.w, h = o.h;
             const MIN = 0.05;
-
             if (d.mode === 'move') {
               x = clamp(o.x + dx, 0, 1 - o.w);
               y = clamp(o.y + dy, 0, 1 - o.h);
             } else {
               if (d.mode.includes('w')) {
                 const newX = clamp(o.x + dx, 0, o.x + o.w - MIN);
-                w = o.x + o.w - newX;
-                x = newX;
+                w = o.x + o.w - newX; x = newX;
               }
-              if (d.mode.includes('e')) {
-                w = clamp(o.w + dx, MIN, 1 - o.x);
-              }
+              if (d.mode.includes('e')) w = clamp(o.w + dx, MIN, 1 - o.x);
               if (d.mode.includes('n')) {
                 const newY = clamp(o.y + dy, 0, o.y + o.h - MIN);
-                h = o.y + o.h - newY;
-                y = newY;
+                h = o.y + o.h - newY; y = newY;
               }
-              if (d.mode.includes('s')) {
-                h = clamp(o.h + dy, MIN, 1 - o.y);
-              }
+              if (d.mode.includes('s')) h = clamp(o.h + dy, MIN, 1 - o.y);
             }
             editor.crop = { x, y, w, h };
           }
@@ -3652,27 +3596,20 @@
           e.preventDefault();
           return;
         }
-
         if (editor.swipeStartX !== null) {
           const dx = e.clientX - editor.swipeStartX;
           const dy = e.clientY - editor.swipeStartY;
-          if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
-            editor.swipeMoved = true;
-          }
+          if (Math.abs(dx) > 10 || Math.abs(dy) > 10) editor.swipeMoved = true;
         }
       }, { passive: false });
-
       function endDrag(e) {
         if (editor.drag) {
           editor.drag = null;
-          if (editor.crop && (editor.crop.w < 0.05 || editor.crop.h < 0.05)) {
-            editor.crop = null;
-          }
+          if (editor.crop && (editor.crop.w < 0.05 || editor.crop.h < 0.05)) editor.crop = null;
           drawEditorCanvas();
           try { stage.releasePointerCapture(e.pointerId); } catch (_) {}
           return;
         }
-
         if (editor.swipeStartX !== null && !editor.cropMode && editor.swipeMoved) {
           const dx = e.clientX - editor.swipeStartX;
           const dy = e.clientY - editor.swipeStartY;
@@ -3681,16 +3618,12 @@
               if (scan.editIndex > 0) {
                 openScanImageEditor(scan.editIndex - 1);
                 showToast('← 上一张');
-              } else {
-                showToast('已经是第一张了');
-              }
+              } else { showToast('已经是第一张了'); }
             } else {
               if (scan.editIndex < scan.items.length - 1) {
                 openScanImageEditor(scan.editIndex + 1);
                 showToast('下一张 →');
-              } else {
-                showToast('已经是最后一张了');
-              }
+              } else { showToast('已经是最后一张了'); }
             }
           }
         }
@@ -3698,7 +3631,6 @@
         editor.swipeStartY = null;
         editor.swipeMoved = false;
       }
-
       stage.addEventListener('pointerup', endDrag);
       stage.addEventListener('pointercancel', endDrag);
     })();
@@ -3716,32 +3648,24 @@
           const sw = Math.round(c.w * finalCanvas.width);
           const sh = Math.round(c.h * finalCanvas.height);
           const cropCv = document.createElement('canvas');
-          cropCv.width = sw;
-          cropCv.height = sh;
+          cropCv.width = sw; cropCv.height = sh;
           const cctx = cropCv.getContext('2d');
           cctx.fillStyle = '#fff';
           cctx.fillRect(0, 0, sw, sh);
           cctx.drawImage(finalCanvas, sx, sy, sw, sh, 0, 0, sw, sh);
           finalCanvas = cropCv;
         }
-
         const dataUrl = finalCanvas.toDataURL('image/jpeg', 0.92);
-        scan.items[idx] = {
-          ...item,
-          dataUrl,
-          width: finalCanvas.width,
-          height: finalCanvas.height
-        };
+        scan.items[idx] = { ...item, dataUrl, width: finalCanvas.width, height: finalCanvas.height };
         renderScanResultGrid();
         updateScanThumbnail();
         updateScanCountBadge();
         markScanDirty();
         showToast('✓ 第 ' + (idx + 1) + ' 张修改已保存');
-        
         if (idx < scan.items.length - 1) {
-            openScanImageEditor(idx + 1);
+          openScanImageEditor(idx + 1);
         } else {
-            $('#scanImgEditor').classList.remove('show');
+          $('#scanImgEditor').classList.remove('show');
         }
       } catch (err) {
         console.error('[editor save]', err);
@@ -3749,12 +3673,8 @@
       }
     });
 
-    bind('#scanIeCancel', 'click', () => {
-      $('#scanImgEditor').classList.remove('show');
-    });
-    bind('#scanIeClose', 'click', () => {
-      $('#scanImgEditor').classList.remove('show');
-    });
+    bind('#scanIeCancel', 'click', () => { $('#scanImgEditor').classList.remove('show'); });
+    bind('#scanIeClose', 'click', () => { $('#scanImgEditor').classList.remove('show'); });
 
     bind('#scanClearBtn', 'click', () => {
       if (scan.items.length === 0) return;
@@ -3789,18 +3709,15 @@
           const blob = await new Promise(res => cv.toBlob(res, 'image/jpeg', 0.9));
           const jpgBytes = new Uint8Array(await blob.arrayBuffer());
           const jpg = await doc.embedJpg(jpgBytes);
-
           let pageW, pageH;
           if (mode === 'a4') { pageW = A4[0]; pageH = A4[1]; }
           else if (mode === 'a4l') { pageW = A4[1]; pageH = A4[0]; }
           else { pageW = item.width; pageH = item.height; }
-
           const page = doc.addPage([pageW, pageH]);
           const k = Math.min(pageW / jpg.width, pageH / jpg.height);
           const w = jpg.width * k, h = jpg.height * k;
           page.drawImage(jpg, {
-            x: (pageW - w) / 2,
-            y: (pageH - h) / 2,
+            x: (pageW - w) / 2, y: (pageH - h) / 2,
             width: w, height: h
           });
           if (i % 2 === 1) await new Promise(r => setTimeout(r, 0));
@@ -3833,10 +3750,10 @@
       say('#scanPdfStatus2', '');
     }
 
-    /* ===== 模块 4.1：证件 A4 合成 (带专用拍照) ===== */
+    /* ===== 模块：身份证复印件 ===== */
     let idcardFrontImg = null;
     let idcardBackImg = null;
-    let idcardCurrentMode = ''; // 'front' 或 'back'
+    let idcardCurrentMode = '';
 
     bind('#idcardFrontCamBtn', 'click', () => {
       idcardCurrentMode = 'front';
@@ -3865,12 +3782,20 @@
         const v = $('#scanFsVideo');
         v.srcObject = scan.stream;
         await v.play();
-        
-        $('#scanFsTitle').textContent = idcardCurrentMode === 'front' ? '拍摄身份证正面' : '拍摄身份证反面';
+
+        const isFront = idcardCurrentMode === 'front';
+        $('#scanFsTitle').textContent = isFront ? '拍摄身份证正面' : '拍摄身份证反面';
+        const hintEl = $('#scanFsFrameHint');
+        if (hintEl) hintEl.textContent = isFront ? '请将「人像面」放入框内' : '请将「国徽面」放入框内';
+        const guideFront = $('#scanFsGuideFront');
+        const guideBack = $('#scanFsGuideBack');
+        if (guideFront && guideBack) {
+          guideFront.style.display = isFront ? '' : 'none';
+          guideBack.style.display  = isFront ? 'none' : '';
+        }
+
         $('#scanFsFrame').classList.add('show');
         $('#scanFullscreen').classList.add('show');
-        
-        // 隐藏底部缩略图和相册按钮，只留快门
         $('#scanFsThumb').style.display = 'none';
         $('#scanFsSwitch').style.display = 'none';
       } catch (err) {
@@ -3878,61 +3803,48 @@
       }
     }
 
-    // 身份证拍照使用的快门逻辑
-    bind('#scanFsShutter', 'click', async () => {
+    async function idcardShutter() {
       const v = $('#scanFsVideo');
       if (!v || !v.videoWidth) return;
-      
       const cv = document.createElement('canvas');
       cv.width = v.videoWidth; cv.height = v.videoHeight;
       cv.getContext('2d').drawImage(v, 0, 0);
-      
-      if (idcardCurrentMode) {
-        // 身份证裁剪逻辑
-        const frame = $('#scanFsFrame').getBoundingClientRect();
-        const videoRect = v.getBoundingClientRect();
-        const videoRatio = v.videoWidth / v.videoHeight;
-        const displayRatio = videoRect.width / videoRect.height;
-        let scaledW, scaledH, offsetX, offsetY;
-        
-        if (videoRatio > displayRatio) {
-          scaledH = videoRect.height; scaledW = scaledH * videoRatio;
-          offsetX = (scaledW - videoRect.width) / 2; offsetY = 0;
-        } else {
-          scaledW = videoRect.width; scaledH = scaledW / videoRatio;
-          offsetX = 0; offsetY = (scaledH - videoRect.height) / 2;
-        }
-        const sx = ((frame.left - videoRect.left + offsetX) / scaledW) * v.videoWidth;
-        const sy = ((frame.top - videoRect.top + offsetY) / scaledH) * v.videoHeight;
-        const sw = (frame.width / scaledW) * v.videoWidth;
-        const sh = (frame.height / scaledH) * v.videoHeight;
-        
-        const cropCanvas = document.createElement('canvas');
-        cropCanvas.width = sw; cropCanvas.height = sh;
-        cropCanvas.getContext('2d').drawImage(cv, sx, sy, sw, sh, 0, 0, sw, sh);
-        
-        if (idcardCurrentMode === 'front') {
-          idcardFrontImg = cropCanvas;
-          const showImg = $('#idcardFrontImgShow');
-          showImg.src = cropCanvas.toDataURL('image/jpeg');
-          $('#idcardFrontPreview').classList.remove('hidden');
-        } else {
-          idcardBackImg = cropCanvas;
-          const showImg = $('#idcardBackImgShow');
-          showImg.src = cropCanvas.toDataURL('image/jpeg');
-          $('#idcardBackPreview').classList.remove('hidden');
-        }
-        
-        // 恢复 UI
-        closeScanCamera();
-        $('#scanFsTitle').textContent = '扫描文档';
-        $('#scanFsFrame').classList.remove('show');
-        $('#scanFsThumb').style.display = '';
-        $('#scanFsSwitch').style.display = '';
-        idcardCurrentMode = '';
-        $('#idcardResultCard').classList.remove('hidden');
+      const frame = $('#scanFsFrame').getBoundingClientRect();
+      const videoRect = v.getBoundingClientRect();
+      const videoRatio = v.videoWidth / v.videoHeight;
+      const displayRatio = videoRect.width / videoRect.height;
+      let scaledW, scaledH, offsetX, offsetY;
+      if (videoRatio > displayRatio) {
+        scaledH = videoRect.height; scaledW = scaledH * videoRatio;
+        offsetX = (scaledW - videoRect.width) / 2; offsetY = 0;
+      } else {
+        scaledW = videoRect.width; scaledH = scaledW / videoRatio;
+        offsetX = 0; offsetY = (scaledH - videoRect.height) / 2;
       }
-    });
+      const sx = ((frame.left - videoRect.left + offsetX) / scaledW) * v.videoWidth;
+      const sy = ((frame.top - videoRect.top + offsetY) / scaledH) * v.videoHeight;
+      const sw = (frame.width / scaledW) * v.videoWidth;
+      const sh = (frame.height / scaledH) * v.videoHeight;
+      const cropCanvas = document.createElement('canvas');
+      cropCanvas.width = sw; cropCanvas.height = sh;
+      cropCanvas.getContext('2d').drawImage(cv, sx, sy, sw, sh, 0, 0, sw, sh);
+      if (idcardCurrentMode === 'front') {
+        idcardFrontImg = cropCanvas;
+        $('#idcardFrontImgShow').src = cropCanvas.toDataURL('image/jpeg');
+        $('#idcardFrontPreview').classList.remove('hidden');
+      } else {
+        idcardBackImg = cropCanvas;
+        $('#idcardBackImgShow').src = cropCanvas.toDataURL('image/jpeg');
+        $('#idcardBackPreview').classList.remove('hidden');
+      }
+      closeScanCamera();
+      $('#scanFsTitle').textContent = '扫描文档';
+      $('#scanFsFrame').classList.remove('show');
+      $('#scanFsThumb').style.display = '';
+      $('#scanFsSwitch').style.display = '';
+      idcardCurrentMode = '';
+      $('#idcardResultCard').classList.remove('hidden');
+    }
 
     bind('#idcardFrontFile', 'change', async (e) => {
       const f = e.target.files[0];
@@ -3943,7 +3855,6 @@
         $('#idcardResultCard').classList.remove('hidden');
       }
     });
-
     bind('#idcardBackFile', 'change', async (e) => {
       const f = e.target.files[0];
       if (f) {
@@ -3960,38 +3871,28 @@
         return;
       }
       say('#idcardStatus', '正在排版并生成 PDF…');
-      
       try {
         const doc = await PDFDocument.create();
-        const A4 = [595.28, 841.89]; // A4 pt
+        const A4 = [595.28, 841.89];
         const page = doc.addPage(A4);
-        
         const targetW = 85.6 * 2.83465;
         const targetH = 54 * 2.83465;
-        
         async function addImgToPage(imgEl, yOffset) {
           const cv = document.createElement('canvas');
           cv.width = imgEl.width; cv.height = imgEl.height;
           cv.getContext('2d').drawImage(imgEl, 0, 0);
           const blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.95));
           const jpg = await doc.embedJpg(new Uint8Array(await blob.arrayBuffer()));
-          
           page.drawImage(jpg, {
             x: (A4[0] - targetW) / 2,
             y: (A4[1] / 2) + yOffset,
-            width: targetW,
-            height: targetH
+            width: targetW, height: targetH
           });
         }
-        
         await addImgToPage(idcardFrontImg, 10);
         await addImgToPage(idcardBackImg, -targetH - 10);
-        
         const bytes = await doc.save();
-        const filename = '身份证复印_A4.pdf';
-        
-        const blob = new Blob([bytes], { type: 'application/pdf' });
-        const url = URL.createObjectURL(blob);
+        const filename = '身份证复印件_A4.pdf';
         $('#idcardPreviewWrap').classList.remove('hidden');
         const pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(bytes.slice(0)) }).promise;
         const p1 = await pdfDoc.getPage(1);
@@ -3999,22 +3900,19 @@
         const canvas = $('#idcardPreviewCanvas');
         canvas.width = vp.width; canvas.height = vp.height;
         await p1.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
-        
         const body = $('#idcardPdfResultBody');
-        body.innerHTML = `
-          <div class="result-file">
-            <div class="result-icon">PDF</div>
-            <div class="result-meta">
-              <div class="result-name">${filename}</div>
-              <div class="result-sub">大小 ${fmtSize(bytes.length)} · 1 页</div>
-            </div>
-          </div>
-          <button class="btn big green" id="idcardSaveBtn" type="button">💾 保存为 PDF</button>
-        `;
+        body.innerHTML =
+          '<div class="result-file">'
+          +   '<div class="result-icon">PDF</div>'
+          +   '<div class="result-meta">'
+          +     '<div class="result-name">' + escapeHtml(filename) + '</div>'
+          +     '<div class="result-sub">大小 ' + fmtSize(bytes.length) + ' · 1 页</div>'
+          +   '</div>'
+          + '</div>'
+          + '<button class="btn big green" id="idcardSaveBtn" type="button">💾 保存为 PDF</button>';
         $('#idcardPdfResultCard').classList.remove('hidden');
         bind('#idcardSaveBtn', 'click', () => sharedSave.saveAsPdf(bytes, filename, t => say('#idcardStatus', t)));
-        
-        say('#idcardStatus', '✅ 生成成功，已生成真实物理尺寸 A4 排版', false, true);
+        say('#idcardStatus', '✅ 生成成功，已按真实物理尺寸 A4 排版', false, true);
         $('#idcardPdfResultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       } catch (err) {
         console.error(err);
@@ -4022,148 +3920,460 @@
       }
     });
 
-    /* ===== 模块 4.3：证件照制作 (纯本地色度抠图) ===== */
+    /* ============================================================
+     * RMBG-1.4 本地 AI 抠图引擎
+     * 首次下载模型（~44MB）→ 缓存 IndexedDB → 之后完全离线
+     * ============================================================ */
+    const RMBG = (function () {
+      const DB_NAME = 'pdf-toolbox-models';
+      const STORE = 'files';
+      const KEY = 'rmbg-1.4.onnx';
+      const MODEL_SIZE = 1024;
+      const MEAN = 0.5, STD = 1.0;
+      let session = null;
+      let loadPromise = null;
+
+      function openDB() {
+        return new Promise((resolve, reject) => {
+          const req = indexedDB.open(DB_NAME, 1);
+          req.onupgradeneeded = () => {
+            const db = req.result;
+            if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE);
+          };
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        });
+      }
+      async function idbGet(key) {
+        try {
+          const db = await openDB();
+          return new Promise((resolve, reject) => {
+            const tx = db.transaction(STORE, 'readonly');
+            const req = tx.objectStore(STORE).get(key);
+            req.onsuccess = () => resolve(req.result || null);
+            req.onerror = () => reject(req.error);
+          });
+        } catch (e) { return null; }
+      }
+      async function idbPut(key, value) {
+        try {
+          const db = await openDB();
+          return new Promise((resolve, reject) => {
+            const tx = db.transaction(STORE, 'readwrite');
+            tx.objectStore(STORE).put(value, key);
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => reject(tx.error);
+          });
+        } catch (e) {}
+      }
+      async function downloadModel(onProgress) {
+        const urls = LOCAL.rmbg.concat(CDN.rmbg);
+        let lastErr = null;
+        for (const url of urls) {
+          try {
+            const res = await fetch(url, { cache: 'force-cache' });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const total = parseInt(res.headers.get('content-length') || '0', 10);
+            const reader = res.body.getReader();
+            const chunks = [];
+            let received = 0;
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              chunks.push(value);
+              received += value.length;
+              if (onProgress && total) onProgress(received / total);
+            }
+            const buf = new Uint8Array(received);
+            let off = 0;
+            for (const c of chunks) { buf.set(c, off); off += c.length; }
+            return buf.buffer;
+          } catch (e) { lastErr = e; }
+        }
+        throw new Error('模型下载失败：' + (lastErr && lastErr.message));
+      }
+      async function ensureORT() {
+        if (window.ort) return window.ort;
+        const all = LOCAL.ort.concat(CDN.ort);
+        for (const url of all) {
+          try {
+            await loadScriptOnce(url);
+            if (window.ort) {
+              window.ort.env.wasm.wasmPaths = url.replace(/ort\.min\.js$/, '');
+              return window.ort;
+            }
+          } catch (e) {}
+        }
+        throw new Error('onnxruntime-web 加载失败');
+      }
+      async function init(onProgress) {
+        if (session) return session;
+        if (loadPromise) return loadPromise;
+        loadPromise = (async () => {
+          try {
+            onProgress && onProgress({ stage: 'ort', value: 0 });
+            const ort = await ensureORT();
+            let modelBuf = await idbGet(KEY);
+            if (!modelBuf) {
+              onProgress && onProgress({ stage: 'download', value: 0 });
+              modelBuf = await downloadModel((p) => {
+                onProgress && onProgress({ stage: 'download', value: p });
+              });
+              await idbPut(KEY, modelBuf);
+            }
+            onProgress && onProgress({ stage: 'session', value: 0 });
+            session = await ort.InferenceSession.create(modelBuf, {
+              executionProviders: ['wasm'],
+              graphOptimizationLevel: 'all'
+            });
+            return session;
+          } catch (e) {
+            loadPromise = null;
+            throw e;
+          }
+        })();
+        return loadPromise;
+      }
+      function preprocess(srcCanvas) {
+        const c = document.createElement('canvas');
+        c.width = MODEL_SIZE; c.height = MODEL_SIZE;
+        const g = c.getContext('2d');
+        g.fillStyle = '#000';
+        g.fillRect(0, 0, MODEL_SIZE, MODEL_SIZE);
+        const sw = srcCanvas.width, sh = srcCanvas.height;
+        const scale = Math.min(MODEL_SIZE / sw, MODEL_SIZE / sh);
+        const dw = sw * scale, dh = sh * scale;
+        const dx = (MODEL_SIZE - dw) / 2, dy = (MODEL_SIZE - dh) / 2;
+        g.drawImage(srcCanvas, dx, dy, dw, dh);
+        const data = g.getImageData(0, 0, MODEL_SIZE, MODEL_SIZE).data;
+        const out = new Float32Array(3 * MODEL_SIZE * MODEL_SIZE);
+        const plane = MODEL_SIZE * MODEL_SIZE;
+        for (let i = 0, j = 0; i < data.length; i += 4, j++) {
+          out[j]           = (data[i]   / 255 - MEAN) / STD;
+          out[plane + j]   = (data[i+1] / 255 - MEAN) / STD;
+          out[plane*2 + j] = (data[i+2] / 255 - MEAN) / STD;
+        }
+        return { tensor: out, dx, dy, dw, dh };
+      }
+      function postprocess(maskData, srcW, srcH, dx, dy, dw, dh) {
+        const mc = document.createElement('canvas');
+        mc.width = MODEL_SIZE; mc.height = MODEL_SIZE;
+        const mg = mc.getContext('2d');
+        const img = mg.createImageData(MODEL_SIZE, MODEL_SIZE);
+        for (let i = 0, j = 0; i < img.data.length; i += 4, j++) {
+          const v = Math.max(0, Math.min(1, maskData[j])) * 255;
+          img.data[i] = img.data[i+1] = img.data[i+2] = v;
+          img.data[i+3] = 255;
+        }
+        mg.putImageData(img, 0, 0);
+        const out = document.createElement('canvas');
+        out.width = srcW; out.height = srcH;
+        const og = out.getContext('2d');
+        og.imageSmoothingEnabled = true;
+        og.imageSmoothingQuality = 'high';
+        og.drawImage(mc, dx, dy, dw, dh, 0, 0, srcW, srcH);
+        const alphaData = og.getImageData(0, 0, srcW, srcH).data;
+        const alpha = new Float32Array(srcW * srcH);
+        for (let i = 0, j = 0; i < alphaData.length; i += 4, j++) {
+          alpha[j] = alphaData[i] / 255;
+        }
+        return alpha;
+      }
+      async function remove(srcCanvas, onProgress) {
+        const sess = await init(onProgress);
+        const ort = window.ort;
+        const { tensor, dx, dy, dw, dh } = preprocess(srcCanvas);
+        const input = new ort.Tensor('float32', tensor, [1, 3, MODEL_SIZE, MODEL_SIZE]);
+        const results = await sess.run({ input });
+        const outKey = Object.keys(results)[0];
+        const maskData = results[outKey].data;
+        const alpha = postprocess(maskData, srcCanvas.width, srcCanvas.height, dx, dy, dw, dh);
+        const out = document.createElement('canvas');
+        out.width = srcCanvas.width;
+        out.height = srcCanvas.height;
+        const g = out.getContext('2d');
+        g.drawImage(srcCanvas, 0, 0);
+        const imgData = g.getImageData(0, 0, out.width, out.height);
+        const d = imgData.data;
+        for (let j = 0, i = 0; j < alpha.length; j++, i += 4) {
+          d[i + 3] = Math.round(alpha[j] * 255);
+        }
+        g.putImageData(imgData, 0, 0);
+        return { canvas: out, alpha };
+      }
+      function isCached() {
+        return idbGet(KEY).then(v => !!v).catch(() => false);
+      }
+      return { init, remove, isCached };
+    })();
+
+    /* ===== 模块：证件照制作 ===== */
     let idphotoImg = null;
+    let idphotoMatted = null;
+    let idphotoMatteMode = 'ai';
     let idphotoCtx = null;
-    let idphotoState = { scale: 1, x: 0, y: 0, startX: 0, startY: 0, dragging: false };
+    const idphotoState = { scale: 1, x: 0, y: 0, startX: 0, startY: 0, dragging: false };
     const idphotoTargetSizes = {
-      '1inch': { w: 295, h: 413 },
-      '2inch': { w: 413, h: 579 },
+      '1inch':  { w: 295, h: 413 },
+      '2inch':  { w: 413, h: 579 },
       'small1': { w: 260, h: 378 },
       'small2': { w: 413, h: 531 }
     };
+
+    // 颜色抠图（四边采样背景色 + 软 matting + 3x3 平滑）
+    function extractForegroundColor(srcCanvas) {
+      const W = srcCanvas.width, H = srcCanvas.height;
+      const ctx = srcCanvas.getContext('2d');
+      const imgData = ctx.getImageData(0, 0, W, H);
+      const d = imgData.data;
+      const N = W * H;
+      const bandW = Math.max(4, Math.round(Math.min(W, H) * 0.06));
+      const rs = [], gs = [], bs = [];
+      const pushSample = (x, y) => {
+        const i = (y * W + x) * 4;
+        rs.push(d[i]); gs.push(d[i+1]); bs.push(d[i+2]);
+      };
+      for (let y = 0; y < H; y += 2) {
+        for (let k = 0; k < bandW; k += 2) {
+          pushSample(k, y); pushSample(W - 1 - k, y);
+        }
+      }
+      for (let x = 0; x < W; x += 2) {
+        for (let k = 0; k < bandW; k += 2) {
+          pushSample(x, k); pushSample(x, H - 1 - k);
+        }
+      }
+      const median = (arr) => { arr.sort((a, b) => a - b); return arr[Math.floor(arr.length / 2)]; };
+      const bgR = median(rs), bgG = median(gs), bgB = median(bs);
+      const tLow = 45, tHigh = 110;
+      const alpha = new Float32Array(N);
+      for (let i = 0, j = 0; i < d.length; i += 4, j++) {
+        const dr = d[i] - bgR, dg = d[i+1] - bgG, db = d[i+2] - bgB;
+        const dist = Math.sqrt(dr*dr + dg*dg + db*db);
+        let a;
+        if (dist <= tLow) a = 0;
+        else if (dist >= tHigh) a = 1;
+        else a = (dist - tLow) / (tHigh - tLow);
+        alpha[j] = a;
+      }
+      const alpha2 = new Float32Array(N);
+      for (let y = 0; y < H; y++) {
+        for (let x = 0; x < W; x++) {
+          let sum = 0, cnt = 0;
+          for (let dy = -1; dy <= 1; dy++) {
+            const yy = y + dy; if (yy < 0 || yy >= H) continue;
+            for (let dx = -1; dx <= 1; dx++) {
+              const xx = x + dx; if (xx < 0 || xx >= W) continue;
+              sum += alpha[yy * W + xx]; cnt++;
+            }
+          }
+          alpha2[y * W + x] = sum / cnt;
+        }
+      }
+      const out = document.createElement('canvas');
+      out.width = W; out.height = H;
+      const octx = out.getContext('2d');
+      const outData = octx.createImageData(W, H);
+      const od = outData.data;
+      for (let j = 0; j < N; j++) {
+        const i = j * 4;
+        const a = alpha2[j];
+        od[i]   = d[i];
+        od[i+1] = d[i+1];
+        od[i+2] = d[i+2];
+        od[i+3] = Math.round(a * 255);
+      }
+      octx.putImageData(outData, 0, 0);
+      return { canvas: out, alpha: alpha2, bgColor: [bgR, bgG, bgB] };
+    }
 
     bind('#idphotoFile', 'change', async (e) => {
       const f = e.target.files[0];
       if (!f) return;
       try {
         idphotoImg = await loadImage(await readDataUrl(f));
+        idphotoMatted = null;
+        idphotoState.x = 0; idphotoState.y = 0;
         $('#idphotoOptCard').classList.remove('hidden');
         $('#idphotoDownloadRow').classList.add('hidden');
         $('#idphotoPreviewWrap').classList.add('hidden');
-      } catch (err) {}
+        $('#idphotoAIStatusWrap').classList.add('hidden');
+        say('#idphotoStatus', '图片已载入，点击「生成证件照预览」开始处理', false, true);
+      } catch (err) {
+        say('#idphotoStatus', '图片载入失败：' + err.message, true);
+      }
     });
 
-    function drawIdPhoto() {
+    bind('#idphotoMatteMode', 'change', () => {
+      idphotoMatteMode = $('#idphotoMatteMode').value;
+      idphotoMatted = null;
+      if (idphotoMatteMode === 'ai' && idphotoImg) {
+        RMBG.isCached().then(cached => {
+          if (!cached) {
+            say('#idphotoStatus', '⚠️ 首次使用 AI 抠图需要下载约 44MB 模型，请点击「生成证件照预览」开始下载');
+          }
+        });
+      }
+    });
+
+    async function ensureIdPhotoMatte() {
+      if (idphotoMatted) return idphotoMatted;
+      if (!idphotoImg) throw new Error('请先上传人像照片');
+      const srcW = idphotoImg.naturalWidth || idphotoImg.width;
+      const srcH = idphotoImg.naturalHeight || idphotoImg.height;
+      const base = document.createElement('canvas');
+      base.width = srcW; base.height = srcH;
+      base.getContext('2d').drawImage(idphotoImg, 0, 0);
+      if (idphotoMatteMode === 'none') {
+        idphotoMatted = { canvas: base, alpha: null, mode: 'none' };
+        return idphotoMatted;
+      }
+      if (idphotoMatteMode === 'color') {
+        const { canvas, alpha } = extractForegroundColor(base);
+        idphotoMatted = { canvas, alpha, mode: 'color' };
+        return idphotoMatted;
+      }
+      // AI
+      $('#idphotoAIStatusWrap').classList.remove('hidden');
+      const bar = $('#idphotoAIProgressBar');
+      const txt = $('#idphotoAIStatusText');
+      bar.style.width = '0%';
+      try {
+        const cached = await RMBG.isCached();
+        if (!cached) {
+          txt.textContent = '正在下载 AI 模型（约 44MB，仅首次）…';
+          say('#idphotoStatus', '正在下载 AI 抠图模型，请保持网络…');
+        } else {
+          txt.textContent = '正在加载本地模型…';
+          bar.style.width = '70%';
+        }
+        const { canvas, alpha } = await RMBG.remove(base, ({ stage, value }) => {
+          if (stage === 'download') {
+            bar.style.width = Math.round(value * 60) + '%';
+            txt.textContent = '下载模型 ' + Math.round(value * 100) + '%（首次约 44MB）';
+          } else if (stage === 'session') {
+            bar.style.width = '80%';
+            txt.textContent = '正在初始化推理引擎…';
+          }
+        });
+        bar.style.width = '100%';
+        txt.textContent = '✅ AI 抠图完成';
+        idphotoMatted = { canvas, alpha, mode: 'ai' };
+        return idphotoMatted;
+      } catch (err) {
+        console.error('[RMBG]', err);
+        bar.style.width = '0%';
+        txt.textContent = '❌ AI 抠图失败：' + err.message + '（已回退到快速抠图）';
+        const { canvas, alpha } = extractForegroundColor(base);
+        idphotoMatted = { canvas, alpha, mode: 'color-fallback' };
+        return idphotoMatted;
+      }
+    }
+
+    async function drawIdPhoto() {
       if (!idphotoImg) return;
+      try {
+        await ensureIdPhotoMatte();
+      } catch (e) {
+        say('#idphotoStatus', '处理失败：' + e.message, true);
+        return;
+      }
       const sizeKey = $('#idphotoSize').value;
       const bgColor = $('#idphotoBg').value;
       const layoutMode = $('#idphotoLayout').value;
       const target = idphotoTargetSizes[sizeKey];
-      
+      const srcCanvas = idphotoMatted.canvas;
+      const srcW = srcCanvas.width, srcH = srcCanvas.height;
       const canvas = $('#idphotoCanvas');
       $('#idphotoPreviewWrap').classList.remove('hidden');
-      
-      if (layoutMode === 'sheet') {
-        canvas.width = 1050;
-        canvas.height = 1500;
-        canvas.style.width = '100%';
-        canvas.style.height = 'auto';
-        idphotoCtx = canvas.getContext('2d');
-        idphotoCtx.fillStyle = '#ffffff';
-        idphotoCtx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        const singleCv = document.createElement('canvas');
-        singleCv.width = target.w; singleCv.height = target.h;
-        const sctx = singleCv.getContext('2d');
-        
-        sctx.fillStyle = bgColor;
-        sctx.fillRect(0, 0, target.w, target.h);
-        const scale = Math.max(target.w / idphotoImg.width, target.h / idphotoImg.height);
-        const drawW = idphotoImg.width * scale;
-        const drawH = idphotoImg.height * scale;
-        
-        let drawX = (target.w - drawW) / 2;
-        let drawY = (target.h - drawH) / 2 - (target.h * 0.05); 
-        
-        if (idphotoState.x !== 0 || idphotoState.y !== 0) {
-            drawX = idphotoState.x;
-            drawY = idphotoState.y;
+
+      function composeSingle() {
+        const c = document.createElement('canvas');
+        c.width = target.w; c.height = target.h;
+        const g = c.getContext('2d');
+        g.fillStyle = bgColor;
+        g.fillRect(0, 0, target.w, target.h);
+        const scale = Math.max(target.w / srcW, target.h / srcH);
+        const drawW = srcW * scale;
+        const drawH = srcH * scale;
+        let dx, dy;
+        if (idphotoState.x === 0 && idphotoState.y === 0) {
+          dx = (target.w - drawW) / 2;
+          dy = (target.h - drawH) / 2 - target.h * 0.05;
+        } else {
+          dx = idphotoState.x; dy = idphotoState.y;
         }
-        
-        sctx.save();
-        sctx.beginPath();
-        sctx.rect(0, 0, target.w, target.h);
-        sctx.clip();
-        sctx.drawImage(idphotoImg, drawX, drawY, drawW, drawH);
-        sctx.restore();
-        
-        const margin = 40; const gap = 20;
-        const cols = Math.floor((canvas.width - margin * 2 + gap) / (target.w + gap));
-        const rows = Math.floor((canvas.height - margin * 2 + gap) / (target.h + gap));
-        
-        const startX = (canvas.width - (cols * target.w + (cols - 1) * gap)) / 2;
-        const startY = (canvas.height - (rows * target.h + (rows - 1) * gap)) / 2;
-        
+        g.drawImage(srcCanvas, dx, dy, drawW, drawH);
+        return c;
+      }
+
+      if (layoutMode === 'sheet') {
+        canvas.width = 1050; canvas.height = 1500;
+        canvas.style.width = '100%'; canvas.style.height = 'auto';
+        idphotoCtx = canvas.getContext('2d');
+        idphotoCtx.fillStyle = '#fff';
+        idphotoCtx.fillRect(0, 0, canvas.width, canvas.height);
+        const single = composeSingle();
+        const margin = 40, gap = 20;
+        const cols = Math.floor((canvas.width - margin*2 + gap) / (target.w + gap));
+        const rows = Math.floor((canvas.height - margin*2 + gap) / (target.h + gap));
+        const startX = (canvas.width - (cols*target.w + (cols-1)*gap)) / 2;
+        const startY = (canvas.height - (rows*target.h + (rows-1)*gap)) / 2;
         for (let r = 0; r < rows; r++) {
           for (let c = 0; c < cols; c++) {
-            const x = startX + c * (target.w + gap);
-            const y = startY + r * (target.h + gap);
-            idphotoCtx.drawImage(singleCv, x, y);
-            idphotoCtx.strokeStyle = '#999';
-            idphotoCtx.lineWidth = 1;
-            idphotoCtx.setLineDash([5, 5]);
+            const x = startX + c*(target.w+gap);
+            const y = startY + r*(target.h+gap);
+            idphotoCtx.drawImage(single, x, y);
+            idphotoCtx.strokeStyle = '#999'; idphotoCtx.lineWidth = 1;
+            idphotoCtx.setLineDash([5,5]);
             idphotoCtx.strokeRect(x, y, target.w, target.h);
           }
         }
-        
       } else {
-        canvas.width = target.w;
-        canvas.height = target.h;
+        canvas.width = target.w; canvas.height = target.h;
         canvas.style.width = '180px';
         canvas.style.height = (180 * target.h / target.w) + 'px';
-        
         idphotoCtx = canvas.getContext('2d');
-        idphotoCtx.fillStyle = bgColor;
-        idphotoCtx.fillRect(0, 0, target.w, target.h);
-        
-        const scale = Math.max(target.w / idphotoImg.width, target.h / idphotoImg.height);
-        const drawW = idphotoImg.width * scale;
-        const drawH = idphotoImg.height * scale;
-        
-        if (idphotoState.x === 0 && idphotoState.y === 0) {
-          idphotoState.x = (target.w - drawW) / 2;
-          idphotoState.y = (target.h - drawH) / 2 - (target.h * 0.05); 
-        }
-        
-        idphotoCtx.save();
-        idphotoCtx.beginPath();
-        idphotoCtx.rect(0, 0, target.w, target.h);
-        idphotoCtx.clip();
-        idphotoCtx.drawImage(idphotoImg, idphotoState.x, idphotoState.y, drawW, drawH);
-        idphotoCtx.restore();
+        idphotoCtx.drawImage(composeSingle(), 0, 0);
       }
-      
       $('#idphotoDownloadRow').classList.remove('hidden');
     }
 
     bind('#idphotoSize', 'change', () => {
       idphotoState.x = 0; idphotoState.y = 0;
-      drawIdPhoto();
+      if (!$('#idphotoPreviewWrap').classList.contains('hidden')) drawIdPhoto();
     });
-    bind('#idphotoBg', 'change', drawIdPhoto);
+    bind('#idphotoBg', 'change', () => {
+      if (!$('#idphotoPreviewWrap').classList.contains('hidden')) drawIdPhoto();
+    });
     bind('#idphotoLayout', 'change', () => {
       idphotoState.x = 0; idphotoState.y = 0;
-      if($('#idphotoPreviewWrap').classList.contains('hidden') === false) {
-          drawIdPhoto();
-      }
+      if (!$('#idphotoPreviewWrap').classList.contains('hidden')) drawIdPhoto();
     });
-    
-    bind('#idphotoGenBtn', 'click', () => {
+
+    bind('#idphotoGenBtn', 'click', async () => {
       if (!idphotoImg) {
         say('#idphotoStatus', '请先上传人像照片', true);
         return;
       }
-      idphotoState.x = 0; idphotoState.y = 0;
-      drawIdPhoto();
-      say('#idphotoStatus', '调整好后点击下方保存。', false, true);
+      const btn = $('#idphotoGenBtn');
+      btn.disabled = true;
+      try {
+        idphotoState.x = 0; idphotoState.y = 0;
+        say('#idphotoStatus', '正在处理…');
+        await drawIdPhoto();
+        const modeText = idphotoMatted && idphotoMatted.mode === 'ai' ? '✅ AI 抠图完成' : '';
+        say('#idphotoStatus', modeText || '调整好后点击下方保存。', false, true);
+      } catch (e) {
+        say('#idphotoStatus', '处理失败：' + e.message, true);
+      } finally {
+        btn.disabled = false;
+      }
     });
 
-    // 证件照拖拽调整
     (function bindIdPhotoDrag() {
       const canvas = $('#idphotoCanvas');
       if (!canvas) return;
-      
       canvas.addEventListener('pointerdown', (e) => {
         if (!idphotoImg || $('#idphotoLayout').value !== 'single') return;
         idphotoState.dragging = true;
@@ -4172,25 +4382,20 @@
         try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
         e.preventDefault();
       }, { passive: false });
-
       canvas.addEventListener('pointermove', (e) => {
         if (!idphotoState.dragging) return;
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
-        
         const dx = (e.clientX - idphotoState.startX) * scaleX;
         const dy = (e.clientY - idphotoState.startY) * scaleY;
-        
         idphotoState.startX = e.clientX;
         idphotoState.startY = e.clientY;
-        
         idphotoState.x += dx;
         idphotoState.y += dy;
         drawIdPhoto();
         e.preventDefault();
       }, { passive: false });
-
       function endDrag(e) {
         idphotoState.dragging = false;
         try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
@@ -4298,7 +4503,6 @@
     bind('#img2pdfBtn', 'click', async () => {
       if (img2pdf.items.length === 0) { say('#img2pdfStatus', '请先选择图片', true); return; }
       const btn = $('#img2pdfBtn'); btn.disabled = true;
-      const mode = 'a4'; // 固定 A4
       say('#img2pdfStatus', '正在转换…');
       try {
         const doc = await PDFDocument.create();
@@ -4320,10 +4524,8 @@
           const blob = await new Promise(res => cv.toBlob(res, 'image/jpeg', 0.9));
           const jpgBytes = new Uint8Array(await blob.arrayBuffer());
           const jpg = await doc.embedJpg(jpgBytes);
-          
           let pageW = A4[0], pageH = A4[1];
-          if (cw > ch) { pageW = A4[1]; pageH = A4[0]; } // 横图用横版 A4
-          
+          if (cw > ch) { pageW = A4[1]; pageH = A4[0]; }
           const page = doc.addPage([pageW, pageH]);
           const k = Math.min(pageW / jpg.width, pageH / jpg.height);
           const w = jpg.width * k, h = jpg.height * k;
@@ -4444,12 +4646,10 @@
             + '</div>'
           ).join('')
         + '</div>';
-
       bind('#pdf2imgZipBtn', 'click', () => {
         downloadBlob(pdf2img.resultZipBlob, pdf2img.resultZipName);
         say('#pdf2imgStatus2', '✅ 已开始下载 ZIP', false, true);
       });
-
       body.querySelectorAll('.file-item').forEach(item => {
         const idx = parseInt(item.dataset.idx, 10);
         const file = pdf2img.resultFiles[idx];
@@ -4457,7 +4657,6 @@
           downloadBlob(file.blob, file.name);
         });
       });
-
       $('#pdf2imgResultCard').classList.remove('hidden');
     }
 
@@ -4486,8 +4685,6 @@
         const arrayBuffer = await readBuffer(word2pdfFile);
         const result = await mammoth.convertToHtml({ arrayBuffer });
         const html = result.value || '<p>（文档内容为空）</p>';
-        const pageSize = 'A4';
-        const marginCss = '2.5cm';
         say('#word2pdfStatus', '正在打开打印窗口…');
         const w = window.open('', '_blank');
         if (!w) { say('#word2pdfStatus', '弹窗被拦截，请允许本站弹出窗口后重试', true); btn.disabled = false; return; }
@@ -4495,7 +4692,7 @@
         w.document.write(
           '<!DOCTYPE html><html><head><meta charset="utf-8">'
           + '<title>' + escapeHtml(stripExt(word2pdfFile.name)) + '</title>'
-          + '<style>@page{size:' + pageSize + ';margin:' + marginCss + '}'
+          + '<style>@page{size:A4;margin:2.5cm}'
           + 'body{font-family:"Microsoft YaHei","PingFang SC","Segoe UI",sans-serif;font-size:14px;line-height:1.7;color:#111;max-width:800px;margin:0 auto;padding:16px}'
           + 'h1,h2,h3{line-height:1.3;margin:16px 0 8px}p{margin:8px 0}'
           + 'table{border-collapse:collapse;width:100%;margin:12px 0}td,th{border:1px solid #ccc;padding:6px 8px}'
@@ -4671,21 +4868,11 @@
         extract.doc = await pdfjsLib.getDocument({ data: new Uint8Array(buf.slice(0)) }).promise;
         $('#extractOptCard').classList.remove('hidden');
         $('#extractPages').value = 1;
-        updateExtractPreview();
         say('#extractStatus', '已载入 ' + extract.doc.numPages + ' 页');
       } catch (err) {
         say('#extractStatus', '载入失败：' + (err && err.message ? err.message : err), true);
       }
     });
-
-    function updateExtractPreview() {
-      if (!extract.doc) return;
-      const per = Math.max(1, parseInt($('#extractPages').value, 10) || 1);
-      const total = extract.doc.numPages;
-      const count = Math.ceil(total / per);
-      $('#extractPreviewHint').textContent = '将拆分为 ' + count + ' 个文件（每份 ' + per + ' 页）';
-    }
-    bind('#extractPages', 'input', updateExtractPreview);
 
     bind('#extractBtn', 'click', async () => {
       if (!extract.doc || !extract.buf) { say('#extractStatus', '请先选择 PDF', true); return; }
@@ -4749,12 +4936,10 @@
             + '</div>'
           ).join('')
         + '</div>';
-
       bind('#extractZipBtn', 'click', () => {
         downloadBlob(extract.resultZipBlob, extract.resultZipName);
         say('#extractStatus2', '✅ 已开始下载 ZIP', false, true);
       });
-
       body.querySelectorAll('.file-item').forEach(item => {
         const idx = parseInt(item.dataset.idx, 10);
         const f = extract.resultFiles[idx];
@@ -4763,7 +4948,6 @@
           downloadBlob(blob, f.name);
         });
       });
-
       $('#extractResultCard').classList.remove('hidden');
     }
 
