@@ -3184,62 +3184,83 @@
       el.classList.toggle('hidden', !show);
     }
 
-    /* ---------- 关键：按取景框位置从视频帧裁剪 ---------- */
+    /* ---------- 关键：按取景框位置从视频帧裁剪（与屏幕所见 1:1 对应） ---------- */
     function captureVideoWithFrame(videoEl) {
       const vw = videoEl.videoWidth;
       const vh = videoEl.videoHeight;
       if (!vw || !vh) throw new Error('视频尚未就绪');
 
-      // 1. 视频在页面上的显示区域（video 元素被 object-fit: cover 填充后，实际可见的区域）
+      // video 元素在屏幕上的实际显示区域
       const videoRect = videoEl.getBoundingClientRect();
       const displayW = videoRect.width;
       const displayH = videoRect.height;
+      if (displayW <= 0 || displayH <= 0) throw new Error('视频显示区域异常');
 
-      // 2. 取景框在页面上的位置（相对视频显示区域）
-      const frameEl = $('#scanFsFrame');
-      const frameRect = frameEl.getBoundingClientRect();
+      // 取景框在屏幕上的位置
+      const frameRect = $('#scanFsFrame').getBoundingClientRect();
 
-      // 3. 因为 video 用 object-fit: cover 填满 displayW×displayH，内部画面会被等比裁切
-      //    计算原始视频画面在页面上的实际“完整显示区域”（等比放大后可能超出显示框）
+      // 取景框相对 video 元素的像素坐标（这就是用户在屏幕上看到的裁剪区域）
+      let fx = frameRect.left - videoRect.left;
+      let fy = frameRect.top - videoRect.top;
+      let fw = frameRect.width;
+      let fh = frameRect.height;
+
+      // 限制在 video 显示区域内，避免越界
+      fx = clamp(fx, 0, displayW);
+      fy = clamp(fy, 0, displayH);
+      fw = clamp(fw, 1, displayW - fx);
+      fh = clamp(fh, 1, displayH - fy);
+
+      // 用一个与 video 显示区域完全重合的 canvas，把 video 当前帧按 object-fit: cover 画上去
+      // 这样 canvas 上的像素坐标 === 屏幕坐标，取景框在哪，就从哪裁
+      const stageCv = document.createElement('canvas');
+      stageCv.width = Math.max(1, Math.round(displayW));
+      stageCv.height = Math.max(1, Math.round(displayH));
+      const sctx = stageCv.getContext('2d');
+
+      // 复刻 object-fit: cover 的绘制逻辑
       const videoRatio = vw / vh;
       const displayRatio = displayW / displayH;
-      let scaledW, scaledH, offsetX, offsetY;
+      let drawW, drawH, drawX, drawY;
       if (videoRatio > displayRatio) {
-        // 视频更宽 → 上下完全填充，左右被裁切
-        scaledH = displayH;
-        scaledW = displayH * videoRatio;
-        offsetX = (scaledW - displayW) / 2;
-        offsetY = 0;
+        // 视频更宽 → 高度铺满，左右溢出
+        drawH = displayH;
+        drawW = displayH * videoRatio;
+        drawX = (displayW - drawW) / 2;
+        drawY = 0;
       } else {
-        // 视频更高 → 左右完全填充，上下被裁切
-        scaledW = displayW;
-        scaledH = displayW / videoRatio;
-        offsetX = 0;
-        offsetY = (scaledH - displayH) / 2;
+        // 视频更高 → 宽度铺满，上下溢出
+        drawW = displayW;
+        drawH = displayW / videoRatio;
+        drawX = 0;
+        drawY = (displayH - drawH) / 2;
       }
+      sctx.drawImage(videoEl, drawX, drawY, drawW, drawH);
 
-      // 4. 取景框相对视频显示区域的坐标（px）
-      const fx = frameRect.left - videoRect.left;
-      const fy = frameRect.top - videoRect.top;
-      const fw = frameRect.width;
-      const fh = frameRect.height;
+      // 在 canvas 上按取景框坐标裁剪（完全等价于"屏幕上看到的取景框内容"）
+      const cropX = Math.round(fx);
+      const cropY = Math.round(fy);
+      const cropW = Math.max(1, Math.round(fw));
+      const cropH = Math.max(1, Math.round(fh));
 
-      // 5. 取景框在“原始视频像素坐标”中的位置
-      const srcX = clamp((fx + offsetX) / scaledW * vw, 0, vw);
-      const srcY = clamp((fy + offsetY) / scaledH * vh, 0, vh);
-      const srcW = clamp(fw / scaledW * vw, 1, vw - srcX);
-      const srcH = clamp(fh / scaledH * vh, 1, vh - srcY);
+      const outCv = document.createElement('canvas');
+      outCv.width = cropW;
+      outCv.height = cropH;
+      const octx = outCv.getContext('2d');
+      octx.drawImage(stageCv, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
 
-      // 6. 从原始视频帧截取该区域
+      // 限制输出尺寸，避免超大分辨率
       const maxDim = 2400;
-      const k = Math.min(1, maxDim / Math.max(srcW, srcH));
-      const outW = Math.max(1, Math.round(srcW * k));
-      const outH = Math.max(1, Math.round(srcH * k));
-      const cv = document.createElement('canvas');
-      cv.width = outW; cv.height = outH;
-      const ctx = cv.getContext('2d');
-      ctx.drawImage(videoEl, srcX, srcY, srcW, srcH, 0, 0, outW, outH);
-      return cv;
+      if (Math.max(outCv.width, outCv.height) > maxDim) {
+        const k = maxDim / Math.max(outCv.width, outCv.height);
+        const scaled = document.createElement('canvas');
+        scaled.width = Math.max(1, Math.round(outCv.width * k));
+        scaled.height = Math.max(1, Math.round(outCv.height * k));
+        const sctx2 = scaled.getContext('2d');
+        sctx2.drawImage(outCv, 0, 0, scaled.width, scaled.height);
+        return scaled;
+      }
+      return outCv;
     }
 
     /* ---------- 拍照 ---------- */
@@ -3253,7 +3274,8 @@
       shutterPulse();
       showProcessing(true);
       try {
-        await new Promise(r => setTimeout(r, 100));
+        // 等待两帧，确保视频帧已刷新为当前画面
+        await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
         const cv = captureVideoWithFrame(v);
         scan.currentCanvas = cv;
         applyScanMode();
