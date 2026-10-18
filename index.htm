@@ -329,7 +329,6 @@
     object-fit: cover; background: #000;
   }
 
-  /* ===== 身份证取景框 ===== */
   .scan-fs-frame {
     position: absolute;
     width: 90%; aspect-ratio: 1.585;
@@ -605,11 +604,34 @@
   .panel[data-theme="organize"] input[type=file]::file-selector-button { background: linear-gradient(135deg, #059669, #10b981); }
   .panel[data-theme="organize"] input[type=file]::-webkit-file-upload-button { background: linear-gradient(135deg, #059669, #10b981); }
 
-  /* ===== 证件照 AI 进度条 ===== */
   .ai-progress-wrap { margin-bottom: 0; }
   .ai-progress-wrap .ai-status-text { font-size: 11px; color: #64748b; margin-bottom: 6px; }
   .ai-progress-wrap .ai-progress-track { width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
   .ai-progress-wrap .ai-progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #7c3aed, #a855f7); transition: width .3s; }
+
+  /* ===== 证件照裁剪预览 ===== */
+  .idphoto-crop-stage {
+    position: relative;
+    width: 100%;
+    border-radius: 10px;
+    background: #0f172a;
+    overflow: hidden;
+    touch-action: none;
+    line-height: 0;
+    margin-top: 10px;
+  }
+  .idphoto-crop-stage canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    touch-action: none;
+  }
+  .idphoto-crop-stage canvas.overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    pointer-events: none;
+  }
 
   @media (max-width: 640px) {
     .app-header { padding: 18px 16px 16px; }
@@ -654,7 +676,7 @@
 
 <header class="app-header">
   <h1>📄 PDF 工具箱 · 本地纯净版</h1>
-  <p class="sub">无需 CDN · 完全离线1 · 包含所有功能</p>
+  <p class="sub">无需 CDN · 完全离线 · 包含所有功能</p>
   <div class="badges">
     <span>🔒 本地安全</span>
     <span>⚡ 无需安装</span>
@@ -972,8 +994,24 @@
           纯色背景（白/蓝/红）效果最好。
         </p>
       </div>
+
+      <!-- 新增：裁剪步骤 -->
+      <div class="card hidden" id="idphotoCropCard">
+        <h2><span class="step-label">第 2 步</span><span class="step-title">裁剪取景区域</span></h2>
+        <p class="hint">拖动虚线框，只框选「头顶到胸口」的区域。AI 只处理这块，速度更快也更准。</p>
+        <div class="idphoto-crop-stage" id="idphotoCropStage">
+          <canvas id="idphotoCropCanvas"></canvas>
+          <canvas class="overlay" id="idphotoCropOverlay"></canvas>
+        </div>
+        <div class="btn-row" style="margin-top:10px">
+          <button class="btn gray" id="idphotoCropReset" type="button">↺ 重置框</button>
+          <button class="btn green" id="idphotoCropConfirm" type="button" style="flex:1">✓ 使用此区域</button>
+        </div>
+        <div class="status" id="idphotoCropStatus"></div>
+      </div>
+
       <div class="card hidden" id="idphotoOptCard">
-        <h2><span class="step-label">第 2 步</span><span class="step-title">尺寸与排版</span></h2>
+        <h2><span class="step-label">第 3 步</span><span class="step-title">尺寸与排版</span></h2>
         <div class="field">
           <label>尺寸规格</label>
           <select id="idphotoSize">
@@ -1140,7 +1178,6 @@
     <div class="scan-fs-frame" id="scanFsFrame">
       <div class="frame-hint" id="scanFsFrameHint">请将身份证放入框内</div>
       <div class="frame-guide" id="scanFsFrameGuide">
-        <!-- 人像面示意：人像在右，文字条在左 -->
         <svg viewBox="0 0 158 100" preserveAspectRatio="xMidYMid meet" id="scanFsGuideFront">
           <ellipse cx="118" cy="36" rx="15" ry="18" fill="currentColor"/>
           <path d="M96 82 Q96 58 118 58 Q140 58 140 82 Z" fill="currentColor"/>
@@ -1149,7 +1186,6 @@
           <rect x="14" y="50" width="58" height="5" rx="2.5" fill="currentColor"/>
           <rect x="14" y="64" width="46" height="5" rx="2.5" fill="currentColor"/>
         </svg>
-        <!-- 国徽面示意：国徽在左上角，下方为标题与文字 -->
         <svg viewBox="0 0 158 100" preserveAspectRatio="xMidYMid meet" id="scanFsGuideBack" style="display:none">
           <circle cx="30" cy="28" r="14" fill="currentColor"/>
           <rect x="58" y="22" width="60" height="6" rx="3" fill="currentColor"/>
@@ -1269,8 +1305,9 @@
       'https://unpkg.com/onnxruntime-web@1.17.3/dist/ort.min.js'
     ],
     rmbg: [
-      'https://huggingface.co/briaai/RMBG-1.4/resolve/main/onnx/model.onnx',
-      'https://hf-mirror.com/briaai/RMBG-1.4/resolve/main/onnx/model.onnx'
+      'https://hf-mirror.com/briaai/RMBG-1.4/resolve/main/onnx/model.onnx',
+      'https://modelscope.cn/models/AI-ModelScope/RMBG-1.4/resolve/master/onnx/model.onnx',
+      'https://huggingface.co/briaai/RMBG-1.4/resolve/main/onnx/model.onnx'
     ]
   };
 
@@ -3367,7 +3404,6 @@
       return cv;
     }
 
-    /* ===== 扫描图片编辑器（支持左右滑动切换） ===== */
     const editor = {
       baseCanvas: null, crop: null, cropMode: false, drag: null,
       cssW: 0, cssH: 0, swipeStartX: 0, swipeStartY: 0, swipeMoved: false
@@ -3924,7 +3960,6 @@
 
     /* ============================================================
      * RMBG-1.4 本地 AI 抠图引擎
-     * 首次下载模型（~44MB）→ 缓存 IndexedDB → 之后完全离线
      * ============================================================ */
     const RMBG = (function () {
       const DB_NAME = 'pdf-toolbox-models';
@@ -3974,9 +4009,17 @@
         const errors = [];
         for (const url of urls) {
           const isLocal = url.startsWith('./') || url.startsWith('/');
+          const ctrl = new AbortController();
+          const timer = setTimeout(() => ctrl.abort(), 60000);
           try {
-            onStatus && onStatus('尝试：' + (isLocal ? '本地 ' + url : 'CDN ' + url));
-            const res = await fetch(url, { cache: 'force-cache' });
+            onStatus && onStatus('尝试：' + (isLocal ? '本地 ' + url : '镜像 ' + url));
+            const res = await fetch(url, {
+              cache: 'force-cache',
+              signal: ctrl.signal,
+              mode: 'cors',
+              credentials: 'omit'
+            });
+            clearTimeout(timer);
             if (!res.ok) throw new Error('HTTP ' + res.status + ' ' + res.statusText);
             const total = parseInt(res.headers.get('content-length') || '0', 10);
             const reader = res.body.getReader();
@@ -3988,29 +4031,38 @@
               chunks.push(value);
               received += value.length;
               if (onProgress && total) onProgress(received / total);
+              if (received % (512 * 1024) < value.length) {
+                await new Promise(r => setTimeout(r, 0));
+              }
+            }
+            if (received < 1 * 1024 * 1024) {
+              throw new Error('文件过小（' + (received / 1024).toFixed(0) + ' KB），可能是错误页面');
             }
             const buf = new Uint8Array(received);
             let off = 0;
             for (const c of chunks) { buf.set(c, off); off += c.length; }
             return buf.buffer;
           } catch (e) {
+            clearTimeout(timer);
             let reason = e.message || String(e);
-            if (e.name === 'TypeError' && /fetch/i.test(reason)) reason = '网络失败或跨域被拦截';
-            if (e.name === 'AbortError') reason = '请求被中止';
-            errors.push((isLocal ? '本地 ' : 'CDN ') + url + ' → ' + reason);
+            if (e.name === 'AbortError') reason = '超时（60 秒未下完）';
+            else if (e.name === 'TypeError') reason = '网络失败或跨域被拦截';
+            errors.push((isLocal ? '本地 ' : '镜像 ') + url + '\n    → ' + reason);
           }
         }
-        const detail = errors.map(x => '· ' + x).join('\n');
+        const detail = errors.map(x => '· ' + x).join('\n\n');
         const err = new Error(
           'AI 抠图模型下载失败。\n\n' +
           '已尝试以下地址：\n' + detail + '\n\n' +
-          '解决方案：\n' +
-          '1) 手动下载模型文件 rmbg-1.4.onnx（约 44MB），放到网页目录的 libs/ 文件夹下：\n' +
-          '   https://huggingface.co/briaai/RMBG-1.4/resolve/main/onnx/model.onnx\n' +
-          '   或国内镜像：\n' +
+          '✅ 最快的解决办法（手动放文件）：\n' +
+          '1) 用浏览器打开下面任一链接，下载 rmbg-1.4.onnx（约 44MB）：\n' +
           '   https://hf-mirror.com/briaai/RMBG-1.4/resolve/main/onnx/model.onnx\n' +
-          '2) 检查网络后点击「生成证件照预览」重试；\n' +
-          '3) 临时改用「🎨 快速抠图」或「➖ 不抠图」模式。'
+          '   https://modelscope.cn/models/AI-ModelScope/RMBG-1.4/resolve/master/onnx/model.onnx\n' +
+          '2) 在你的网页目录建一个 libs 文件夹\n' +
+          '3) 把下载的文件放进去，改名为 rmbg-1.4.onnx\n' +
+          '   路径应为：libs/rmbg-1.4.onnx\n' +
+          '4) 刷新页面，重新点击「生成证件照预览」\n\n' +
+          '或者临时改用「🎨 快速抠图」模式（不需要下载）。'
         );
         err.detail = detail;
         throw err;
@@ -4148,6 +4200,7 @@
 
     /* ===== 模块：证件照制作 ===== */
     let idphotoImg = null;
+    let idphotoCropped = null;
     let idphotoMatted = null;
     let idphotoMatteMode = 'ai';
     let idphotoCtx = null;
@@ -4158,6 +4211,269 @@
       'small1': { w: 260, h: 378 },
       'small2': { w: 413, h: 531 }
     };
+
+    const idphotoCrop = {
+      viewport: null,
+      crop: { x: 0.1, y: 0.05, w: 0.8, h: 0.9 },
+      dragMode: null,
+      dragStart: null
+    };
+
+    bind('#idphotoFile', 'change', async (e) => {
+      const f = e.target.files[0];
+      if (!f) return;
+      try {
+        idphotoImg = await loadImage(await readDataUrl(f));
+        idphotoCropped = null;
+        idphotoMatted = null;
+        idphotoState.x = 0; idphotoState.y = 0;
+        idphotoCrop.crop = { x: 0.1, y: 0.05, w: 0.8, h: 0.9 };
+        $('#idphotoCropCard').classList.remove('hidden');
+        $('#idphotoOptCard').classList.add('hidden');
+        $('#idphotoPreviewWrap').classList.add('hidden');
+        $('#idphotoDownloadRow').classList.add('hidden');
+        $('#idphotoAIStatusWrap').classList.add('hidden');
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            idphotoCropRender();
+          });
+        });
+        say('#idphotoCropStatus', '拖动虚线框，框选头顶到胸口的区域');
+      } catch (err) {
+        say('#idphotoCropStatus', '图片载入失败：' + err.message, true);
+      }
+    });
+
+    function idphotoCropRender() {
+      if (!idphotoImg) return;
+      const stage = $('#idphotoCropStage');
+      const canvas = $('#idphotoCropCanvas');
+      const overlay = $('#idphotoCropOverlay');
+      if (!stage || !canvas || !overlay) return;
+
+      const stageW = stage.clientWidth || 320;
+      const imgW = idphotoImg.naturalWidth;
+      const imgH = idphotoImg.naturalHeight;
+      const scale = stageW / imgW;
+      const dispW = imgW * scale;
+      const dispH = imgH * scale;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      idphotoCrop.viewport = { width: dispW, height: dispH, dpr };
+
+      [canvas, overlay].forEach((cv) => {
+        cv.width = Math.round(dispW * dpr);
+        cv.height = Math.round(dispH * dpr);
+        cv.style.width = dispW + 'px';
+        cv.style.height = dispH + 'px';
+      });
+
+      const ctx = canvas.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, dispW, dispH);
+      ctx.drawImage(idphotoImg, 0, 0, dispW, dispH);
+      idphotoCropDrawOverlay();
+    }
+
+    function idphotoCropDrawOverlay() {
+      const overlay = $('#idphotoCropOverlay');
+      const vp = idphotoCrop.viewport;
+      if (!overlay || !vp) return;
+      const dpr = vp.dpr;
+      const ctx = overlay.getContext('2d');
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, overlay.width, overlay.height);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const W = vp.width, H = vp.height;
+      const c = idphotoCrop.crop;
+      const cx = c.x * W, cy = c.y * H;
+      const cw = c.w * W, ch = c.h * H;
+      ctx.fillStyle = 'rgba(0,0,0,0.55)';
+      ctx.fillRect(0, 0, W, cy);
+      ctx.fillRect(0, cy + ch, W, H - cy - ch);
+      ctx.fillRect(0, cy, cx, ch);
+      ctx.fillRect(cx + cw, cy, W - cx - cw, ch);
+      ctx.strokeStyle = '#60a5fa';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([8, 6]);
+      ctx.strokeRect(cx, cy, cw, ch);
+      ctx.setLineDash([]);
+      ctx.save();
+      ctx.strokeStyle = 'rgba(96,165,250,0.35)';
+      ctx.lineWidth = 1;
+      for (let i = 1; i <= 2; i++) {
+        ctx.beginPath();
+        ctx.moveTo(cx + cw * i / 3, cy);
+        ctx.lineTo(cx + cw * i / 3, cy + ch);
+        ctx.moveTo(cx, cy + ch * i / 3);
+        ctx.lineTo(cx + cw, cy + ch * i / 3);
+        ctx.stroke();
+      }
+      ctx.restore();
+      const HIT = isMobile ? 22 : 16;
+      const pts = [
+        [cx, cy], [cx + cw / 2, cy], [cx + cw, cy],
+        [cx, cy + ch / 2], [cx + cw, cy + ch / 2],
+        [cx, cy + ch], [cx + cw / 2, cy + ch], [cx + cw, cy + ch]
+      ];
+      pts.forEach(([x, y]) => {
+        ctx.beginPath();
+        ctx.rect(x - HIT / 2, y - HIT / 2, HIT, HIT);
+        ctx.fillStyle = '#fff';
+        ctx.fill();
+        ctx.strokeStyle = '#2563eb';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      });
+      const ratio = (cw / ch).toFixed(2);
+      const text = '比例 ' + ratio + ' · 拖边框调整';
+      ctx.font = '600 12px -apple-system,"PingFang SC",sans-serif';
+      ctx.fillStyle = 'rgba(37,99,235,0.92)';
+      const tw = ctx.measureText(text).width + 14;
+      ctx.fillRect(cx + 4, cy + 4, tw, 22);
+      ctx.fillStyle = '#fff';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, cx + 11, cy + 16);
+    }
+
+    function idphotoCropHitTest(px, py) {
+      const vp = idphotoCrop.viewport;
+      if (!vp) return null;
+      const W = vp.width, H = vp.height;
+      const c = idphotoCrop.crop;
+      const cx = c.x * W, cy = c.y * H;
+      const cw = c.w * W, ch = c.h * H;
+      const hr = isMobile ? 28 : 20;
+      const corners = [
+        [cx, cy, 'nw'], [cx + cw, cy, 'ne'],
+        [cx, cy + ch, 'sw'], [cx + cw, cy + ch, 'se']
+      ];
+      for (const [hx, hy, mode] of corners) {
+        if (Math.hypot(px - hx, py - hy) < hr) return mode;
+      }
+      if (Math.abs(py - cy) < hr && px > cx && px < cx + cw) return 'n';
+      if (Math.abs(py - (cy + ch)) < hr && px > cx && px < cx + cw) return 's';
+      if (Math.abs(px - cx) < hr && py > cy && py < cy + ch) return 'w';
+      if (Math.abs(px - (cx + cw)) < hr && py > cy && py < cy + ch) return 'e';
+      if (px > cx && px < cx + cw && py > cy && py < cy + ch) return 'move';
+      return null;
+    }
+
+    (function bindIdPhotoCropDrag() {
+      const stage = $('#idphotoCropStage');
+      if (!stage) return;
+      const getPos = (e) => {
+        const rect = stage.getBoundingClientRect();
+        return { x: e.clientX - rect.left, y: e.clientY - rect.top, w: rect.width, h: rect.height };
+      };
+      stage.addEventListener('pointerdown', (e) => {
+        if (!idphotoCrop.viewport) return;
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        const p = getPos(e);
+        const mode = idphotoCropHitTest(p.x, p.y);
+        if (!mode) return;
+        const c = idphotoCrop.crop;
+        idphotoCrop.dragMode = mode;
+        idphotoCrop.dragStart = { px: p.x, py: p.y, W: p.w, H: p.h, x: c.x, y: c.y, w: c.w, h: c.h };
+        try { stage.setPointerCapture(e.pointerId); } catch (_) {}
+        e.preventDefault();
+      }, { passive: false });
+      stage.addEventListener('pointermove', (e) => {
+        if (!idphotoCrop.dragMode || !idphotoCrop.dragStart) return;
+        const p = getPos(e);
+        const s = idphotoCrop.dragStart;
+        const dx = (p.x - s.px) / s.W;
+        const dy = (p.y - s.py) / s.H;
+        const mode = idphotoCrop.dragMode;
+        const MIN = 0.08;
+        let x = s.x, y = s.y, w = s.w, h = s.h;
+        if (mode === 'move') {
+          x = clamp(s.x + dx, 0, 1 - s.w);
+          y = clamp(s.y + dy, 0, 1 - s.h);
+        } else {
+          if (mode.includes('w')) {
+            const nx = clamp(s.x + dx, 0, s.x + s.w - MIN);
+            w = s.x + s.w - nx;
+            x = nx;
+          }
+          if (mode.includes('e')) w = clamp(s.w + dx, MIN, 1 - s.x);
+          if (mode.includes('n')) {
+            const ny = clamp(s.y + dy, 0, s.y + s.h - MIN);
+            h = s.y + s.h - ny;
+            y = ny;
+          }
+          if (mode.includes('s')) h = clamp(s.h + dy, MIN, 1 - s.y);
+        }
+        idphotoCrop.crop = { x, y, w, h };
+        idphotoCropDrawOverlay();
+        e.preventDefault();
+      }, { passive: false });
+      function endDrag(e) {
+        if (!idphotoCrop.dragMode) return;
+        idphotoCrop.dragMode = null;
+        idphotoCrop.dragStart = null;
+        if (e && e.pointerId !== undefined) {
+          try { stage.releasePointerCapture(e.pointerId); } catch (_) {}
+        }
+      }
+      stage.addEventListener('pointerup', endDrag);
+      stage.addEventListener('pointercancel', endDrag);
+      stage.addEventListener('lostpointercapture', endDrag);
+      stage.addEventListener('contextmenu', (e) => e.preventDefault());
+    })();
+
+    bind('#idphotoCropReset', 'click', () => {
+      idphotoCrop.crop = { x: 0.1, y: 0.05, w: 0.8, h: 0.9 };
+      idphotoCropDrawOverlay();
+      say('#idphotoCropStatus', '已重置为居中区域');
+    });
+
+    bind('#idphotoCropConfirm', 'click', async () => {
+      if (!idphotoImg) return;
+      const c = idphotoCrop.crop;
+      const iw = idphotoImg.naturalWidth;
+      const ih = idphotoImg.naturalHeight;
+      const sx = Math.round(c.x * iw);
+      const sy = Math.round(c.y * ih);
+      const sw = Math.max(1, Math.round(c.w * iw));
+      const sh = Math.max(1, Math.round(c.h * ih));
+      const MAX_DIM = 1024;
+      const outW = Math.min(sw, MAX_DIM);
+      const outH = Math.round(sh * (outW / sw));
+      const cv = document.createElement('canvas');
+      cv.width = outW;
+      cv.height = outH;
+      const ctx = cv.getContext('2d');
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, outW, outH);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(idphotoImg, sx, sy, sw, sh, 0, 0, outW, outH);
+      idphotoCropped = cv;
+      idphotoMatted = null;
+      idphotoState.x = 0; idphotoState.y = 0;
+      $('#idphotoCropCard').classList.add('hidden');
+      $('#idphotoOptCard').classList.remove('hidden');
+      $('#idphotoPreviewWrap').classList.add('hidden');
+      $('#idphotoDownloadRow').classList.add('hidden');
+      $('#idphotoAIStatusWrap').classList.add('hidden');
+      say('#idphotoStatus',
+        '✅ 已裁剪为 ' + outW + '×' + outH + '，选择规格后点击「生成证件照预览」',
+        false, true);
+    });
+
+    bind('#idphotoMatteMode', 'change', () => {
+      idphotoMatteMode = $('#idphotoMatteMode').value;
+      idphotoMatted = null;
+      if (idphotoMatteMode === 'ai' && idphotoImg) {
+        RMBG.isCached().then(cached => {
+          if (!cached) {
+            say('#idphotoStatus', '⚠️ 首次使用 AI 抠图需要下载约 44MB 模型，请点击「生成证件照预览」开始下载');
+          }
+        });
+      }
+    });
 
     function extractForegroundColor(srcCanvas) {
       const W = srcCanvas.width, H = srcCanvas.height;
@@ -4225,43 +4541,14 @@
       return { canvas: out, alpha: alpha2, bgColor: [bgR, bgG, bgB] };
     }
 
-    bind('#idphotoFile', 'change', async (e) => {
-      const f = e.target.files[0];
-      if (!f) return;
-      try {
-        idphotoImg = await loadImage(await readDataUrl(f));
-        idphotoMatted = null;
-        idphotoState.x = 0; idphotoState.y = 0;
-        $('#idphotoOptCard').classList.remove('hidden');
-        $('#idphotoDownloadRow').classList.add('hidden');
-        $('#idphotoPreviewWrap').classList.add('hidden');
-        $('#idphotoAIStatusWrap').classList.add('hidden');
-        say('#idphotoStatus', '图片已载入，点击「生成证件照预览」开始处理', false, true);
-      } catch (err) {
-        say('#idphotoStatus', '图片载入失败：' + err.message, true);
-      }
-    });
-
-    bind('#idphotoMatteMode', 'change', () => {
-      idphotoMatteMode = $('#idphotoMatteMode').value;
-      idphotoMatted = null;
-      if (idphotoMatteMode === 'ai' && idphotoImg) {
-        RMBG.isCached().then(cached => {
-          if (!cached) {
-            say('#idphotoStatus', '⚠️ 首次使用 AI 抠图需要下载约 44MB 模型，请点击「生成证件照预览」开始下载');
-          }
-        });
-      }
-    });
-
     async function ensureIdPhotoMatte() {
       if (idphotoMatted) return idphotoMatted;
-      if (!idphotoImg) throw new Error('请先上传人像照片');
-      const srcW = idphotoImg.naturalWidth || idphotoImg.width;
-      const srcH = idphotoImg.naturalHeight || idphotoImg.height;
+      const src = idphotoCropped || idphotoImg;
+      if (!src) throw new Error('请先上传照片并裁剪');
       const base = document.createElement('canvas');
-      base.width = srcW; base.height = srcH;
-      base.getContext('2d').drawImage(idphotoImg, 0, 0);
+      base.width = src.naturalWidth || src.width;
+      base.height = src.naturalHeight || src.height;
+      base.getContext('2d').drawImage(src, 0, 0);
       if (idphotoMatteMode === 'none') {
         idphotoMatted = { canvas: base, alpha: null, mode: 'none' };
         return idphotoMatted;
@@ -4305,8 +4592,7 @@
         console.error('[RMBG]', err);
         bar.style.width = '0%';
         txt.textContent = '❌ AI 抠图失败';
-        const msg = (err && err.message) ? err.message : String(err);
-        alert(msg);
+        alert((err && err.message) ? err.message : String(err));
         say('#idphotoStatus', '已自动回退到快速抠图（可在上方切换为 AI 重试）', true);
         const { canvas, alpha } = extractForegroundColor(base);
         idphotoMatted = { canvas, alpha, mode: 'color-fallback' };
@@ -4330,7 +4616,6 @@
       const srcW = srcCanvas.width, srcH = srcCanvas.height;
       const canvas = $('#idphotoCanvas');
       $('#idphotoPreviewWrap').classList.remove('hidden');
-
       function composeSingle() {
         const c = document.createElement('canvas');
         c.width = target.w; c.height = target.h;
@@ -4350,7 +4635,6 @@
         g.drawImage(srcCanvas, dx, dy, drawW, drawH);
         return c;
       }
-
       if (layoutMode === 'sheet') {
         canvas.width = 1050; canvas.height = 1500;
         canvas.style.width = '100%'; canvas.style.height = 'auto';
@@ -4398,6 +4682,11 @@
     bind('#idphotoGenBtn', 'click', async () => {
       if (!idphotoImg) {
         say('#idphotoStatus', '请先上传人像照片', true);
+        return;
+      }
+      if (!idphotoCropped) {
+        say('#idphotoStatus', '请先完成第 2 步的裁剪', true);
+        $('#idphotoCropCard').classList.remove('hidden');
         return;
       }
       const btn = $('#idphotoGenBtn');
@@ -4448,7 +4737,6 @@
       canvas.addEventListener('pointercancel', endDrag);
     })();
 
-    /* ===== 证件照保存（路径提示 + 显式保存） ===== */
     bind('#idphotoDownloadBtn', 'click', async () => {
       const canvas = $('#idphotoCanvas');
       const btn = $('#idphotoDownloadBtn');
@@ -5097,6 +5385,7 @@
           if (document.querySelector('#panel-split.active') && split.doc) splitRender();
           if (document.querySelector('#panel-crop.active') && crop.doc) cropRender();
           if ($('#scanImgEditor').classList.contains('show')) drawEditorCanvas();
+          if (!$('#idphotoCropCard').classList.contains('hidden') && idphotoImg) idphotoCropRender();
         } catch (e) {}
       }, 200);
     });
@@ -5106,6 +5395,7 @@
           if (document.querySelector('#panel-split.active') && split.doc) splitRender();
           if (document.querySelector('#panel-crop.active') && crop.doc) cropRender();
           if ($('#scanImgEditor').classList.contains('show')) drawEditorCanvas();
+          if (!$('#idphotoCropCard').classList.contains('hidden') && idphotoImg) idphotoCropRender();
         } catch (e) {}
       }, 300);
     });
