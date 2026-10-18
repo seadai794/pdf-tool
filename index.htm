@@ -1223,7 +1223,6 @@
       btn.addEventListener('click', function (e) {
         e.preventDefault();
         showTool(btn.dataset.tab, true);
-        // 离开扫描面板时关闭摄像头
         if (btn.dataset.tab !== 'scan' && scan.stream) closeCamera();
       });
     });
@@ -1310,16 +1309,28 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url; a.download = filename; a.rel = 'noopener';
+      a.target = '_self';
       a.style.display = 'none';
-      document.body.appendChild(a); a.click();
+      document.body.appendChild(a);
+      if (typeof a.click === 'function') {
+        a.click();
+      } else {
+        const evt = document.createEvent('MouseEvents');
+        evt.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0,
+          false, false, false, false, 0, null);
+        a.dispatchEvent(evt);
+      }
       setTimeout(() => {
         try { document.body.removeChild(a); } catch (_) {}
         setTimeout(() => { try { URL.revokeObjectURL(url); } catch (_) {} }, 60000);
-      }, 3000);
+      }, 5000);
     }
 
     const sharedSave = {
       async saveAsPdf(bytes, filename, sayFn) {
+        const blob = new Blob([bytes], { type: 'application/pdf' });
+
+        // 1) File System Access API（桌面 Chrome / Edge）
         if (hasSavePicker) {
           try {
             const handle = await window.showSaveFilePicker({
@@ -1327,24 +1338,56 @@
               types: [{ description: 'PDF 文件', accept: { 'application/pdf': ['.pdf'] } }]
             });
             const writable = await handle.createWritable();
-            await writable.write(new Blob([bytes], { type: 'application/pdf' }));
+            await writable.write(blob);
             await writable.close();
             sayFn('✅ 已保存为：' + (handle.name || filename), false, true);
             return;
           } catch (err) {
             if (err && err.name === 'AbortError') { sayFn('已取消保存'); return; }
+            console.warn('[save] showSaveFilePicker 失败，回退到 Blob 下载：', err);
           }
         }
+
+        // 2) Blob URL + a.download（手机和电脑通用，比 data: URL 兼容性好）
+        let url = null;
+        try {
+          url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          a.rel = 'noopener';
+          a.target = '_self';
+          a.style.display = 'none';
+          document.body.appendChild(a);
+
+          if (typeof a.click === 'function') {
+            a.click();
+          } else {
+            const evt = document.createEvent('MouseEvents');
+            evt.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0,
+              false, false, false, false, 0, null);
+            a.dispatchEvent(evt);
+          }
+
+          setTimeout(() => {
+            try { document.body.removeChild(a); } catch (_) {}
+            setTimeout(() => { try { URL.revokeObjectURL(url); } catch (_) {} }, 60000);
+          }, 5000);
+
+          sayFn('已触发下载：' + filename + '。如浏览器未弹出保存提示，请用「↗ 新窗口打开」后手动保存。', false, true);
+          return;
+        } catch (err) {
+          console.warn('[save] Blob 下载失败：', err);
+          if (url) { try { URL.revokeObjectURL(url); } catch (_) {} }
+        }
+
+        // 3) 兜底：弹窗让用户复制 data URL（极少用到）
         try {
           const dataUrl = await bytesToDataUrl(bytes);
-          const a = document.createElement('a');
-          a.href = dataUrl; a.download = filename; a.rel = 'noopener';
-          a.style.display = 'none';
-          document.body.appendChild(a); a.click();
-          setTimeout(() => { try { document.body.removeChild(a); } catch (_) {} }, 3000);
-          sayFn('已尝试下载。如未成功，请用「🖨 打印 / 存为 PDF」或「📋 复制 PDF 数据」。', false, true);
+          showDataModalDirect(dataUrl);
+          sayFn('请手动复制下方文本，粘贴到新标签地址栏打开并另存。', false, true);
         } catch (err) {
-          showDataModalFor(bytes, sayFn);
+          sayFn('保存失败：' + (err && err.message ? err.message : err), true);
         }
       },
       async printAsPdf(previewDoc, filename, sayFn) {
