@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
-<title>PDF 工具箱 · 9 合 1</title>
+<title>PDF 工具箱 · 全能版</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; padding: 0; }
@@ -198,21 +198,6 @@
     font-size: 11px; color: #64748b; padding: 4px 2px 8px; flex-wrap: wrap; gap: 6px; }
   .preview-toolbar .label { font-weight: 700; color: #334155; font-size: 12px; }
   .preview-loading { text-align: center; padding: 24px 10px; font-size: 12px; color: #64748b; }
-
-  details.troubleshoot { margin-top: 12px; background: #f8fafc;
-    border: 1px solid #e2e8f0; border-radius: 10px; }
-  details.troubleshoot summary { padding: 10px 12px; font-size: 12px; font-weight: 600;
-    color: #334155; cursor: pointer; list-style: none;
-    display: flex; align-items: center; gap: 6px; border-radius: 10px; }
-  details.troubleshoot summary::-webkit-details-marker { display: none; }
-  details.troubleshoot summary::before { content: '❓'; font-size: 13px; }
-  details.troubleshoot[open] summary::before { content: '💡'; }
-  details.troubleshoot[open] summary { border-bottom: 1px solid #e2e8f0; border-radius: 10px 10px 0 0; }
-  .troubleshoot-body { padding: 10px 14px 12px; font-size: 11px; color: #475569; line-height: 1.7; }
-  .troubleshoot-body p { margin: 6px 0 3px; }
-  .troubleshoot-body b { color: #0f172a; }
-  .troubleshoot-body code { background: #eef2ff; color: #3730a3; padding: 1px 5px;
-    border-radius: 4px; font-family: ui-monospace, Menlo, monospace; font-size: 10px; }
 
   .modal { position: fixed; inset: 0; z-index: 1000; background: rgba(15,23,42,.6);
     display: flex; align-items: center; justify-content: center; padding: 16px; }
@@ -650,8 +635,8 @@
 <body>
 
 <header class="app-header">
-  <h1>📄 PDF 工具箱</h1>
-  <p class="sub">90 个实用工具 · 全部在浏览器本地处理 · 文件不上传</p>
+  <h1>📄 PDF 工具箱 · 全能版</h1>
+  <p class="sub">新增 OCR 识别 · 证件合成 · 证件照制作</p>
   <div class="badges">
     <span>🔒 本地安全</span>
     <span>⚡ 无需安装</span>
@@ -663,7 +648,7 @@
   <div class="catalog-group" data-category="edit">
     <div class="catalog-title">
       <span class="catalog-icon">✏️</span>
-      <span>页面编辑</span>
+      <span>页面编辑 & 图像处理</span>
       <span class="catalog-line"></span>
     </div>
     <div class="catalog-items">
@@ -681,18 +666,32 @@
           <span class="feature-desc">去白边 · 统一 A4</span>
         </span>
       </button>
-      <button class="feature-card" data-tab="arrange" type="button">
-        <span class="feature-icon">📄</span>
-        <span class="feature-text">
-          <span class="feature-name">页面调整</span>
-          <span class="feature-desc">排序 · 旋转 · 插页</span>
-        </span>
-      </button>
       <button class="feature-card" data-tab="scan" type="button">
         <span class="feature-icon">📷</span>
         <span class="feature-text">
           <span class="feature-name">扫描文档</span>
-          <span class="feature-desc">拍照去底色 · 白底黑字</span>
+          <span class="feature-desc">拍照去底色</span>
+        </span>
+      </button>
+      <button class="feature-card" data-tab="ocr" type="button">
+        <span class="feature-icon">🔍</span>
+        <span class="feature-text">
+          <span class="feature-name">图片转文字</span>
+          <span class="feature-desc">OCR 识别并导出</span>
+        </span>
+      </button>
+      <button class="feature-card" data-tab="idcard" type="button">
+        <span class="feature-icon">🪪</span>
+        <span class="feature-text">
+          <span class="feature-name">证件 A4 合成</span>
+          <span class="feature-desc">正反面同页打印</span>
+        </span>
+      </button>
+      <button class="feature-card" data-tab="idphoto" type="button">
+        <span class="feature-icon">👤</span>
+        <span class="feature-text">
+          <span class="feature-name">证件照制作</span>
+          <span class="feature-desc">换底色 · 尺寸裁剪</span>
         </span>
       </button>
     </div>
@@ -781,7 +780,6 @@
           <label>切分方向</label>
           <select id="splitDir"><option value="vertical">左右切分（竖线）</option><option value="horizontal">上下切分（横线）</option></select>
         </div>
-        <p class="hint">选择拆分模式后，第 3 步会按此模式显示拆分线。改变模式会重置拆分线。</p>
       </div>
       <div class="card hidden" id="splitCard">
         <h2><span class="step-label">第 3 步</span><span class="step-title">预览与调整拆分线</span></h2>
@@ -794,11 +792,6 @@
           <canvas id="splitCanvas"></canvas>
           <canvas class="overlay" id="splitOverlay"></canvas>
         </div>
-        <p class="hint"><b>触摸或拖动</b>蓝色虚线上的圆形手柄，即可调整拆分位置。</p>
-        <div class="btn-row" style="margin-top:10px">
-          <button class="btn ghost" id="splitResetPage" type="button">重置本页</button>
-          <button class="btn ghost" id="splitApplyAll" type="button">应用到全部页</button>
-        </div>
       </div>
       <div class="card hidden" id="splitGenCard">
         <h2><span class="step-label">第 4 步</span><span class="step-title">开始拆分</span></h2>
@@ -808,7 +801,6 @@
       <div class="card result-card hidden" id="splitResultCard">
         <h2><span class="step-label step-ok">✓ 完成</span><span class="step-title">拆分完成</span></h2>
         <div id="splitResultBody"></div>
-        <div class="status" id="splitStatus2"></div>
       </div>
     </section>
 
@@ -816,10 +808,9 @@
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择 PDF</span></h2>
         <input type="file" id="cropFile" accept=".pdf,application/pdf" />
-        <p class="hint">适用于去掉试卷扫描件四周的白边、黑边、装订线等无关区域。</p>
       </div>
       <div class="card hidden" id="cropCard">
-        <h2><span class="step-label">第 2 步</span><span class="step-title">调整裁剪框（每页可独立设置）</span></h2>
+        <h2><span class="step-label">第 2 步</span><span class="step-title">调整裁剪框</span></h2>
         <div class="pager">
           <button class="btn gray" id="cropPrev" type="button">上一页</button>
           <span class="info" id="cropPageInfo">1 / 1</span>
@@ -829,37 +820,22 @@
           <canvas id="cropCanvas"></canvas>
           <canvas class="overlay" id="cropOverlay"></canvas>
         </div>
-        <div class="crop-tips">
-          <b>操作方法：</b>拖动框内可移动；拖动 <b>8 个白色控制点</b>可调整大小；点击「应用到全部页」把当前页裁剪框复制到所有页。
-        </div>
-        <div class="btn-row" style="margin-top:10px">
-          <button class="btn ghost" id="cropResetPage" type="button">重置本页</button>
-          <button class="btn ghost" id="cropApplyAll" type="button">应用到全部页</button>
-          <button class="btn ghost" id="cropFullPage" type="button">恢复整页</button>
-        </div>
       </div>
       <div class="card hidden" id="cropOptCard">
-        <h2><span class="step-label">第 3 步</span><span class="step-title">选择输出尺寸并裁剪</span></h2>
+        <h2><span class="step-label">第 3 步</span><span class="step-title">输出设置</span></h2>
         <div class="field">
-          <label>输出页面尺寸</label>
           <select id="cropUnifySize">
-            <option value="a4" selected>A4 纵向（595 × 842 pt）· 推荐</option>
-            <option value="a4l">A4 横向（842 × 595 pt）</option>
-            <option value="letter">Letter（612 × 792 pt）</option>
-            <option value="none">保持原裁剪尺寸（矢量裁剪）</option>
+            <option value="a4" selected>A4 纵向</option>
+            <option value="a4l">A4 横向</option>
+            <option value="none">保持原尺寸</option>
           </select>
         </div>
-        <p class="hint" id="cropUnifyHint">
-          选择 A4 / Letter 时，裁剪结果会缩放到统一的页面上。<br>
-          选择「保持原裁剪尺寸」时，保留每页原始大小，内容仍是矢量。
-        </p>
         <button class="btn big" id="cropBtn" type="button">开始裁剪</button>
         <div class="status" id="cropStatus"></div>
       </div>
       <div class="card result-card hidden" id="cropResultCard">
         <h2><span class="step-label step-ok">✓ 完成</span><span class="step-title">裁剪完成</span></h2>
         <div id="cropResultBody"></div>
-        <div class="status" id="cropStatus2"></div>
       </div>
     </section>
 
@@ -867,7 +843,6 @@
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择 PDF</span></h2>
         <input type="file" id="arrangeFile" accept=".pdf,application/pdf" />
-        <p class="hint">加载后可调整页面顺序、旋转页面、插入空白页、删除页面。</p>
       </div>
       <div class="card hidden" id="arrangeCard">
         <h2><span class="step-label">第 2 步</span><span class="step-title">管理页面</span></h2>
@@ -875,24 +850,19 @@
           <button class="btn ghost" id="arrangeAddBlank" type="button">＋ 末尾加空白页</button>
           <button class="btn ghost" id="arrangeRotateAllLeft" type="button">↺ 全部左转</button>
           <button class="btn ghost" id="arrangeRotateAllRight" type="button">↻ 全部右转</button>
-          <button class="btn ghost" id="arrangeReverse" type="button">⇅ 反转顺序</button>
           <button class="btn gray" id="arrangeReset" type="button">↺ 重置全部</button>
           <span class="arrange-info" id="arrangeInfo">共 0 页</span>
         </div>
-        <p class="hint" style="margin-top:0;margin-bottom:10px">
-          <b>拖拽</b>缩略图可调整顺序；卡片下方按钮可 <b>旋转</b>、<b>插入空白页</b>、<b>删除</b>。
-        </p>
         <div id="arrangeGrid" class="arrange-grid"></div>
       </div>
       <div class="card hidden" id="arrangeOptCard">
-        <h2><span class="step-label">第 3 步</span><span class="step-title">应用调整并导出</span></h2>
+        <h2><span class="step-label">第 3 步</span><span class="step-title">导出</span></h2>
         <button class="btn big" id="arrangeBtn" type="button">应用调整</button>
         <div class="status" id="arrangeStatus"></div>
       </div>
       <div class="card result-card hidden" id="arrangeResultCard">
         <h2><span class="step-label step-ok">✓ 完成</span><span class="step-title">调整完成</span></h2>
         <div id="arrangeResultBody"></div>
-        <div class="status" id="arrangeStatus2"></div>
       </div>
     </section>
 
@@ -917,16 +887,12 @@
           <button class="btn ghost" id="scanClearBtn" type="button">清空全部</button>
           <span class="info" id="scanResultInfo">共 0 页</span>
         </div>
-        <p class="hint" style="margin-top:0;margin-bottom:10px">
-          <b>点击缩略图</b>可放大编辑（旋转 / 裁剪）；<b>↑ ↓</b> 调整顺序；<b>↺ ↻</b> 快速旋转；<b>✕</b> 删除。
-        </p>
         <div class="scan-result-grid" id="scanResultGrid"></div>
         <div class="field" style="margin-top:12px">
-          <label>PDF 页面尺寸</label>
           <select id="scanPdfSize">
-            <option value="a4" selected>A4 纵向（自动缩放居中）</option>
+            <option value="a4" selected>A4 纵向</option>
             <option value="a4l">A4 横向</option>
-            <option value="original">按图片原始尺寸</option>
+            <option value="original">原始尺寸</option>
           </select>
         </div>
         <button class="btn big" id="scanPdfBtn" type="button">生成扫描 PDF</button>
@@ -936,7 +902,92 @@
       <div class="card result-card hidden" id="scanResultCard">
         <h2><span class="step-label step-ok">✓ 完成</span><span class="step-title">扫描 PDF 已生成</span></h2>
         <div id="scanPdfResultBody"></div>
-        <div class="status" id="scanPdfStatus2"></div>
+      </div>
+    </section>
+
+    <!-- OCR 功能 -->
+    <section class="panel" id="panel-ocr" data-theme="convert">
+      <div class="card">
+        <h2><span class="step-label">第 1 步</span><span class="step-title">上传要识别的文档图片</span></h2>
+        <input type="file" id="ocrFile" accept="image/*" />
+        <p class="hint">适用于印刷体、清晰的表格。识别过程在本地完成，需要下载语言库，请稍候。识别结果可复制粘贴到 Word/Excel。</p>
+      </div>
+      <div class="card hidden" id="ocrResultCard">
+        <h2><span class="step-label">第 2 步</span><span class="step-title">识别结果与导出</span></h2>
+        <div class="status" id="ocrStatus"></div>
+        <textarea id="ocrTextarea" style="width:100%; height:300px; padding:10px; border:1px solid #e2e8f0; border-radius:8px; font-family:monospace; font-size:13px; line-height:1.5;" placeholder="正在识别，请稍候…"></textarea>
+        <div class="btn-row" style="margin-top:12px">
+          <button class="btn green" id="ocrCopyBtn" type="button">📋 复制文字</button>
+          <button class="btn amber" id="ocrExportWordBtn" type="button">📄 导出为 Word (.doc)</button>
+          <button class="btn gray" id="ocrExportExcelBtn" type="button">📊 导出为 Excel (.xls)</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 身份证 A4 合成 -->
+    <section class="panel" id="panel-idcard" data-theme="organize">
+      <div class="card">
+        <h2><span class="step-label">第 1 步</span><span class="step-title">选择身份证图片</span></h2>
+        <div class="field">
+          <label>身份证正面（人像面）</label>
+          <input type="file" id="idcardFrontFile" accept="image/*" />
+        </div>
+        <div class="field">
+          <label>身份证反面（国徽面）</label>
+          <input type="file" id="idcardBackFile" accept="image/*" />
+        </div>
+      </div>
+      <div class="card hidden" id="idcardResultCard">
+        <h2><span class="step-label">第 2 步</span><span class="step-title">生成并导出 A4</span></h2>
+        <p class="hint">会将两张图上下居中排版到一张 A4 纸上，非常适合直接打印。</p>
+        <button class="btn big" id="idcardGenBtn" type="button">生成身份证 A4 拼图</button>
+        <div class="status" id="idcardStatus"></div>
+        <div class="preview-wrap hidden" id="idcardPreviewWrap">
+          <canvas id="idcardPreviewCanvas" style="display:block; width:100%; height:auto;"></canvas>
+        </div>
+      </div>
+      <div class="card result-card hidden" id="idcardPdfResultCard">
+        <h2><span class="step-label step-ok">✓ 完成</span><span class="step-title">PDF 已生成</span></h2>
+        <div id="idcardPdfResultBody"></div>
+      </div>
+    </section>
+
+    <!-- 证件照制作 -->
+    <section class="panel" id="panel-idphoto" data-theme="convert">
+      <div class="card">
+        <h2><span class="step-label">第 1 步</span><span class="step-title">上传人像照片</span></h2>
+        <input type="file" id="idphotoFile" accept="image/*" />
+        <p class="hint">选一张正面清晰的人像照片（纯前端无法完美抠图，如果原图背景较杂乱，结果会有背景保留）。</p>
+      </div>
+      <div class="card hidden" id="idphotoOptCard">
+        <h2><span class="step-label">第 2 步</span><span class="step-title">尺寸与背景</span></h2>
+        <div class="field">
+          <label>尺寸规格</label>
+          <select id="idphotoSize">
+            <option value="1inch">一寸 (25 × 35 mm)</option>
+            <option value="2inch">二寸 (35 × 49 mm)</option>
+            <option value="small1">小一寸 (22 × 32 mm)</option>
+            <option value="small2">小二寸 (35 × 45 mm)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>背景颜色</label>
+          <select id="idphotoBg">
+            <option value="#ffffff">白色</option>
+            <option value="#d92b2b" selected>红色</option>
+            <option value="#1d4ed8">蓝色</option>
+            <option value="#4b5563">灰色</option>
+          </select>
+        </div>
+        <button class="btn big" id="idphotoGenBtn" type="button">生成证件照</button>
+        <div class="status" id="idphotoStatus"></div>
+        <div class="preview-wrap hidden" id="idphotoPreviewWrap" style="text-align:center;">
+          <p class="hint" style="text-align:left;margin-top:0;">提示：请拖动图片调整位置，使其居中。</p>
+          <canvas id="idphotoCanvas" style="box-shadow: 0 4px 12px rgba(0,0,0,0.15); border-radius: 4px; touch-action:none; cursor:grab;"></canvas>
+        </div>
+        <div class="btn-row hidden" id="idphotoDownloadRow" style="margin-top:12px">
+          <button class="btn green" id="idphotoDownloadBtn" type="button">💾 保存证件照</button>
+        </div>
       </div>
     </section>
 
@@ -944,30 +995,12 @@
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择图片</span></h2>
         <input type="file" id="img2pdfFile" accept="image/*" multiple />
-        <p class="hint">支持 JPG / PNG / WebP 等。可一次选择多张，按顺序每张生成一页。</p>
       </div>
       <div class="card hidden" id="img2pdfListCard">
-        <h2><span class="step-label">第 2 步</span><span class="step-title">图片列表与页面设置</span></h2>
+        <h2><span class="step-label">第 2 步</span><span class="step-title">转换</span></h2>
         <div id="img2pdfList" class="img-list"></div>
-        <div class="field" style="margin-top:12px">
-          <label>页面尺寸</label>
-          <select id="img2pdfSize">
-            <option value="a4">A4 纵向（每张图片占一页）</option>
-            <option value="a4l">A4 横向</option>
-            <option value="original">原图尺寸（按图片像素）</option>
-            <option value="auto">自适应（按图片比例选 A4 纵向或横向）</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>页边距</label>
-          <select id="img2pdfMargin">
-            <option value="0">无</option>
-            <option value="0.05">小（约 5mm）</option>
-            <option value="0.1">中（约 1cm）</option>
-          </select>
-        </div>
-        <div class="btn-row">
-          <button class="btn ghost" id="img2pdfClear" type="button">清空列表</button>
+        <div class="btn-row" style="margin-top:12px">
+          <button class="btn ghost" id="img2pdfClear" type="button">清空</button>
           <button class="btn big" id="img2pdfBtn" type="button" style="flex:1">转换为 PDF</button>
         </div>
         <div class="status" id="img2pdfStatus"></div>
@@ -975,7 +1008,6 @@
       <div class="card result-card hidden" id="img2pdfResultCard">
         <h2><span class="step-label step-ok">✓ 完成</span><span class="step-title">转换完成</span></h2>
         <div id="img2pdfResultBody"></div>
-        <div class="status" id="img2pdfStatus2"></div>
       </div>
     </section>
 
@@ -983,21 +1015,14 @@
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择 PDF</span></h2>
         <input type="file" id="pdf2imgFile" accept=".pdf,application/pdf" />
-        <p class="hint">把 PDF 的每一页导出为图片。多页会自动打包成 ZIP 下载。</p>
       </div>
       <div class="card hidden" id="pdf2imgOptCard">
         <h2><span class="step-label">第 2 步</span><span class="step-title">导出设置</span></h2>
         <div class="field">
-          <label>图片格式</label>
-          <select id="pdf2imgFormat"><option value="png">PNG（无损）</option><option value="jpeg">JPEG（体积小）</option></select>
+          <select id="pdf2imgFormat"><option value="png">PNG</option><option value="jpeg">JPEG</option></select>
         </div>
         <div class="field">
-          <label>清晰度（缩放倍率）</label>
-          <select id="pdf2imgScale"><option value="1">1x（约 72 DPI）</option><option value="2" selected>2x（约 144 DPI，推荐）</option><option value="3">3x（约 216 DPI，高清）</option></select>
-        </div>
-        <div class="field">
-          <label>JPEG 质量（仅 JPEG 有效）</label>
-          <select id="pdf2imgQuality"><option value="0.7">70%</option><option value="0.85" selected>85%</option><option value="0.95">95%</option></select>
+          <select id="pdf2imgScale"><option value="2" selected>高清 (2x)</option><option value="3">超清 (3x)</option></select>
         </div>
         <button class="btn big" id="pdf2imgBtn" type="button">导出图片</button>
         <div class="status" id="pdf2imgStatus"></div>
@@ -1005,26 +1030,16 @@
       <div class="card result-card hidden" id="pdf2imgResultCard">
         <h2><span class="step-label step-ok">✓ 完成</span><span class="step-title">导出完成</span></h2>
         <div id="pdf2imgResultBody"></div>
-        <div class="status" id="pdf2imgStatus2"></div>
       </div>
     </section>
 
     <section class="panel" id="panel-word2pdf" data-theme="convert">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择 Word 文档</span></h2>
-        <input type="file" id="word2pdfFile" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
-        <p class="hint">支持 <b>.docx</b>（不支持旧版 .doc）。转换后会打开新窗口，在打印对话框里选「另存为 PDF」即可。</p>
+        <input type="file" id="word2pdfFile" accept=".docx" />
       </div>
       <div class="card hidden" id="word2pdfOptCard">
         <h2><span class="step-label">第 2 步</span><span class="step-title">转换设置</span></h2>
-        <div class="field">
-          <label>纸张大小</label>
-          <select id="word2pdfPageSize"><option value="a4">A4</option><option value="letter">Letter</option></select>
-        </div>
-        <div class="field">
-          <label>页边距</label>
-          <select id="word2pdfMargin"><option value="normal">普通（约 2.5cm）</option><option value="narrow">窄（约 1.5cm）</option><option value="none">无</option></select>
-        </div>
         <button class="btn big" id="word2pdfBtn" type="button">转换并打印为 PDF</button>
         <div class="status" id="word2pdfStatus"></div>
       </div>
@@ -1034,13 +1049,12 @@
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择要合并的 PDF</span></h2>
         <input type="file" id="mergeFile" accept=".pdf,application/pdf" multiple />
-        <p class="hint">可一次选择多个 PDF，按列表顺序合并。可调整顺序、删除文件。</p>
       </div>
       <div class="card hidden" id="mergeListCard">
-        <h2><span class="step-label">第 2 步</span><span class="step-title">调整文件顺序并合并</span></h2>
+        <h2><span class="step-label">第 2 步</span><span class="step-title">合并</span></h2>
         <div id="mergeList" class="file-list"></div>
         <div class="btn-row" style="margin-top:12px">
-          <button class="btn ghost" id="mergeClear" type="button">清空列表</button>
+          <button class="btn ghost" id="mergeClear" type="button">清空</button>
           <button class="btn big" id="mergeBtn" type="button" style="flex:1">开始合并</button>
         </div>
         <div class="status" id="mergeStatus"></div>
@@ -1048,7 +1062,6 @@
       <div class="card result-card hidden" id="mergeResultCard">
         <h2><span class="step-label step-ok">✓ 完成</span><span class="step-title">合并完成</span></h2>
         <div id="mergeResultBody"></div>
-        <div class="status" id="mergeStatus2"></div>
       </div>
     </section>
 
@@ -1056,27 +1069,25 @@
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择 PDF</span></h2>
         <input type="file" id="extractFile" accept=".pdf,application/pdf" />
-        <p class="hint">把一个 PDF 拆分成多个小 PDF。可设置每个 PDF 包含几页。</p>
       </div>
       <div class="card hidden" id="extractOptCard">
-        <h2><span class="step-label">第 2 步</span><span class="step-title">设置每份页数并拆分</span></h2>
+        <h2><span class="step-label">第 2 步</span><span class="step-title">拆分</span></h2>
         <div class="field">
           <label>每个 PDF 包含几页</label>
-          <input type="number" id="extractPages" value="1" min="1" step="1" inputmode="numeric" />
+          <input type="number" id="extractPages" value="1" min="1" step="1" />
         </div>
-        <p class="hint" id="extractPreviewHint">将拆分为 - 个文件</p>
         <button class="btn big" id="extractBtn" type="button">按份数拆分</button>
         <div class="status" id="extractStatus"></div>
       </div>
       <div class="card result-card hidden" id="extractResultCard">
         <h2><span class="step-label step-ok">✓ 完成</span><span class="step-title">拆分完成</span></h2>
         <div id="extractResultBody"></div>
-        <div class="status" id="extractStatus2"></div>
       </div>
     </section>
   </main>
 </div>
 
+<!-- 全屏相机 -->
 <div class="scan-fullscreen" id="scanFullscreen">
   <div class="scan-fs-topbar">
     <button class="scan-fs-close" id="scanFsClose" type="button">✕</button>
@@ -1114,6 +1125,7 @@
   <span>✓</span><span id="scanToastText">已添加到扫描列表</span>
 </div>
 
+<!-- 扫描图片编辑器 -->
 <div class="scan-img-editor" id="scanImgEditor">
   <div class="scan-ie-header">
     <button class="close-btn" id="scanIeClose" type="button">✕</button>
@@ -1160,6 +1172,9 @@
 (function () {
   'use strict';
 
+  // 新增：Tesseract 语言库路径，用于 OCR
+  const TESSERACT_CDN = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+
   const LOCAL = {
     pdfLib:    ['./libs/pdf-lib.min.js',         './pdf-lib.min.js'],
     pdfJs:     ['./libs/pdf.min.js',             './pdf.min.js'],
@@ -1172,24 +1187,20 @@
     pdfLib: [
       'https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js',
       'https://fastly.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js',
-      'https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js',
-      'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js'
+      'https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js'
     ],
     pdfJs: [
       'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js',
       'https://fastly.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js',
-      'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js',
-      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js'
+      'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js'
     ],
     jszip: [
       'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js',
-      'https://unpkg.com/jszip@3.10.1/dist/jszip.min.js',
-      'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'
+      'https://unpkg.com/jszip@3.10.1/dist/jszip.min.js'
     ],
     mammoth: [
       'https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js',
-      'https://unpkg.com/mammoth@1.6.0/mammoth.browser.min.js',
-      'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js'
+      'https://unpkg.com/mammoth@1.6.0/mammoth.browser.min.js'
     ]
   };
 
@@ -1402,15 +1413,15 @@
       if (env.isFile) {
         el.className = 'envBanner show err';
         el.innerHTML = '⚠️ <b>当前以本地文件方式打开（file://），Chrome 会屏蔽普通下载。</b><br>'
-          + '请用下面任一方式保存 PDF：<br>'
-          + '<b>①「🖨 打印 / 存为 PDF」</b>——通过打印对话框另存为 PDF；<br>'
-          + '<b>②「📋 复制 PDF 数据」</b>——粘贴到新标签地址栏打开，再右键另存；<br>'
+          + '请用下面任一方式保存文件：<br>'
+          + '<b>① 打印 / 存为 PDF</b><br>'
+          + '<b>② 复制数据</b><br>'
           + '<b>③ 本地服务器</b>——执行 <code>python -m http.server 8000</code>，访问 <code>http://localhost:8000</code>。';
         el.classList.add('show'); return;
       }
       if (!env.isSecure && !env.isHttps && !env.isLocalhost) {
         el.className = 'envBanner show warn';
-        el.innerHTML = '⚠️ <b>当前页面不是安全上下文（非 HTTPS 且非 localhost）。</b><br>推荐使用「🖨 打印 / 存为 PDF」或「📋 复制 PDF 数据」保存。';
+        el.innerHTML = '⚠️ <b>当前页面不是安全上下文（非 HTTPS 且非 localhost）。</b><br>推荐使用「打印 / 存为 PDF」或「复制数据」保存。';
         el.classList.add('show'); return;
       }
       el.className = 'envBanner show ok';
@@ -1421,11 +1432,13 @@
 
     const toolNames = {
       split: '试卷拆分', crop: 'PDF 裁剪', arrange: '页面调整', scan: '扫描文档',
+      ocr: '图片转文字 (OCR)', idcard: '证件 A4 合成', idphoto: '证件照制作',
       img2pdf: '图片转 PDF', pdf2img: 'PDF 转图片', word2pdf: 'Word 转 PDF',
       merge: 'PDF 合并', extract: 'PDF 拆分'
     };
     const toolIcons = {
       split: '📝', crop: '✂️', arrange: '📄', scan: '📷',
+      ocr: '🔍', idcard: '🪪', idphoto: '👤',
       img2pdf: '🖼️', pdf2img: '📷', word2pdf: '📘',
       merge: '🔗', extract: '📑'
     };
@@ -1545,6 +1558,12 @@
       }
       throw new Error('Word 解析库加载失败，请检查网络或下载 mammoth.browser.min.js 到 libs/ 目录');
     }
+    async function ensureTesseract() {
+      if (window.Tesseract) return window.Tesseract;
+      await loadScriptOnce(TESSERACT_CDN);
+      if (!window.Tesseract) throw new Error('OCR 识别库加载失败');
+      return window.Tesseract;
+    }
     function downloadBlob(blob, filename) {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -1582,7 +1601,6 @@
             return;
           } catch (err) {
             if (err && err.name === 'AbortError') { sayFn('已取消保存'); return; }
-            console.warn('[save] showSaveFilePicker 失败，回退到 Blob 下载：', err);
           }
         }
         let url = null;
@@ -1607,10 +1625,9 @@
             try { document.body.removeChild(a); } catch (_) {}
             setTimeout(() => { try { URL.revokeObjectURL(url); } catch (_) {} }, 60000);
           }, 5000);
-          sayFn('已触发下载：' + filename + '。如浏览器未弹出保存提示，请用「↗ 新窗口打开」后手动保存。', false, true);
+          sayFn('已触发下载：' + filename, false, true);
           return;
         } catch (err) {
-          console.warn('[save] Blob 下载失败：', err);
           if (url) { try { URL.revokeObjectURL(url); } catch (_) {} }
         }
         try {
@@ -1636,7 +1653,6 @@
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           await page.render({ canvasContext: ctx, viewport: vp }).promise;
           images.push(canvas.toDataURL('image/jpeg', 0.9));
-          sayFn('正在准备打印… ' + i + '/' + total);
           if (i % 3 === 0) await new Promise(r => setTimeout(r, 0));
         }
         const w = window.open('', '_blank');
@@ -3357,7 +3373,7 @@
     }
 
     /* ============================================================
-     * 带左右滑动切换功能的图片编辑器
+     * 新增模块：图片编辑器（支持左右滑动切换）
      * ============================================================ */
     const editor = {
       baseCanvas: null,
@@ -3825,6 +3841,331 @@
       say('#scanPdfStatus2', '');
     }
 
+    /* ===== 模块 4.1：图片转文字 (OCR) ===== */
+    let ocrResultText = '';
+    let ocrWorker = null;
+
+    $('#ocrFile').addEventListener('change', async (e) => {
+      const f = e.target.files[0]; if (!f) return;
+      $('#ocrResultCard').classList.remove('hidden');
+      const statusEl = $('#ocrStatus');
+      const ta = $('#ocrTextarea');
+      ta.value = '';
+      ocrResultText = '';
+      say('#ocrStatus', '正在读取图片…');
+      
+      try {
+        const dataUrl = await readDataUrl(f);
+        say('#ocrStatus', '正在加载 OCR 引擎（首次加载需下载中文字库，请耐心等待）…');
+        
+        const Tesseract = await ensureTesseract();
+        
+        const worker = await Tesseract.createWorker('chi_sim+eng', 1, {
+          logger: m => {
+             if (m.status === 'recognizing text') {
+               say('#ocrStatus', '正在识别文字：' + Math.round(m.progress * 100) + '%');
+             } else if (m.status === 'loading language traineddata') {
+               say('#ocrStatus', '正在下载语言库：' + Math.round(m.progress * 100) + '%');
+             }
+          }
+        });
+        
+        say('#ocrStatus', '正在分析排版并识别文字…');
+        const ret = await worker.recognize(dataUrl);
+        ocrResultText = ret.data.text;
+        ta.value = ocrResultText;
+        say('#ocrStatus', '✅ 识别完成！请核对文字后复制或导出。', false, true);
+        
+        await worker.terminate();
+      } catch (err) {
+        console.error(err);
+        say('#ocrStatus', '识别失败：' + (err && err.message ? err.message : err), true);
+        ta.value = '识别失败，请重试。';
+      }
+    });
+
+    $('#ocrCopyBtn').addEventListener('click', async () => {
+      if (!ocrResultText) return;
+      try {
+        await navigator.clipboard.writeText(ocrResultText);
+        showToast('✓ 已复制到剪贴板');
+      } catch (e) {
+        $('#ocrTextarea').select();
+        document.execCommand('copy');
+        showToast('✓ 已复制到剪贴板');
+      }
+    });
+
+    $('#ocrExportWordBtn').addEventListener('click', () => {
+      if (!ocrResultText) return;
+      // 使用简单的 HTML 包裹，使 Word 能够识别段落
+      const html = `
+        <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+        <head><meta charset="utf-8"><title>识别结果</title>
+        <style>body { font-family: "Microsoft YaHei", sans-serif; font-size: 14px; line-height: 1.6; }</style>
+        </head><body>
+        ${ocrResultText.replace(/\n/g, '<br>')}
+        </body></html>
+      `;
+      const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+      downloadBlob(blob, '识别结果_' + Date.now() + '.doc');
+    });
+
+    $('#ocrExportExcelBtn').addEventListener('click', () => {
+      if (!ocrResultText) return;
+      // 将每一行转成 tr/td，以便在 Excel 中显示为不同行
+      const lines = ocrResultText.split('\n');
+      let trs = '';
+      lines.forEach(line => {
+        trs += `<tr><td>${line.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</td></tr>`;
+      });
+      
+      const html = `
+        <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:x='urn:schemas-microsoft-com:office:excel' xmlns='http://www.w3.org/TR/REC-html40'>
+        <head><meta charset="utf-8">
+        <!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Sheet1</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
+        </head><body>
+        <table border="1">
+        ${trs}
+        </table>
+        </body></html>
+      `;
+      const blob = new Blob(['\ufeff', html], { type: 'application/vnd.ms-excel' });
+      downloadBlob(blob, '识别表格_' + Date.now() + '.xls');
+    });
+
+    /* ===== 模块 4.2：证件 A4 合成 ===== */
+    let idcardFrontImg = null;
+    let idcardBackImg = null;
+
+    $('#idcardFrontFile').addEventListener('change', async (e) => {
+      const f = e.target.files[0];
+      if (f) {
+        idcardFrontImg = await loadImage(await readDataUrl(f));
+        $('#idcardResultCard').classList.remove('hidden');
+      }
+    });
+
+    $('#idcardBackFile').addEventListener('change', async (e) => {
+      const f = e.target.files[0];
+      if (f) {
+        idcardBackImg = await loadImage(await readDataUrl(f));
+        $('#idcardResultCard').classList.remove('hidden');
+      }
+    });
+
+    $('#idcardGenBtn').addEventListener('click', async () => {
+      if (!idcardFrontImg || !idcardBackImg) {
+        say('#idcardStatus', '请先选择正反面两张图片', true);
+        return;
+      }
+      say('#idcardStatus', '正在排版并生成 PDF…');
+      
+      try {
+        const doc = await PDFDocument.create();
+        const A4 = [595.28, 841.89]; // A4
+        const page = doc.addPage(A4);
+        
+        // 计算图片缩放，目标宽度约占 A4 宽度的 70% (约 416pt)
+        const targetW = A4[0] * 0.7;
+        
+        async function addImgToPage(imgEl, centerYOffset) {
+          const cv = document.createElement('canvas');
+          cv.width = imgEl.width; cv.height = imgEl.height;
+          cv.getContext('2d').drawImage(imgEl, 0, 0);
+          const blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.9));
+          const jpg = await doc.embedJpg(new Uint8Array(await blob.arrayBuffer()));
+          
+          const k = targetW / jpg.width;
+          const targetH = jpg.height * k;
+          
+          page.drawImage(jpg, {
+            x: (A4[0] - targetW) / 2,
+            y: (A4[1] / 2) - targetH + centerYOffset,
+            width: targetW,
+            height: targetH
+          });
+        }
+        
+        // 正面画在中线偏上，反面画在中线偏下，中间留点间距
+        await addImgToPage(idcardFrontImg, -20);
+        await addImgToPage(idcardBackImg, -40 - (idcardFrontImg.height * (targetW / idcardFrontImg.width)));
+        
+        const bytes = await doc.save();
+        const filename = '身份证复印_A4.pdf';
+        
+        // 预览
+        const blob = new Blob([bytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        $('#idcardPreviewWrap').classList.remove('hidden');
+        const pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(bytes.slice(0)) }).promise;
+        const p1 = await pdfDoc.getPage(1);
+        const vp = p1.getViewport({ scale: 1.5 });
+        const canvas = $('#idcardPreviewCanvas');
+        canvas.width = vp.width; canvas.height = vp.height;
+        await p1.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+        
+        // 准备下载区
+        const body = $('#idcardPdfResultBody');
+        body.innerHTML = `
+          <div class="result-file">
+            <div class="result-icon">PDF</div>
+            <div class="result-meta">
+              <div class="result-name">${filename}</div>
+              <div class="result-sub">大小 ${fmtSize(bytes.length)} · 1 页</div>
+            </div>
+          </div>
+          <button class="btn big green" id="idcardSaveBtn" type="button">💾 保存为 PDF</button>
+        `;
+        $('#idcardPdfResultCard').classList.remove('hidden');
+        $('#idcardSaveBtn').addEventListener('click', () => sharedSave.saveAsPdf(bytes, filename, t => say('#idcardStatus', t)));
+        
+        say('#idcardStatus', '✅ 生成成功，已生成 A4 排版', false, true);
+        $('#idcardPdfResultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } catch (err) {
+        console.error(err);
+        say('#idcardStatus', '生成失败：' + err.message, true);
+      }
+    });
+
+    /* ===== 模块 4.3：证件照制作 ===== */
+    let idphotoImg = null;
+    let idphotoCtx = null;
+    let idphotoState = { scale: 1, x: 0, y: 0, startX: 0, startY: 0, dragging: false };
+    const idphotoTargetSizes = {
+      '1inch': { w: 295, h: 413 }, // 25x35mm @300dpi
+      '2inch': { w: 413, h: 579 }, // 35x49mm
+      'small1': { w: 260, h: 378 }, // 22x32mm
+      'small2': { w: 413, h: 531 }  // 35x45mm
+    };
+
+    $('#idphotoFile').addEventListener('change', async (e) => {
+      const f = e.target.files[0];
+      if (!f) return;
+      try {
+        idphotoImg = await loadImage(await readDataUrl(f));
+        $('#idphotoOptCard').classList.remove('hidden');
+        $('#idphotoPreviewWrap').classList.remove('hidden');
+        $('#idphotoDownloadRow').classList.add('hidden');
+        drawIdPhoto();
+      } catch (err) {}
+    });
+
+    function drawIdPhoto() {
+      if (!idphotoImg) return;
+      const sizeKey = $('#idphotoSize').value;
+      const bgColor = $('#idphotoBg').value;
+      const target = idphotoTargetSizes[sizeKey];
+      
+      const canvas = $('#idphotoCanvas');
+      canvas.width = target.w;
+      canvas.height = target.h;
+      // 为了在手机端显示不至于太大，设置一个合理的 css 宽度
+      canvas.style.width = '150px';
+      canvas.style.height = (150 * target.h / target.w) + 'px';
+      
+      idphotoCtx = canvas.getContext('2d');
+      // 1. 填充背景
+      idphotoCtx.fillStyle = bgColor;
+      idphotoCtx.fillRect(0, 0, target.w, target.h);
+      
+      // 2. 计算居中缩放
+      const scale = Math.max(target.w / idphotoImg.width, target.h / idphotoImg.height);
+      const drawW = idphotoImg.width * scale;
+      const drawH = idphotoImg.height * scale;
+      
+      // 初始位置居中
+      if (idphotoState.x === 0 && idphotoState.y === 0) {
+        idphotoState.x = (target.w - drawW) / 2;
+        idphotoState.y = (target.h - drawH) / 2 - (target.h * 0.1); // 稍微往上一点，脸通常在中间偏上
+      }
+      
+      // 3. 裁剪绘制（保证不出界）
+      idphotoCtx.save();
+      idphotoCtx.beginPath();
+      idphotoCtx.rect(0, 0, target.w, target.h);
+      idphotoCtx.clip();
+      
+      idphotoCtx.drawImage(idphotoImg, idphotoState.x, idphotoState.y, drawW, drawH);
+      idphotoCtx.restore();
+      
+      $('#idphotoDownloadRow').classList.remove('hidden');
+    }
+
+    $('#idphotoSize').addEventListener('change', () => {
+      idphotoState.x = 0; idphotoState.y = 0; // 重置位置
+      drawIdPhoto();
+    });
+    $('#idphotoBg').addEventListener('change', drawIdPhoto);
+    
+    $('#idphotoGenBtn').addEventListener('click', () => {
+      if (!idphotoImg) {
+        say('#idphotoStatus', '请先上传人像照片', true);
+        return;
+      }
+      idphotoState.x = 0; idphotoState.y = 0;
+      drawIdPhoto();
+      say('#idphotoStatus', '可以手指拖动图片调整位置，调整好后点击下方保存。', false, true);
+    });
+
+    // 证件照拖拽调整
+    (function bindIdPhotoDrag() {
+      const canvas = $('#idphotoCanvas');
+      
+      const getPos = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        // 计算缩放比例：canvas内部真实像素 与 屏幕上显示的 css 像素 的比例
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        return {
+          x: (e.clientX - rect.left) * scaleX,
+          y: (e.clientY - rect.top) * scaleY
+        };
+      };
+
+      canvas.addEventListener('pointerdown', (e) => {
+        if (!idphotoImg) return;
+        idphotoState.dragging = true;
+        idphotoState.startX = e.clientX;
+        idphotoState.startY = e.clientY;
+        try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+        e.preventDefault();
+      }, { passive: false });
+
+      canvas.addEventListener('pointermove', (e) => {
+        if (!idphotoState.dragging) return;
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        
+        const dx = (e.clientX - idphotoState.startX) * scaleX;
+        const dy = (e.clientY - idphotoState.startY) * scaleY;
+        
+        idphotoState.startX = e.clientX;
+        idphotoState.startY = e.clientY;
+        
+        idphotoState.x += dx;
+        idphotoState.y += dy;
+        drawIdPhoto();
+        e.preventDefault();
+      }, { passive: false });
+
+      function endDrag(e) {
+        idphotoState.dragging = false;
+        try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
+      }
+      canvas.addEventListener('pointerup', endDrag);
+      canvas.addEventListener('pointercancel', endDrag);
+    })();
+
+    $('#idphotoDownloadBtn').addEventListener('click', () => {
+      const canvas = $('#idphotoCanvas');
+      canvas.toBlob((blob) => {
+        downloadBlob(blob, '证件照_' + Date.now() + '.jpg');
+        say('#idphotoStatus', '✅ 已保存到本地', false, true);
+      }, 'image/jpeg', 0.95);
+    });
+
     /* ===== 模块 5：图片转 PDF ===== */
     const img2pdf = {
       items: [], idCounter: 0,
@@ -3912,14 +4253,11 @@
       say('#img2pdfStatus', '已清空');
       markImg2PdfDirty();
     });
-    $('#img2pdfSize').addEventListener('change', markImg2PdfDirty);
-    $('#img2pdfMargin').addEventListener('change', markImg2PdfDirty);
 
     $('#img2pdfBtn').addEventListener('click', async () => {
       if (img2pdf.items.length === 0) { say('#img2pdfStatus', '请先选择图片', true); return; }
       const btn = $('#img2pdfBtn'); btn.disabled = true;
-      const mode = $('#img2pdfSize').value;
-      const marginRatio = parseFloat($('#img2pdfMargin').value) || 0;
+      const mode = 'a4'; // 固定 A4
       say('#img2pdfStatus', '正在转换…');
       try {
         const doc = await PDFDocument.create();
@@ -3941,15 +4279,12 @@
           const blob = await new Promise(res => cv.toBlob(res, 'image/jpeg', 0.9));
           const jpgBytes = new Uint8Array(await blob.arrayBuffer());
           const jpg = await doc.embedJpg(jpgBytes);
-          let pageW, pageH;
-          if (mode === 'original') { pageW = item.width; pageH = item.height; }
-          else if (mode === 'a4') { pageW = A4[0]; pageH = A4[1]; }
-          else if (mode === 'a4l') { pageW = A4[1]; pageH = A4[0]; }
-          else { if (item.width > item.height) { pageW = A4[1]; pageH = A4[0]; } else { pageW = A4[0]; pageH = A4[1]; } }
+          
+          let pageW = A4[0], pageH = A4[1];
+          if (cw > ch) { pageW = A4[1]; pageH = A4[0]; } // 横图用横版 A4
+          
           const page = doc.addPage([pageW, pageH]);
-          const marginX = pageW * marginRatio;
-          const marginY = pageH * marginRatio;
-          const k = Math.min((pageW - marginX * 2) / jpg.width, (pageH - marginY * 2) / jpg.height);
+          const k = Math.min(pageW / jpg.width, pageH / jpg.height);
           const w = jpg.width * k, h = jpg.height * k;
           page.drawImage(jpg, { x: (pageW - w) / 2, y: (pageH - h) / 2, width: w, height: h });
           if (i % 2 === 1) await new Promise(r => setTimeout(r, 0));
@@ -4009,7 +4344,7 @@
       const btn = $('#pdf2imgBtn'); btn.disabled = true;
       const format = $('#pdf2imgFormat').value;
       const scale = parseFloat($('#pdf2imgScale').value) || 2;
-      const quality = parseFloat($('#pdf2imgQuality').value) || 0.85;
+      const quality = 0.85;
       const ext = format === 'jpeg' ? 'jpg' : 'png';
       const mime = format === 'jpeg' ? 'image/jpeg' : 'image/png';
       const base = stripExt(pdf2img.file.name);
@@ -4110,9 +4445,8 @@
         const arrayBuffer = await readBuffer(word2pdfFile);
         const result = await mammoth.convertToHtml({ arrayBuffer });
         const html = result.value || '<p>（文档内容为空）</p>';
-        const pageSize = $('#word2pdfPageSize').value === 'letter' ? 'letter' : 'A4';
-        const marginMode = $('#word2pdfMargin').value;
-        const marginCss = marginMode === 'none' ? '0' : marginMode === 'narrow' ? '1.5cm' : '2.5cm';
+        const pageSize = 'A4';
+        const marginCss = '2.5cm';
         say('#word2pdfStatus', '正在打开打印窗口…');
         const w = window.open('', '_blank');
         if (!w) { say('#word2pdfStatus', '弹窗被拦截，请允许本站弹出窗口后重试', true); btn.disabled = false; return; }
