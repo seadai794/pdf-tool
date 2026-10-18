@@ -709,7 +709,7 @@
 
 <header class="app-header">
   <h1>📄 PDF 工具箱</h1>
-  <p class="sub">9 个实用工具 · 全部在浏览器本地处理 · 文件不上传</p>
+  <p class="sub">95 个实用工具 · 全部在浏览器本地处理 · 文件不上传</p>
   <div class="badges">
     <span>🔒 本地安全</span>
     <span>⚡ 无需安装</span>
@@ -3050,9 +3050,10 @@
       say('#scanStatus', '正在打开摄像头…');
       try {
         if (scan.stream) { scan.stream.getTracks().forEach(t => t.stop()); scan.stream = null; }
+        // 兼容极个别手机浏览器：约束降级，先尝试理想值，失败则不用
         scan.stream = await navigator.mediaDevices.getUserMedia({
           video: {
-            facingMode: { ideal: scan.facingMode },
+            facingMode: scan.facingMode,
             width: { ideal: 1920 },
             height: { ideal: 1080 }
           },
@@ -3154,7 +3155,7 @@
       el.classList.toggle('hidden', !show);
     }
 
-    /* ---------- 终极方案：屏幕上直接截图（所见即所得） ---------- */
+    /* ---------- 终极兼容方案：屏幕坐标直接对应（所见即所得） ---------- */
     function captureVideoWithFrame(videoEl) {
       if (!videoEl.videoWidth || !videoEl.videoHeight) throw new Error('视频尚未就绪');
 
@@ -3164,23 +3165,24 @@
       const displayW = wrapRect.width;
       const displayH = wrapRect.height;
 
-      // 1. 先把整个屏幕显示区域画到一个临时 canvas 上（这步完美复刻屏幕上你看到的画面）
+      // 1. 创建一个和屏幕可视区域一样大的临时画布
       const stageCv = document.createElement('canvas');
-      // 放大 2.5 倍绘制，保证输出清晰度
+      // 用 2.5 倍放大，确保清晰度
       const scale = 2.5; 
       stageCv.width = displayW * scale;
       stageCv.height = displayH * scale;
       const sctx = stageCv.getContext('2d');
       
+      // 2. 把视频画满整个区域。这一步完美复刻了 `object-fit: cover` 的视觉效果
       sctx.drawImage(videoEl, 0, 0, stageCv.width, stageCv.height);
 
-      // 2. 计算取景框在这个 canvas 上的像素坐标
+      // 3. 算取景框相对于屏幕左上角的绝对偏移
       const fx = frameRect.left - wrapRect.left;
       const fy = frameRect.top - wrapRect.top;
       const fw = frameRect.width;
       const fh = frameRect.height;
 
-      // 3. 从临时 canvas 上精确切出取景框的内容
+      // 4. 从大画布上精确抠出取景框的内容
       const cropX = fx * scale;
       const cropY = fy * scale;
       const cropW = fw * scale;
@@ -3190,7 +3192,6 @@
       outCv.width = cropW;
       outCv.height = cropH;
       const octx = outCv.getContext('2d');
-      
       octx.drawImage(stageCv, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
 
       return outCv;
@@ -3206,12 +3207,13 @@
       shutterPulse();
       showProcessing(true);
       try {
-        // 等待两帧，确保画面已刷新
+        // 必须等待两帧，确保画面在屏幕上已经刷新渲染完毕
         await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
         const cv = captureVideoWithFrame(v);
         scan.currentCanvas = cv;
         scan.currentProcessed = null;
 
+        // 弹层打开后再重绘，避免尺寸算错
         $('#scanEditOverlay').classList.add('show');
         await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
