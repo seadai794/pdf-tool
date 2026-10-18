@@ -179,7 +179,6 @@
     background: linear-gradient(135deg, #fee2e2, #fecaca); color: #dc2626;
     font-size: 11px; font-weight: 800; display: flex; align-items: center;
     justify-content: center; letter-spacing: .5px; }
-  .result-icon.zip { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; }
   .result-meta { min-width: 0; flex: 1; }
   .result-name { font-size: 13px; font-weight: 700; color: #0f172a;
     word-break: break-all; line-height: 1.35; }
@@ -325,7 +324,7 @@
   .zip-result .zip-title { font-size: 14px; font-weight: 700; margin-bottom: 5px; color: #065f46; }
   .zip-result .zip-sub { font-size: 11px; color: #64748b; margin-bottom: 16px; }
 
-  /* ===== 扫描文档 - 全屏相机 ===== */
+  /* ===== 全屏相机 ===== */
   .scan-fullscreen {
     position: fixed; inset: 0; z-index: 9000; background: #000;
     display: none; flex-direction: column;
@@ -343,22 +342,28 @@
     object-fit: cover; background: #000;
   }
 
-  .scan-fs-frame { position: absolute; inset: 0; pointer-events: none; }
-  .scan-fs-frame::before {
-    content: ''; position: absolute;
+  /* ===== 取景框（4 角 + 连接线，更精确表示裁剪区域） ===== */
+  .scan-fs-frame {
+    position: absolute;
     top: 12%; left: 8%; right: 8%; bottom: 22%;
-    border: 1px solid rgba(255,255,255,.15);
+    pointer-events: none;
+    border: 1px solid rgba(255,255,255,.25);
     border-radius: 8px;
+  }
+  .scan-fs-frame::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,.05));
+    pointer-events: none;
   }
   .scan-fs-corner {
     position: absolute; width: 44px; height: 44px;
     border-color: #fff; border-style: solid; border-width: 0;
     filter: drop-shadow(0 0 6px rgba(0,0,0,.6));
   }
-  .scan-fs-corner.tl { top: 12%; left: 8%; border-top-width: 4px; border-left-width: 4px; border-top-left-radius: 8px; }
-  .scan-fs-corner.tr { top: 12%; right: 8%; border-top-width: 4px; border-right-width: 4px; border-top-right-radius: 8px; }
-  .scan-fs-corner.bl { bottom: 22%; left: 8%; border-bottom-width: 4px; border-left-width: 4px; border-bottom-left-radius: 8px; }
-  .scan-fs-corner.br { bottom: 22%; right: 8%; border-bottom-width: 4px; border-right-width: 4px; border-bottom-right-radius: 8px; }
+  .scan-fs-corner.tl { top: -2px; left: -2px; border-top-width: 4px; border-left-width: 4px; border-top-left-radius: 8px; }
+  .scan-fs-corner.tr { top: -2px; right: -2px; border-top-width: 4px; border-right-width: 4px; border-top-right-radius: 8px; }
+  .scan-fs-corner.bl { bottom: -2px; left: -2px; border-bottom-width: 4px; border-left-width: 4px; border-bottom-left-radius: 8px; }
+  .scan-fs-corner.br { bottom: -2px; right: -2px; border-bottom-width: 4px; border-right-width: 4px; border-bottom-right-radius: 8px; }
 
   .scan-fs-topbar {
     position: absolute; top: 0; left: 0; right: 0;
@@ -478,7 +483,7 @@
   @keyframes spin { to { transform: rotate(360deg); } }
   .scan-fs-processing .txt { font-size: 14px; font-weight: 600; }
 
-  /* ===== 扫描结果列表（增强版） ===== */
+  /* ===== 扫描结果列表 ===== */
   .scan-result-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
     gap: 8px; padding: 10px; background: #f8fafc;
     border: 1px solid #e2e8f0; border-radius: 10px;
@@ -486,17 +491,14 @@
     -webkit-overflow-scrolling: touch; }
   .scan-result-item { position: relative; background: #fff; border: 1.5px solid #e2e8f0;
     border-radius: 9px; padding: 6px; display: flex;
-    flex-direction: column; gap: 4px; cursor: pointer;
+    flex-direction: column; gap: 4px;
     transition: all .15s; }
-  .scan-result-item:hover { border-color: #cbd5e1; box-shadow: 0 2px 8px rgba(15,23,42,.08); }
   .scan-result-item .thumb { width: 100%; height: 100px; object-fit: contain;
-    background: #fff; border-radius: 5px; display: block; border: 1px solid #f1f5f9; }
+    background: #fff; border-radius: 5px; display: block; border: 1px solid #f1f5f9;
+    cursor: pointer; }
+  .scan-result-item .thumb:active { opacity: .7; }
   .scan-result-item .num { position: absolute; top: 8px; left: 8px;
     background: rgba(15,23,42,.85); color: #fff;
-    font-size: 10px; font-weight: 700; padding: 2px 7px;
-    border-radius: 999px; pointer-events: none; }
-  .scan-result-item .rot-tag { position: absolute; top: 8px; right: 8px;
-    background: linear-gradient(135deg, #d97706, #f59e0b); color: #fff;
     font-size: 10px; font-weight: 700; padding: 2px 7px;
     border-radius: 999px; pointer-events: none; }
   .scan-result-item .actions { display: flex; gap: 2px; }
@@ -510,11 +512,6 @@
   .scan-result-item .actions button.danger { background: #fee2e2; color: #b91c1c; }
   .scan-result-item .actions button.primary { background: #eff6ff; color: #2563eb; }
   .scan-result-item .actions button:active { background: #e2e8f0; }
-  .scan-result-item .edit-tip {
-    text-align: center; font-size: 10px; color: #2563eb;
-    background: #eff6ff; padding: 3px; border-radius: 4px;
-    font-weight: 600; cursor: pointer;
-  }
 
   .scan-toolbar {
     display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;
@@ -525,80 +522,7 @@
     align-self: center; font-weight: 600; padding: 4px 10px;
     background: #fff; border: 1px solid #e2e8f0; border-radius: 7px; }
 
-  /* ===== 扫描图片编辑器（全屏） ===== */
-  .scan-img-editor {
-    position: fixed; inset: 0; z-index: 9200; background: #0f172a;
-    display: none; flex-direction: column;
-  }
-  .scan-img-editor.show { display: flex; }
-
-  .scan-ie-header {
-    padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;
-    background: #0f172a; color: #fff; flex: 0 0 auto;
-    border-bottom: 1px solid #1e293b;
-  }
-  .scan-ie-header .title { font-size: 14px; font-weight: 700; }
-  .scan-ie-header .close-btn {
-    width: 36px; height: 36px; border-radius: 50%;
-    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
-    color: #fff; font-size: 18px; display: flex; align-items: center; justify-content: center;
-    cursor: pointer; -webkit-appearance: none; appearance: none;
-  }
-
-  .scan-ie-stage {
-    flex: 1; overflow: hidden; position: relative;
-    display: flex; align-items: center; justify-content: center;
-    touch-action: none; -webkit-user-select: none; user-select: none;
-    background: #0f172a;
-  }
-  .scan-ie-stage canvas {
-    display: block; max-width: 100%; max-height: 100%;
-    touch-action: none;
-  }
-  .scan-ie-stage .crop-mask {
-    position: absolute; pointer-events: none;
-  }
-
-  .scan-ie-toolbar {
-    display: flex; align-items: center; justify-content: space-around;
-    padding: 10px 12px; background: #0f172a; flex: 0 0 auto;
-    gap: 4px; flex-wrap: wrap;
-  }
-  .scan-ie-toolbar button {
-    flex: 1; min-width: 0; padding: 10px 6px;
-    border: none; border-radius: 8px;
-    background: #1e293b; color: #cbd5e1;
-    font-size: 12px; font-weight: 600; cursor: pointer;
-    font-family: inherit; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; gap: 3px;
-    min-height: 58px;
-    -webkit-appearance: none; appearance: none;
-    touch-action: manipulation;
-  }
-  .scan-ie-toolbar button .icon { font-size: 20px; line-height: 1; }
-  .scan-ie-toolbar button:active { background: #334155; }
-  .scan-ie-toolbar button.active {
-    background: #2563eb; color: #fff;
-  }
-
-  .scan-ie-actions {
-    display: flex; gap: 8px; flex: 0 0 auto;
-    padding: 12px 16px calc(20px + env(safe-area-inset-bottom));
-    background: #0f172a; border-top: 1px solid #1e293b;
-  }
-  .scan-ie-actions .btn {
-    flex: 1; min-height: 50px; border-radius: 10px; font-size: 15px;
-  }
-  .scan-ie-actions .btn.gray {
-    background: #334155; color: #fff; border: 1px solid #475569;
-    box-shadow: none;
-  }
-  .scan-ie-actions .btn.green {
-    background: linear-gradient(135deg, #059669, #10b981);
-    box-shadow: 0 2px 8px rgba(5,150,105,.35);
-  }
-
-  /* 照片处理弹层（拍照后立即处理） */
+  /* ===== 照片处理弹层（拍照后处理） ===== */
   .scan-edit-overlay {
     position: fixed; inset: 0; z-index: 9100; background: #0f172a;
     display: none; flex-direction: column;
@@ -607,6 +531,7 @@
   .scan-edit-header {
     padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;
     background: #0f172a; color: #fff; flex: 0 0 auto;
+    border-bottom: 1px solid #1e293b;
   }
   .scan-edit-header .title { font-size: 14px; font-weight: 700; }
   .scan-edit-header .close-btn {
@@ -651,6 +576,80 @@
     box-shadow: none;
   }
   .scan-edit-actions .btn.green {
+    background: linear-gradient(135deg, #059669, #10b981);
+    box-shadow: 0 2px 8px rgba(5,150,105,.35);
+  }
+
+  /* ===== 扫描图片编辑器（单张编辑） ===== */
+  .scan-img-editor {
+    position: fixed; inset: 0; z-index: 9200; background: #0f172a;
+    display: none; flex-direction: column;
+  }
+  .scan-img-editor.show { display: flex; }
+
+  .scan-ie-header {
+    padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;
+    background: #0f172a; color: #fff; flex: 0 0 auto;
+    border-bottom: 1px solid #1e293b;
+  }
+  .scan-ie-header .title { font-size: 14px; font-weight: 700; }
+  .scan-ie-header .close-btn {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+    color: #fff; font-size: 18px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; -webkit-appearance: none; appearance: none;
+  }
+
+  .scan-ie-stage {
+    flex: 1; overflow: hidden; position: relative;
+    display: flex; align-items: center; justify-content: center;
+    touch-action: none; -webkit-user-select: none; user-select: none;
+    background: #0f172a;
+    min-height: 200px;
+  }
+  .scan-ie-stage canvas {
+    display: block;
+    touch-action: none;
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .scan-ie-toolbar {
+    display: flex; align-items: center; justify-content: space-around;
+    padding: 10px 12px; background: #0f172a; flex: 0 0 auto;
+    gap: 4px; flex-wrap: wrap;
+    border-top: 1px solid #1e293b;
+  }
+  .scan-ie-toolbar button {
+    flex: 1; min-width: 0; padding: 10px 6px;
+    border: none; border-radius: 8px;
+    background: #1e293b; color: #cbd5e1;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    font-family: inherit; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 3px;
+    min-height: 58px;
+    -webkit-appearance: none; appearance: none;
+    touch-action: manipulation;
+  }
+  .scan-ie-toolbar button .icon { font-size: 20px; line-height: 1; }
+  .scan-ie-toolbar button:active { background: #334155; }
+  .scan-ie-toolbar button.active {
+    background: #2563eb; color: #fff;
+  }
+
+  .scan-ie-actions {
+    display: flex; gap: 8px; flex: 0 0 auto;
+    padding: 12px 16px calc(20px + env(safe-area-inset-bottom));
+    background: #0f172a; border-top: 1px solid #1e293b;
+  }
+  .scan-ie-actions .btn {
+    flex: 1; min-height: 50px; border-radius: 10px; font-size: 15px;
+  }
+  .scan-ie-actions .btn.gray {
+    background: #334155; color: #fff; border: 1px solid #475569;
+    box-shadow: none;
+  }
+  .scan-ie-actions .btn.green {
     background: linear-gradient(135deg, #059669, #10b981);
     box-shadow: 0 2px 8px rgba(5,150,105,.35);
   }
@@ -968,7 +967,7 @@
           <button class="btn gray" id="scanStopBtn" type="button">关闭摄像头</button>
           <button class="btn ghost" id="scanSwitchBtn" type="button">切换前后摄像头</button>
         </div>
-        <p class="hint">摄像头需要 HTTPS 环境（或 localhost）。打开后是<b>全屏取景</b>，拍照有白闪反馈。</p>
+        <p class="hint">摄像头需要 HTTPS 环境（或 localhost）。拍照时只截取取景框内的区域。</p>
         <div class="status" id="scanStatus"></div>
       </div>
 
@@ -980,7 +979,7 @@
           <span class="info" id="scanResultInfo">共 0 页</span>
         </div>
         <p class="hint" style="margin-top:0;margin-bottom:10px">
-          <b>点击缩略图</b>可放大编辑（旋转 / 裁剪）；<b>↑ ↓</b> 调整顺序；<b>✕</b> 删除。
+          <b>点击缩略图</b>可放大编辑（旋转 / 裁剪）；<b>↑ ↓</b> 调整顺序；<b>↺ ↻</b> 快速旋转；<b>✕</b> 删除。
         </p>
         <div class="scan-result-grid" id="scanResultGrid"></div>
         <div class="field" style="margin-top:12px">
@@ -1152,9 +1151,9 @@
     <div class="page-count" id="scanFsCount">已拍 0 页</div>
   </div>
 
-  <div class="scan-fs-video-wrap">
+  <div class="scan-fs-video-wrap" id="scanFsVideoWrap">
     <video id="scanFsVideo" playsinline autoplay muted></video>
-    <div class="scan-fs-frame">
+    <div class="scan-fs-frame" id="scanFsFrame">
       <div class="scan-fs-corner tl"></div>
       <div class="scan-fs-corner tr"></div>
       <div class="scan-fs-corner bl"></div>
@@ -1187,7 +1186,7 @@
   <span>✓</span><span id="scanToastText">已添加到扫描列表</span>
 </div>
 
-<!-- 照片处理弹层（拍照后立即处理） -->
+<!-- 照片处理弹层 -->
 <div class="scan-edit-overlay" id="scanEditOverlay">
   <div class="scan-edit-header">
     <div class="title">处理当前照片</div>
@@ -1213,7 +1212,7 @@
   </div>
 </div>
 
-<!-- 扫描图片编辑器（全屏编辑单张扫描图：旋转 / 裁剪） -->
+<!-- 扫描图片编辑器 -->
 <div class="scan-img-editor" id="scanImgEditor">
   <div class="scan-ie-header">
     <button class="close-btn" id="scanIeClose" type="button">✕</button>
@@ -1222,7 +1221,7 @@
   </div>
   <div class="scan-ie-stage" id="scanIeStage">
     <canvas id="scanIeCanvas"></canvas>
-    <canvas id="scanIeOverlay" style="position:absolute;left:0;top:0;pointer-events:none;"></canvas>
+    <canvas id="scanIeOverlay" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none;"></canvas>
   </div>
   <div class="scan-ie-toolbar">
     <button id="scanIeRotateLeft" type="button">
@@ -3052,12 +3051,7 @@
       resultFilename: '', resultSize: 0, resultOutPages: 0,
       hasResult: false, dirty: false,
       previewDoc: null, previewOpen: false,
-      editIndex: -1,
-      editOriginal: null,
-      editRotation: 0,
-      editCrop: null,
-      editCropMode: false,
-      editDrag: null
+      editIndex: -1
     };
     $('#scanPdfResultBody').innerHTML = buildResultCardHtml('scanRes');
     bindResultCard('scanRes', scan, (t, e, o) => say('#scanPdfStatus2', t, e, o), true);
@@ -3190,6 +3184,64 @@
       el.classList.toggle('hidden', !show);
     }
 
+    /* ---------- 关键：按取景框位置从视频帧裁剪 ---------- */
+    function captureVideoWithFrame(videoEl) {
+      const vw = videoEl.videoWidth;
+      const vh = videoEl.videoHeight;
+      if (!vw || !vh) throw new Error('视频尚未就绪');
+
+      // 1. 视频在页面上的显示区域（video 元素被 object-fit: cover 填充后，实际可见的区域）
+      const videoRect = videoEl.getBoundingClientRect();
+      const displayW = videoRect.width;
+      const displayH = videoRect.height;
+
+      // 2. 取景框在页面上的位置（相对视频显示区域）
+      const frameEl = $('#scanFsFrame');
+      const frameRect = frameEl.getBoundingClientRect();
+
+      // 3. 因为 video 用 object-fit: cover 填满 displayW×displayH，内部画面会被等比裁切
+      //    计算原始视频画面在页面上的实际“完整显示区域”（等比放大后可能超出显示框）
+      const videoRatio = vw / vh;
+      const displayRatio = displayW / displayH;
+      let scaledW, scaledH, offsetX, offsetY;
+      if (videoRatio > displayRatio) {
+        // 视频更宽 → 上下完全填充，左右被裁切
+        scaledH = displayH;
+        scaledW = displayH * videoRatio;
+        offsetX = (scaledW - displayW) / 2;
+        offsetY = 0;
+      } else {
+        // 视频更高 → 左右完全填充，上下被裁切
+        scaledW = displayW;
+        scaledH = displayW / videoRatio;
+        offsetX = 0;
+        offsetY = (scaledH - displayH) / 2;
+      }
+
+      // 4. 取景框相对视频显示区域的坐标（px）
+      const fx = frameRect.left - videoRect.left;
+      const fy = frameRect.top - videoRect.top;
+      const fw = frameRect.width;
+      const fh = frameRect.height;
+
+      // 5. 取景框在“原始视频像素坐标”中的位置
+      const srcX = clamp((fx + offsetX) / scaledW * vw, 0, vw);
+      const srcY = clamp((fy + offsetY) / scaledH * vh, 0, vh);
+      const srcW = clamp(fw / scaledW * vw, 1, vw - srcX);
+      const srcH = clamp(fh / scaledH * vh, 1, vh - srcY);
+
+      // 6. 从原始视频帧截取该区域
+      const maxDim = 2400;
+      const k = Math.min(1, maxDim / Math.max(srcW, srcH));
+      const outW = Math.max(1, Math.round(srcW * k));
+      const outH = Math.max(1, Math.round(srcH * k));
+      const cv = document.createElement('canvas');
+      cv.width = outW; cv.height = outH;
+      const ctx = cv.getContext('2d');
+      ctx.drawImage(videoEl, srcX, srcY, srcW, srcH, 0, 0, outW, outH);
+      return cv;
+    }
+
     /* ---------- 拍照 ---------- */
     async function takePhoto() {
       const v = $('#scanFsVideo');
@@ -3202,7 +3254,7 @@
       showProcessing(true);
       try {
         await new Promise(r => setTimeout(r, 100));
-        const cv = drawImageToCanvas(v, 2400);
+        const cv = captureVideoWithFrame(v);
         scan.currentCanvas = cv;
         applyScanMode();
         openScanEditOverlay();
@@ -3237,19 +3289,6 @@
       const overlay = $('#scanEditOverlay');
       if (!overlay) return;
       overlay.classList.remove('show');
-    }
-
-    function drawImageToCanvas(img, maxDim) {
-      const w = img.naturalWidth || img.videoWidth || img.width;
-      const h = img.naturalHeight || img.videoHeight || img.height;
-      const scale = Math.min(1, (maxDim || 2400) / Math.max(w, h));
-      const cw = Math.max(1, Math.round(w * scale));
-      const ch = Math.max(1, Math.round(h * scale));
-      const cv = document.createElement('canvas');
-      cv.width = cw; cv.height = ch;
-      const ctx = cv.getContext('2d');
-      ctx.drawImage(img, 0, 0, cw, ch);
-      return cv;
     }
 
     function renderScanEditPreview() {
@@ -3368,8 +3407,7 @@
           id: 's' + (++scan.idCounter),
           dataUrl,
           width: scan.currentProcessed.width,
-          height: scan.currentProcessed.height,
-          rotation: 0
+          height: scan.currentProcessed.height
         });
         updateScanCountBadge();
         updateScanThumbnail();
@@ -3398,19 +3436,17 @@
     }
 
     /* ============================================================
-     * 扫描结果列表（带排序 / 旋转 / 放大裁剪）
+     * 扫描结果列表
      * ============================================================ */
     function renderScanResultGrid() {
       const grid = $('#scanResultGrid');
       if (!grid) return;
       grid.innerHTML = '';
       scan.items.forEach((item, idx) => {
-        const rot = ((item.rotation || 0) % 360 + 360) % 360;
         const div = document.createElement('div');
         div.className = 'scan-result-item';
         div.innerHTML =
           '<span class="num">#' + (idx + 1) + '</span>'
-          + (rot !== 0 ? '<span class="rot-tag">↻ ' + rot + '°</span>' : '')
           + '<img class="thumb" src="' + item.dataUrl + '" alt="" />'
           + '<div class="actions">'
           +   '<button data-act="up" type="button" title="上移">↑</button>'
@@ -3418,15 +3454,9 @@
           +   '<button data-act="rotR" type="button" title="右转 90°">↻</button>'
           +   '<button data-act="down" type="button" title="下移">↓</button>'
           +   '<button class="danger" data-act="del" type="button" title="删除">✕</button>'
-          + '</div>'
-          + '<div class="edit-tip" data-act="edit">🔍 点击放大编辑</div>';
+          + '</div>';
 
-        // 点击缩略图 / 编辑提示 → 打开编辑器
         div.querySelector('.thumb').addEventListener('click', (e) => {
-          e.stopPropagation();
-          openScanImageEditor(idx);
-        });
-        div.querySelector('[data-act="edit"]').addEventListener('click', (e) => {
           e.stopPropagation();
           openScanImageEditor(idx);
         });
@@ -3447,13 +3477,13 @@
           renderScanResultGrid(); markScanDirty();
           updateScanThumbnail();
         });
-        div.querySelector('[data-act="rotL"]').addEventListener('click', (e) => {
+        div.querySelector('[data-act="rotL"]').addEventListener('click', async (e) => {
           e.stopPropagation();
-          rotateScanItem(idx, -90);
+          await rotateScanItem(idx, -90);
         });
-        div.querySelector('[data-act="rotR"]').addEventListener('click', (e) => {
+        div.querySelector('[data-act="rotR"]').addEventListener('click', async (e) => {
           e.stopPropagation();
-          rotateScanItem(idx, 90);
+          await rotateScanItem(idx, 90);
         });
         div.querySelector('[data-act="del"]').addEventListener('click', (e) => {
           e.stopPropagation();
@@ -3466,33 +3496,29 @@
       });
     }
 
-    /* 直接旋转某张扫描图（列表按钮快捷操作） */
+    /* 直接旋转某张扫描图 */
     async function rotateScanItem(idx, delta) {
       const item = scan.items[idx];
       if (!item) return;
-      item.rotation = ((item.rotation || 0) + delta + 360) % 360;
       try {
         const img = await loadImage(item.dataUrl);
-        const rotatedCanvas = drawRotatedCanvas(img, item.rotation);
+        const rotatedCanvas = drawRotatedCanvas(img, ((delta % 360) + 360) % 360);
         const dataUrl = rotatedCanvas.toDataURL('image/jpeg', 0.92);
         scan.items[idx] = {
           ...item,
           dataUrl,
           width: rotatedCanvas.width,
-          height: rotatedCanvas.height,
-          rotation: 0
+          height: rotatedCanvas.height
         };
-        // 显示一个临时旋转标签（旋转后角度归零了，只是视觉提示）
-        showToast('已旋转 90°');
         renderScanResultGrid(); markScanDirty();
         updateScanThumbnail();
+        showToast('已旋转');
       } catch (err) {
         console.error('[rotate]', err);
         say('#scanListStatus', '旋转失败：' + (err && err.message ? err.message : err), true);
       }
     }
 
-    /* 计算旋转后的 canvas */
     function drawRotatedCanvas(img, rotation) {
       const rot = ((rotation % 360) + 360) % 360;
       const w = img.naturalWidth || img.width;
@@ -3512,31 +3538,39 @@
     }
 
     /* ============================================================
-     * 扫描图片编辑器（点击缩略图后全屏编辑）
+     * 扫描图片编辑器
      * ============================================================ */
     const editor = {
-      baseCanvas: null,    // 旋转后（未裁剪）的完整 canvas
-      rotation: 0,         // 当前旋转角度（仅内存，应用于 baseCanvas）
-      crop: null,          // 裁剪框（归一化 x,y,w,h 相对于 baseCanvas）
-      cropMode: false,     // 是否处于裁剪模式
-      drag: null
+      baseCanvas: null,
+      crop: null,
+      cropMode: false,
+      drag: null,
+      cssW: 0,
+      cssH: 0
     };
 
     async function openScanImageEditor(idx) {
       const item = scan.items[idx];
       if (!item) return;
       scan.editIndex = idx;
-      editor.rotation = item.rotation || 0;
       editor.crop = null;
       editor.cropMode = false;
+      editor.drag = null;
       $('#scanIeTitle').textContent = '编辑扫描图 #' + (idx + 1);
+      $('#scanIeCrop').classList.remove('active');
 
       try {
         const img = await loadImage(item.dataUrl);
-        const base = drawRotatedCanvas(img, 0); // 加载原始未旋转（item 已经是处理过的图）
-        editor.baseCanvas = base;
-        drawEditorCanvas();
+        // 用原图生成基础 canvas（不再叠加旋转，旋转通过画布重绘实现）
+        editor.baseCanvas = drawRotatedCanvas(img, 0);
+        // 先显示编辑器，让布局完成后再绘制
         $('#scanImgEditor').classList.add('show');
+        // 延迟绘制，确保布局尺寸就绪
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            drawEditorCanvas();
+          });
+        });
       } catch (err) {
         say('#scanListStatus', '打开编辑失败：' + (err && err.message ? err.message : err), true);
       }
@@ -3548,20 +3582,30 @@
       const overlay = $('#scanIeOverlay');
       if (!editor.baseCanvas) return;
 
-      const maxW = stage.clientWidth - 16;
-      const maxH = stage.clientHeight - 16;
+      // 宽高可能为 0（布局未完成），此时跳过，等待下一次触发
+      const stageW = stage.clientWidth;
+      const stageH = stage.clientHeight;
+      if (stageW <= 10 || stageH <= 10) {
+        // 再等一帧
+        requestAnimationFrame(() => drawEditorCanvas());
+        return;
+      }
+
+      const maxW = stageW - 16;
+      const maxH = stageH - 16;
       const scale = Math.min(maxW / editor.baseCanvas.width, maxH / editor.baseCanvas.height);
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
       const cssW = Math.round(editor.baseCanvas.width * scale);
       const cssH = Math.round(editor.baseCanvas.height * scale);
+      editor.cssW = cssW;
+      editor.cssH = cssH;
 
       [canvas, overlay].forEach((cv) => {
         cv.width = Math.round(cssW * dpr);
         cv.height = Math.round(cssH * dpr);
         cv.style.width = cssW + 'px';
         cv.style.height = cssH + 'px';
-        cv.style.position = 'absolute';
         cv.style.left = '50%';
         cv.style.top = '50%';
         cv.style.transform = 'translate(-50%, -50%)';
@@ -3573,7 +3617,6 @@
       ctx.fillRect(0, 0, cssW, cssH);
       ctx.drawImage(editor.baseCanvas, 0, 0, cssW, cssH);
 
-      // 画裁剪遮罩
       drawEditorCropOverlay(cssW, cssH);
     }
 
@@ -3587,7 +3630,6 @@
       if (!editor.cropMode) return;
 
       if (!editor.crop) {
-        // 裁剪模式但没有裁剪框：显示提示文字
         ctx.fillStyle = 'rgba(0,0,0,0.55)';
         ctx.fillRect(0, 0, cssW, cssH);
         ctx.fillStyle = '#fff';
@@ -3601,21 +3643,18 @@
       const cx = c.x * cssW, cy = c.y * cssH;
       const cw = c.w * cssW, ch = c.h * cssH;
 
-      // 半透明遮罩（裁剪框外）
       ctx.fillStyle = 'rgba(0,0,0,0.55)';
       ctx.fillRect(0, 0, cssW, cy);
       ctx.fillRect(0, cy + ch, cssW, cssH - cy - ch);
       ctx.fillRect(0, cy, cx, ch);
       ctx.fillRect(cx + cw, cy, cssW - cx - cw, ch);
 
-      // 裁剪框边框
       ctx.strokeStyle = '#60a5fa';
       ctx.lineWidth = 2;
       ctx.setLineDash([8, 6]);
       ctx.strokeRect(cx, cy, cw, ch);
       ctx.setLineDash([]);
 
-      // 8 个控制点
       const HIT = isMobile ? 20 : 16;
       const positions = [
         [cx, cy], [cx + cw / 2, cy], [cx + cw, cy],
@@ -3633,36 +3672,18 @@
       });
     }
 
-    /* 旋转按钮：直接旋转 baseCanvas */
     async function rotateEditor(delta) {
       if (!editor.baseCanvas) return;
-      editor.rotation = ((editor.rotation + delta) + 360) % 360;
-
-      // 旋转当前 baseCanvas
       const old = editor.baseCanvas;
-      const rotated = drawRotatedCanvas(old, delta);
-      editor.baseCanvas = rotated;
-
-      // 如果已存在裁剪框，转换其坐标到新的旋转画布
+      editor.baseCanvas = drawRotatedCanvas(old, delta);
       if (editor.crop) {
-        editor.crop = rotateCropRect(editor.crop, delta);
+        const dx = ((delta % 360) + 360) % 360;
+        const { x, y, w, h } = editor.crop;
+        if (dx === 90) editor.crop = { x: 1 - y - h, y: x, w: h, h: w };
+        else if (dx === 180) editor.crop = { x: 1 - x - w, y: 1 - y - h, w, h };
+        else if (dx === 270) editor.crop = { x: y, y: 1 - x - w, w: h, h: w };
       }
-
       drawEditorCanvas();
-    }
-
-    function rotateCropRect(crop, delta) {
-      // 简单处理：旋转后裁剪框坐标映射
-      const dx = ((delta % 360) + 360) % 360;
-      const { x, y, w, h } = crop;
-      if (dx === 90) {
-        return { x: 1 - y - h, y: x, w: h, h: w };
-      } else if (dx === 180) {
-        return { x: 1 - x - w, y: 1 - y - h, w, h };
-      } else if (dx === 270) {
-        return { x: y, y: 1 - x - w, w: h, h: w };
-      }
-      return crop;
     }
 
     $('#scanIeRotateLeft').addEventListener('click', () => rotateEditor(-90));
@@ -3670,14 +3691,8 @@
 
     $('#scanIeCrop').addEventListener('click', () => {
       editor.cropMode = !editor.cropMode;
-      if (!editor.cropMode) {
-        editor.crop = null;
-      } else {
-        // 默认框在中间 80%
-        editor.crop = { x: 0.1, y: 0.1, w: 0.8, h: 0.8 };
-      }
+      editor.crop = editor.cropMode ? { x: 0.1, y: 0.1, w: 0.8, h: 0.8 } : null;
       $('#scanIeCrop').classList.toggle('active', editor.cropMode);
-      const stage = $('#scanIeStage');
       drawEditorCanvas();
     });
 
@@ -3689,7 +3704,6 @@
         editor.baseCanvas = drawRotatedCanvas(img, 0);
         editor.crop = null;
         editor.cropMode = false;
-        editor.rotation = 0;
         $('#scanIeCrop').classList.remove('active');
         drawEditorCanvas();
         showToast('已重置');
@@ -3701,8 +3715,6 @@
       const stage = $('#scanIeStage');
 
       function getStagePos(e) {
-        const rect = stage.getBoundingClientRect();
-        // canvas 在 stage 中居中，需要考虑偏移
         const canvas = $('#scanIeCanvas');
         const cRect = canvas.getBoundingClientRect();
         return {
@@ -3738,10 +3750,9 @@
         if (!p.inside) return;
         const mode = hitTest(p.x, p.y);
         if (!mode) {
-          // 重新框选：从点击处开始
           editor.drag = { mode: 'new', startX: p.x, startY: p.y };
           editor.crop = { x: p.x, y: p.y, w: 0, h: 0 };
-          stage.setPointerCapture(e.pointerId);
+          try { stage.setPointerCapture(e.pointerId); } catch (_) {}
           e.preventDefault();
           return;
         }
@@ -3751,7 +3762,7 @@
           startY: p.y,
           origCrop: { ...editor.crop }
         };
-        stage.setPointerCapture(e.pointerId);
+        try { stage.setPointerCapture(e.pointerId); } catch (_) {}
         e.preventDefault();
       }, { passive: false });
 
@@ -3808,7 +3819,6 @@
       function endDrag(e) {
         if (!editor.drag) return;
         editor.drag = null;
-        // 如果框太小就清除
         if (editor.crop && (editor.crop.w < 0.05 || editor.crop.h < 0.05)) {
           editor.crop = null;
         }
@@ -3826,7 +3836,6 @@
       if (!item || !editor.baseCanvas) return;
       try {
         let finalCanvas = editor.baseCanvas;
-        // 应用裁剪
         if (editor.crop && editor.crop.w > 0 && editor.crop.h > 0) {
           const c = editor.crop;
           const sx = Math.round(c.x * finalCanvas.width);
@@ -3848,8 +3857,7 @@
           ...item,
           dataUrl,
           width: finalCanvas.width,
-          height: finalCanvas.height,
-          rotation: 0
+          height: finalCanvas.height
         };
         renderScanResultGrid();
         updateScanThumbnail();
