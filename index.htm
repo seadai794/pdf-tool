@@ -651,7 +651,7 @@
 
 <header class="app-header">
   <h1>📄 PDF 工具箱</h1>
-  <p class="sub">9 个实用工具 · 全部在浏览器本地处理 · 文件不上传</p>
+  <p class="sub">90 个实用工具 · 全部在浏览器本地处理 · 文件不上传</p>
   <div class="badges">
     <span>🔒 本地安全</span>
     <span>⚡ 无需安装</span>
@@ -1114,7 +1114,6 @@
   <span>✓</span><span id="scanToastText">已添加到扫描列表</span>
 </div>
 
-<!-- 扫描图片编辑器 -->
 <div class="scan-img-editor" id="scanImgEditor">
   <div class="scan-ie-header">
     <button class="close-btn" id="scanIeClose" type="button">✕</button>
@@ -3246,27 +3245,6 @@
       }
       ctx.putImageData(imgData, 0, 0);
       return cv;
-    }
-
-    $('#scanEditMode').addEventListener('change', () => {
-      // 弹层已取消，保留监听避免报错
-    });
-
-    $('#scanEditRetake').addEventListener('click', () => {
-      closeScanEditOverlay();
-    });
-
-    $('#scanEditClose').addEventListener('click', () => {
-      closeScanEditOverlay();
-    });
-
-    $('#scanEditAdd').addEventListener('click', () => {
-      closeScanEditOverlay();
-    });
-
-    function closeScanEditOverlay() {
-      const overlay = $('#scanEditOverlay');
-      if (overlay) overlay.classList.remove('show');
     }
 
     function updateScanThumbnail() {
