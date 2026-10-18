@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
-<title>PDF 工具箱 · 全能版</title>
+<title>PDF 工具箱 · 本地纯净版</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; padding: 0; }
@@ -119,11 +119,11 @@
     padding: 8px 14px; border-radius: 7px; margin-right: 10px; cursor: pointer;
     font-size: 13px; font-weight: 600; font-family: inherit; }
 
-  select, input[type=number] { width: 100%; padding: 12px;
+  select, input[type=number], input[type=text] { width: 100%; padding: 12px;
     border: 1.5px solid #e2e8f0; border-radius: 9px; background: #fff;
     color: #0f172a; font-size: 16px; transition: all .15s;
     font-family: inherit; -webkit-appearance: none; appearance: none; min-height: 48px; }
-  select:focus, input[type=number]:focus { outline: none; border-color: #2563eb;
+  select:focus, input[type=number]:focus, input[type=text]:focus { outline: none; border-color: #2563eb;
     box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
   select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
@@ -328,28 +328,38 @@
     object-fit: cover; background: #000;
   }
 
-  /* ===== 取景框 ===== */
+  /* ===== 取景框 (身份证专用 1.585 比例) ===== */
   .scan-fs-frame {
     position: absolute;
-    top: 12%; left: 8%; right: 8%; bottom: 22%;
+    width: 90%; aspect-ratio: 1.585;
     pointer-events: none;
     border: 1px solid rgba(255,255,255,.25);
     border-radius: 8px;
+    box-shadow: 0 0 0 4000px rgba(0,0,0,0.5);
+    display: none;
   }
-  .scan-fs-frame::after {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,.05));
-    pointer-events: none;
-  }
+  .scan-fs-frame.show { display: block; }
   .scan-fs-corner {
     position: absolute; width: 44px; height: 44px;
-    border-color: #fff; border-style: solid; border-width: 0;
+    border-color: #60a5fa; border-style: solid; border-width: 0;
     filter: drop-shadow(0 0 6px rgba(0,0,0,.6));
   }
   .scan-fs-corner.tl { top: -2px; left: -2px; border-top-width: 4px; border-left-width: 4px; border-top-left-radius: 8px; }
   .scan-fs-corner.tr { top: -2px; right: -2px; border-top-width: 4px; border-right-width: 4px; border-top-right-radius: 8px; }
   .scan-fs-corner.bl { bottom: -2px; left: -2px; border-bottom-width: 4px; border-left-width: 4px; border-bottom-left-radius: 8px; }
   .scan-fs-corner.br { bottom: -2px; right: -2px; border-bottom-width: 4px; border-right-width: 4px; border-bottom-right-radius: 8px; }
+
+  /* 对焦框 */
+  .scan-fs-focus {
+    position: absolute; width: 80px; height: 80px;
+    border: 2px solid #60a5fa; border-radius: 8px;
+    display: none; pointer-events: none;
+    animation: focusAnim 0.5s ease-out;
+  }
+  @keyframes focusAnim {
+    0% { transform: scale(1.2); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
 
   .scan-fs-topbar {
     position: absolute; top: 0; left: 0; right: 0;
@@ -403,10 +413,7 @@
     background: #fff;
     transition: all .12s;
   }
-  .scan-fs-shutter:active {
-    transform: scale(.92);
-    background: rgba(255,255,255,.5);
-  }
+  .scan-fs-shutter:active { transform: scale(.92); background: rgba(255,255,255,.5); }
   .scan-fs-shutter:active .inner { background: #e5e7eb; }
   .scan-fs-shutter.flash::after {
     content: ''; position: absolute; inset: -8px;
@@ -561,26 +568,16 @@
   }
   .scan-ie-toolbar button .icon { font-size: 20px; line-height: 1; }
   .scan-ie-toolbar button:active { background: #334155; }
-  .scan-ie-toolbar button.active {
-    background: #2563eb; color: #fff;
-  }
+  .scan-ie-toolbar button.active { background: #2563eb; color: #fff; }
 
   .scan-ie-actions {
     display: flex; gap: 8px; flex: 0 0 auto;
     padding: 12px 16px calc(20px + env(safe-area-inset-bottom));
     background: #0f172a; border-top: 1px solid #1e293b;
   }
-  .scan-ie-actions .btn {
-    flex: 1; min-height: 50px; border-radius: 10px; font-size: 15px;
-  }
-  .scan-ie-actions .btn.gray {
-    background: #334155; color: #fff; border: 1px solid #475569;
-    box-shadow: none;
-  }
-  .scan-ie-actions .btn.green {
-    background: linear-gradient(135deg, #059669, #10b981);
-    box-shadow: 0 2px 8px rgba(5,150,105,.35);
-  }
+  .scan-ie-actions .btn { flex: 1; min-height: 50px; border-radius: 10px; font-size: 15px; }
+  .scan-ie-actions .btn.gray { background: #334155; color: #fff; border: 1px solid #475569; box-shadow: none; }
+  .scan-ie-actions .btn.green { background: linear-gradient(135deg, #059669, #10b981); box-shadow: 0 2px 8px rgba(5,150,105,.35); }
 
   .panel[data-theme="edit"] .card::before { background: linear-gradient(90deg, #2563eb, #3b82f6); }
   .panel[data-theme="edit"] .step-label:not(.step-ok) { background: linear-gradient(135deg, #2563eb, #3b82f6); }
@@ -635,8 +632,8 @@
 <body>
 
 <header class="app-header">
-  <h1>📄 PDF 工具箱 · 全能版</h1>
-  <p class="sub">新增 OCR 识别 · 证件合成 · 证件照制作</p>
+  <h1>📄 PDF 工具箱 · 本地纯净版</h1>
+  <p class="sub">无需 CDN · 完全离线 · 包含所有功能</p>
   <div class="badges">
     <span>🔒 本地安全</span>
     <span>⚡ 无需安装</span>
@@ -671,13 +668,6 @@
         <span class="feature-text">
           <span class="feature-name">扫描文档</span>
           <span class="feature-desc">拍照去底色</span>
-        </span>
-      </button>
-      <button class="feature-card" data-tab="ocr" type="button">
-        <span class="feature-icon">🔍</span>
-        <span class="feature-text">
-          <span class="feature-name">图片转文字</span>
-          <span class="feature-desc">OCR 识别并导出</span>
         </span>
       </button>
       <button class="feature-card" data-tab="idcard" type="button">
@@ -764,6 +754,7 @@
   <div id="envBanner"></div>
 
   <main>
+    <!-- 模块 1 -->
     <section class="panel active" id="panel-split" data-theme="edit">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择试卷 PDF</span></h2>
@@ -804,6 +795,7 @@
       </div>
     </section>
 
+    <!-- 模块 2 -->
     <section class="panel" id="panel-crop" data-theme="edit">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择 PDF</span></h2>
@@ -839,6 +831,7 @@
       </div>
     </section>
 
+    <!-- 模块 3 -->
     <section class="panel" id="panel-arrange" data-theme="edit">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择 PDF</span></h2>
@@ -866,6 +859,7 @@
       </div>
     </section>
 
+    <!-- 模块 4 -->
     <section class="panel" id="panel-scan" data-theme="edit">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">打开全屏相机</span></h2>
@@ -905,36 +899,31 @@
       </div>
     </section>
 
-    <!-- OCR 功能 -->
-    <section class="panel" id="panel-ocr" data-theme="convert">
-      <div class="card">
-        <h2><span class="step-label">第 1 步</span><span class="step-title">上传要识别的文档图片</span></h2>
-        <input type="file" id="ocrFile" accept="image/*" />
-        <p class="hint">适用于印刷体、清晰的表格。识别过程在本地完成，需要下载语言库，请稍候。识别结果可复制粘贴到 Word/Excel。</p>
-      </div>
-      <div class="card hidden" id="ocrResultCard">
-        <h2><span class="step-label">第 2 步</span><span class="step-title">识别结果与导出</span></h2>
-        <div class="status" id="ocrStatus"></div>
-        <textarea id="ocrTextarea" style="width:100%; height:300px; padding:10px; border:1px solid #e2e8f0; border-radius:8px; font-family:monospace; font-size:13px; line-height:1.5;" placeholder="正在识别，请稍候…"></textarea>
-        <div class="btn-row" style="margin-top:12px">
-          <button class="btn green" id="ocrCopyBtn" type="button">📋 复制文字</button>
-          <button class="btn amber" id="ocrExportWordBtn" type="button">📄 导出为 Word (.doc)</button>
-          <button class="btn gray" id="ocrExportExcelBtn" type="button">📊 导出为 Excel (.xls)</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- 身份证 A4 合成 -->
+    <!-- 身份证 -->
     <section class="panel" id="panel-idcard" data-theme="organize">
       <div class="card">
-        <h2><span class="step-label">第 1 步</span><span class="step-title">选择身份证图片</span></h2>
+        <h2><span class="step-label">第 1 步</span><span class="step-title">选择/拍摄身份证图片</span></h2>
         <div class="field">
           <label>身份证正面（人像面）</label>
-          <input type="file" id="idcardFrontFile" accept="image/*" />
+          <div class="btn-row" style="margin-bottom:8px;">
+            <button class="btn ghost" id="idcardFrontCamBtn" type="button" style="flex:1">📷 拍摄正面</button>
+            <button class="btn ghost" type="button" style="flex:1" onclick="document.getElementById('idcardFrontFile').click()">🖼️ 从相册选</button>
+          </div>
+          <input type="file" id="idcardFrontFile" accept="image/*" class="hidden" />
+          <div id="idcardFrontPreview" class="hidden" style="text-align:center; margin-top:10px;">
+            <img id="idcardFrontImgShow" style="max-height: 120px; border-radius: 8px; border: 1px solid #e2e8f0;" />
+          </div>
         </div>
-        <div class="field">
+        <div class="field" style="margin-bottom:0">
           <label>身份证反面（国徽面）</label>
-          <input type="file" id="idcardBackFile" accept="image/*" />
+          <div class="btn-row" style="margin-bottom:8px;">
+            <button class="btn ghost" id="idcardBackCamBtn" type="button" style="flex:1">📷 拍摄反面</button>
+            <button class="btn ghost" type="button" style="flex:1" onclick="document.getElementById('idcardBackFile').click()">🖼️ 从相册选</button>
+          </div>
+          <input type="file" id="idcardBackFile" accept="image/*" class="hidden" />
+          <div id="idcardBackPreview" class="hidden" style="text-align:center; margin-top:10px;">
+            <img id="idcardBackImgShow" style="max-height: 120px; border-radius: 8px; border: 1px solid #e2e8f0;" />
+          </div>
         </div>
       </div>
       <div class="card hidden" id="idcardResultCard">
@@ -952,7 +941,7 @@
       </div>
     </section>
 
-    <!-- 证件照制作 -->
+    <!-- 证件照 -->
     <section class="panel" id="panel-idphoto" data-theme="convert">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">上传人像照片</span></h2>
@@ -999,6 +988,7 @@
       </div>
     </section>
 
+    <!-- 模块 5 -->
     <section class="panel" id="panel-img2pdf" data-theme="convert">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择图片</span></h2>
@@ -1019,6 +1009,7 @@
       </div>
     </section>
 
+    <!-- 模块 6 -->
     <section class="panel" id="panel-pdf2img" data-theme="convert">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择 PDF</span></h2>
@@ -1041,6 +1032,7 @@
       </div>
     </section>
 
+    <!-- 模块 7 -->
     <section class="panel" id="panel-word2pdf" data-theme="convert">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择 Word 文档</span></h2>
@@ -1053,6 +1045,7 @@
       </div>
     </section>
 
+    <!-- 模块 8 -->
     <section class="panel" id="panel-merge" data-theme="organize">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择要合并的 PDF</span></h2>
@@ -1073,6 +1066,7 @@
       </div>
     </section>
 
+    <!-- 模块 9 -->
     <section class="panel" id="panel-extract" data-theme="organize">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择 PDF</span></h2>
@@ -1099,18 +1093,22 @@
 <div class="scan-fullscreen" id="scanFullscreen">
   <div class="scan-fs-topbar">
     <button class="scan-fs-close" id="scanFsClose" type="button">✕</button>
-    <div class="title">扫描文档</div>
+    <div class="title" id="scanFsTitle">扫描文档</div>
     <div class="page-count" id="scanFsCount">已拍 0 页</div>
   </div>
 
   <div class="scan-fs-video-wrap" id="scanFsVideoWrap">
     <video id="scanFsVideo" playsinline autoplay muted></video>
+    <!-- 身份证专用取景框 -->
     <div class="scan-fs-frame" id="scanFsFrame">
       <div class="scan-fs-corner tl"></div>
       <div class="scan-fs-corner tr"></div>
       <div class="scan-fs-corner bl"></div>
       <div class="scan-fs-corner br"></div>
     </div>
+    <!-- 点击对焦框 -->
+    <div class="scan-fs-focus" id="scanFsFocus"></div>
+    
     <div id="scanFsProcessing" class="scan-fs-processing hidden">
       <div class="spinner"></div>
       <div class="txt">正在处理…</div>
@@ -1130,7 +1128,7 @@
 
 <div class="scan-flash-screen" id="scanFlash"></div>
 <div class="scan-toast" id="scanToast">
-  <span>✓</span><span id="scanToastText">已添加到扫描列表</span>
+  <span>✓</span><span id="scanToastText">已添加</span>
 </div>
 
 <!-- 扫描图片编辑器 -->
@@ -1179,9 +1177,6 @@
 <script>
 (function () {
   'use strict';
-
-  // 新增：Tesseract 语言库路径，用于 OCR
-  const TESSERACT_CDN = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
 
   const LOCAL = {
     pdfLib:    ['./libs/pdf-lib.min.js',         './pdf-lib.min.js'],
@@ -1400,7 +1395,6 @@
     const $$ = (s) => Array.prototype.slice.call(document.querySelectorAll(s));
     const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
-    // ★★★ 新增：安全绑定事件的方法，如果元素不存在则跳过，防止崩溃 ★★★
     const bind = (sel, event, fn) => {
       const el = typeof sel === 'string' ? $(sel) : sel;
       if (el) el.addEventListener(event, fn);
@@ -1446,13 +1440,13 @@
 
     const toolNames = {
       split: '试卷拆分', crop: 'PDF 裁剪', arrange: '页面调整', scan: '扫描文档',
-      ocr: '图片转文字 (OCR)', idcard: '证件 A4 合成', idphoto: '证件照制作',
+      idcard: '证件 A4 合成', idphoto: '证件照制作',
       img2pdf: '图片转 PDF', pdf2img: 'PDF 转图片', word2pdf: 'Word 转 PDF',
       merge: 'PDF 合并', extract: 'PDF 拆分'
     };
     const toolIcons = {
       split: '📝', crop: '✂️', arrange: '📄', scan: '📷',
-      ocr: '🔍', idcard: '🪪', idphoto: '👤',
+      idcard: '🪪', idphoto: '👤',
       img2pdf: '🖼️', pdf2img: '📷', word2pdf: '📘',
       merge: '🔗', extract: '📑'
     };
@@ -1487,7 +1481,7 @@
     }
 
     $$('.feature-card').forEach(btn => {
-      bind(btn, 'click', function (e) {
+      btn.addEventListener('click', function (e) {
         e.preventDefault();
         showTool(btn.dataset.tab, true);
         if (btn.dataset.tab !== 'scan' && scan.stream) closeScanCamera();
@@ -1571,12 +1565,6 @@
         } catch (e) {}
       }
       throw new Error('Word 解析库加载失败，请检查网络或下载 mammoth.browser.min.js 到 libs/ 目录');
-    }
-    async function ensureTesseract() {
-      if (window.Tesseract) return window.Tesseract;
-      await loadScriptOnce(TESSERACT_CDN);
-      if (!window.Tesseract) throw new Error('OCR 识别库加载失败');
-      return window.Tesseract;
     }
     function downloadBlob(blob, filename) {
       const url = URL.createObjectURL(blob);
@@ -3845,105 +3833,113 @@
       say('#scanPdfStatus2', '');
     }
 
-    /* ===== 模块 4.1：图片转文字 (OCR) ===== */
-    let ocrResultText = '';
-    let ocrWorker = null;
-
-    bind('#ocrFile', 'change', async (e) => {
-      const f = e.target.files[0]; if (!f) return;
-      $('#ocrResultCard').classList.remove('hidden');
-      const statusEl = $('#ocrStatus');
-      const ta = $('#ocrTextarea');
-      ta.value = '';
-      ocrResultText = '';
-      say('#ocrStatus', '正在读取图片…');
-      
-      try {
-        const dataUrl = await readDataUrl(f);
-        say('#ocrStatus', '正在加载 OCR 引擎（首次加载需下载中文字库，请耐心等待）…');
-        
-        const Tesseract = await ensureTesseract();
-        
-        const worker = await Tesseract.createWorker('chi_sim+eng', 1, {
-          logger: m => {
-             if (m.status === 'recognizing text') {
-               say('#ocrStatus', '正在识别文字：' + Math.round(m.progress * 100) + '%');
-             } else if (m.status === 'loading language traineddata') {
-               say('#ocrStatus', '正在下载语言库：' + Math.round(m.progress * 100) + '%');
-             }
-          }
-        });
-        
-        say('#ocrStatus', '正在分析排版并识别文字…');
-        const ret = await worker.recognize(dataUrl);
-        ocrResultText = ret.data.text;
-        ta.value = ocrResultText;
-        say('#ocrStatus', '✅ 识别完成！请核对文字后复制或导出。', false, true);
-        
-        await worker.terminate();
-      } catch (err) {
-        console.error(err);
-        say('#ocrStatus', '识别失败：' + (err && err.message ? err.message : err), true);
-        ta.value = '识别失败，请重试。';
-      }
-    });
-
-    bind('#ocrCopyBtn', 'click', async () => {
-      if (!ocrResultText) return;
-      try {
-        await navigator.clipboard.writeText(ocrResultText);
-        showToast('✓ 已复制到剪贴板');
-      } catch (e) {
-        $('#ocrTextarea').select();
-        document.execCommand('copy');
-        showToast('✓ 已复制到剪贴板');
-      }
-    });
-
-    bind('#ocrExportWordBtn', 'click', () => {
-      if (!ocrResultText) return;
-      const html = `
-        <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-        <head><meta charset="utf-8"><title>识别结果</title>
-        <style>body { font-family: "Microsoft YaHei", sans-serif; font-size: 14px; line-height: 1.6; }</style>
-        </head><body>
-        ${ocrResultText.replace(/\n/g, '<br>')}
-        </body></html>
-      `;
-      const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
-      downloadBlob(blob, '识别结果_' + Date.now() + '.doc');
-    });
-
-    bind('#ocrExportExcelBtn', 'click', () => {
-      if (!ocrResultText) return;
-      const lines = ocrResultText.split('\n');
-      let trs = '';
-      lines.forEach(line => {
-        trs += `<tr><td>${line.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</td></tr>`;
-      });
-      
-      const html = `
-        <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:x='urn:schemas-microsoft-com:office:excel' xmlns='http://www.w3.org/TR/REC-html40'>
-        <head><meta charset="utf-8">
-        <!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Sheet1</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
-        </head><body>
-        <table border="1">
-        ${trs}
-        </table>
-        </body></html>
-      `;
-      const blob = new Blob(['\ufeff', html], { type: 'application/vnd.ms-excel' });
-      downloadBlob(blob, '识别表格_' + Date.now() + '.xls');
-    });
-
-    /* ===== 模块 4.2：证件 A4 合成 ===== */
+    /* ===== 模块 4.1：证件 A4 合成 (带专用拍照) ===== */
     let idcardFrontImg = null;
     let idcardBackImg = null;
+    let idcardCurrentMode = ''; // 'front' 或 'back'
+
+    bind('#idcardFrontCamBtn', 'click', () => {
+      idcardCurrentMode = 'front';
+      openIdCardCamera();
+    });
+    bind('#idcardBackCamBtn', 'click', () => {
+      idcardCurrentMode = 'back';
+      openIdCardCamera();
+    });
+
+    async function openIdCardCamera() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('当前浏览器不支持摄像头调用');
+        return;
+      }
+      if (!env.isSecure) {
+        alert('摄像头需要在 HTTPS 或 localhost 环境才能使用。');
+        return;
+      }
+      try {
+        if (scan.stream) { scan.stream.getTracks().forEach(t => t.stop()); scan.stream = null; }
+        scan.stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
+          audio: false
+        });
+        const v = $('#scanFsVideo');
+        v.srcObject = scan.stream;
+        await v.play();
+        
+        $('#scanFsTitle').textContent = idcardCurrentMode === 'front' ? '拍摄身份证正面' : '拍摄身份证反面';
+        $('#scanFsFrame').classList.add('show');
+        $('#scanFullscreen').classList.add('show');
+        
+        // 隐藏底部缩略图和相册按钮，只留快门
+        $('#scanFsThumb').style.display = 'none';
+        $('#scanFsSwitch').style.display = 'none';
+      } catch (err) {
+        alert('无法打开相机：' + err.message);
+      }
+    }
+
+    // 身份证拍照使用的快门逻辑
+    bind('#scanFsShutter', 'click', async () => {
+      const v = $('#scanFsVideo');
+      if (!v || !v.videoWidth) return;
+      
+      const cv = document.createElement('canvas');
+      cv.width = v.videoWidth; cv.height = v.videoHeight;
+      cv.getContext('2d').drawImage(v, 0, 0);
+      
+      if (idcardCurrentMode) {
+        // 身份证裁剪逻辑
+        const frame = $('#scanFsFrame').getBoundingClientRect();
+        const videoRect = v.getBoundingClientRect();
+        const videoRatio = v.videoWidth / v.videoHeight;
+        const displayRatio = videoRect.width / videoRect.height;
+        let scaledW, scaledH, offsetX, offsetY;
+        
+        if (videoRatio > displayRatio) {
+          scaledH = videoRect.height; scaledW = scaledH * videoRatio;
+          offsetX = (scaledW - videoRect.width) / 2; offsetY = 0;
+        } else {
+          scaledW = videoRect.width; scaledH = scaledW / videoRatio;
+          offsetX = 0; offsetY = (scaledH - videoRect.height) / 2;
+        }
+        const sx = ((frame.left - videoRect.left + offsetX) / scaledW) * v.videoWidth;
+        const sy = ((frame.top - videoRect.top + offsetY) / scaledH) * v.videoHeight;
+        const sw = (frame.width / scaledW) * v.videoWidth;
+        const sh = (frame.height / scaledH) * v.videoHeight;
+        
+        const cropCanvas = document.createElement('canvas');
+        cropCanvas.width = sw; cropCanvas.height = sh;
+        cropCanvas.getContext('2d').drawImage(cv, sx, sy, sw, sh, 0, 0, sw, sh);
+        
+        if (idcardCurrentMode === 'front') {
+          idcardFrontImg = cropCanvas;
+          const showImg = $('#idcardFrontImgShow');
+          showImg.src = cropCanvas.toDataURL('image/jpeg');
+          $('#idcardFrontPreview').classList.remove('hidden');
+        } else {
+          idcardBackImg = cropCanvas;
+          const showImg = $('#idcardBackImgShow');
+          showImg.src = cropCanvas.toDataURL('image/jpeg');
+          $('#idcardBackPreview').classList.remove('hidden');
+        }
+        
+        // 恢复 UI
+        closeScanCamera();
+        $('#scanFsTitle').textContent = '扫描文档';
+        $('#scanFsFrame').classList.remove('show');
+        $('#scanFsThumb').style.display = '';
+        $('#scanFsSwitch').style.display = '';
+        idcardCurrentMode = '';
+        $('#idcardResultCard').classList.remove('hidden');
+      }
+    });
 
     bind('#idcardFrontFile', 'change', async (e) => {
       const f = e.target.files[0];
       if (f) {
         idcardFrontImg = await loadImage(await readDataUrl(f));
+        $('#idcardFrontImgShow').src = idcardFrontImg.src;
+        $('#idcardFrontPreview').classList.remove('hidden');
         $('#idcardResultCard').classList.remove('hidden');
       }
     });
@@ -3952,6 +3948,8 @@
       const f = e.target.files[0];
       if (f) {
         idcardBackImg = await loadImage(await readDataUrl(f));
+        $('#idcardBackImgShow').src = idcardBackImg.src;
+        $('#idcardBackPreview').classList.remove('hidden');
         $('#idcardResultCard').classList.remove('hidden');
       }
     });
@@ -3968,20 +3966,16 @@
         const A4 = [595.28, 841.89]; // A4 pt
         const page = doc.addPage(A4);
         
-        // 身份证真实物理尺寸：85.6mm x 54mm
-        // 1 mm = 2.83465 pt
         const targetW = 85.6 * 2.83465;
         const targetH = 54 * 2.83465;
         
         async function addImgToPage(imgEl, yOffset) {
           const cv = document.createElement('canvas');
-          // 使用高分辨率绘制以保证清晰
           cv.width = imgEl.width; cv.height = imgEl.height;
           cv.getContext('2d').drawImage(imgEl, 0, 0);
           const blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.95));
           const jpg = await doc.embedJpg(new Uint8Array(await blob.arrayBuffer()));
           
-          // 居中排放，纵向间距 20pt
           page.drawImage(jpg, {
             x: (A4[0] - targetW) / 2,
             y: (A4[1] / 2) + yOffset,
@@ -3990,14 +3984,12 @@
           });
         }
         
-        // 正面在中线上方，反面在中线下方
         await addImgToPage(idcardFrontImg, 10);
         await addImgToPage(idcardBackImg, -targetH - 10);
         
         const bytes = await doc.save();
         const filename = '身份证复印_A4.pdf';
         
-        // 预览
         const blob = new Blob([bytes], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
         $('#idcardPreviewWrap').classList.remove('hidden');
@@ -4008,7 +4000,6 @@
         canvas.width = vp.width; canvas.height = vp.height;
         await p1.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
         
-        // 准备下载区
         const body = $('#idcardPdfResultBody');
         body.innerHTML = `
           <div class="result-file">
@@ -4031,16 +4022,15 @@
       }
     });
 
-    /* ===== 模块 4.3：证件照制作 ===== */
+    /* ===== 模块 4.3：证件照制作 (纯本地色度抠图) ===== */
     let idphotoImg = null;
     let idphotoCtx = null;
     let idphotoState = { scale: 1, x: 0, y: 0, startX: 0, startY: 0, dragging: false };
-    // 使用 300dpi 下的像素尺寸
     const idphotoTargetSizes = {
-      '1inch': { w: 295, h: 413 }, // 25x35mm
-      '2inch': { w: 413, h: 579 }, // 35x49mm
-      'small1': { w: 260, h: 378 }, // 22x32mm
-      'small2': { w: 413, h: 531 }  // 35x45mm
+      '1inch': { w: 295, h: 413 },
+      '2inch': { w: 413, h: 579 },
+      'small1': { w: 260, h: 378 },
+      'small2': { w: 413, h: 531 }
     };
 
     bind('#idphotoFile', 'change', async (e) => {
@@ -4065,7 +4055,6 @@
       $('#idphotoPreviewWrap').classList.remove('hidden');
       
       if (layoutMode === 'sheet') {
-        // 5寸相纸：3.5 x 5 英寸 (1050 x 1500 像素 @300dpi)
         canvas.width = 1050;
         canvas.height = 1500;
         canvas.style.width = '100%';
@@ -4074,12 +4063,10 @@
         idphotoCtx.fillStyle = '#ffffff';
         idphotoCtx.fillRect(0, 0, canvas.width, canvas.height);
         
-        // 这里由于有底色，我们需要生成单张然后贴过去
         const singleCv = document.createElement('canvas');
         singleCv.width = target.w; singleCv.height = target.h;
         const sctx = singleCv.getContext('2d');
         
-        // 渲染单张
         sctx.fillStyle = bgColor;
         sctx.fillRect(0, 0, target.w, target.h);
         const scale = Math.max(target.w / idphotoImg.width, target.h / idphotoImg.height);
@@ -4087,7 +4074,7 @@
         const drawH = idphotoImg.height * scale;
         
         let drawX = (target.w - drawW) / 2;
-        let drawY = (target.h - drawH) / 2 - (target.h * 0.05); // 稍微偏上
+        let drawY = (target.h - drawH) / 2 - (target.h * 0.05); 
         
         if (idphotoState.x !== 0 || idphotoState.y !== 0) {
             drawX = idphotoState.x;
@@ -4101,9 +4088,7 @@
         sctx.drawImage(idphotoImg, drawX, drawY, drawW, drawH);
         sctx.restore();
         
-        // 计算排版
-        const margin = 40; // 边距
-        const gap = 20; // 间距
+        const margin = 40; const gap = 20;
         const cols = Math.floor((canvas.width - margin * 2 + gap) / (target.w + gap));
         const rows = Math.floor((canvas.height - margin * 2 + gap) / (target.h + gap));
         
@@ -4115,7 +4100,6 @@
             const x = startX + c * (target.w + gap);
             const y = startY + r * (target.h + gap);
             idphotoCtx.drawImage(singleCv, x, y);
-            // 绘制裁切线
             idphotoCtx.strokeStyle = '#999';
             idphotoCtx.lineWidth = 1;
             idphotoCtx.setLineDash([5, 5]);
@@ -4124,7 +4108,6 @@
         }
         
       } else {
-        // 单张模式
         canvas.width = target.w;
         canvas.height = target.h;
         canvas.style.width = '180px';
