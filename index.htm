@@ -343,7 +343,7 @@
     object-fit: cover; background: #000;
   }
 
-  /* ===== 取景框（4 角 + 连接线，更精确表示裁剪区域） ===== */
+  /* ===== 取景框 ===== */
   .scan-fs-frame {
     position: absolute;
     top: 12%; left: 8%; right: 8%; bottom: 22%;
@@ -523,7 +523,7 @@
     align-self: center; font-weight: 600; padding: 4px 10px;
     background: #fff; border: 1px solid #e2e8f0; border-radius: 7px; }
 
-  /* ===== 照片处理弹层（拍照后处理） ===== */
+  /* ===== 照片处理弹层 ===== */
   .scan-edit-overlay {
     position: fixed; inset: 0; z-index: 9100; background: #0f172a;
     display: none; flex-direction: column;
@@ -581,7 +581,7 @@
     box-shadow: 0 2px 8px rgba(5,150,105,.35);
   }
 
-  /* ===== 扫描图片编辑器（单张编辑） ===== */
+  /* ===== 扫描图片编辑器 ===== */
   .scan-img-editor {
     position: fixed; inset: 0; z-index: 9200; background: #0f172a;
     display: none; flex-direction: column;
@@ -709,7 +709,7 @@
 
 <header class="app-header">
   <h1>📄 PDF 工具箱</h1>
-  <p class="sub">91 个实用工具 · 全部在浏览器本地处理 · 文件不上传</p>
+  <p class="sub">10 个实用工具 · 全部在浏览器本地处理 · 文件不上传</p>
   <div class="badges">
     <span>🔒 本地安全</span>
     <span>⚡ 无需安装</span>
@@ -823,7 +823,6 @@
   <div id="envBanner"></div>
 
   <main>
-    <!-- 1. 试卷拆分 -->
     <section class="panel active" id="panel-split" data-theme="edit">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择试卷 PDF</span></h2>
@@ -871,7 +870,6 @@
       </div>
     </section>
 
-    <!-- 2. PDF 裁剪 -->
     <section class="panel" id="panel-crop" data-theme="edit">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择 PDF</span></h2>
@@ -923,7 +921,6 @@
       </div>
     </section>
 
-    <!-- 3. 页面调整 -->
     <section class="panel" id="panel-arrange" data-theme="edit">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择 PDF</span></h2>
@@ -957,7 +954,6 @@
       </div>
     </section>
 
-    <!-- 4. 扫描文档 -->
     <section class="panel" id="panel-scan" data-theme="edit">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">打开全屏相机</span></h2>
@@ -1002,7 +998,6 @@
       </div>
     </section>
 
-    <!-- 5. 图片转 PDF -->
     <section class="panel" id="panel-img2pdf" data-theme="convert">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择图片</span></h2>
@@ -1042,7 +1037,6 @@
       </div>
     </section>
 
-    <!-- 6. PDF 转图片 -->
     <section class="panel" id="panel-pdf2img" data-theme="convert">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择 PDF</span></h2>
@@ -1073,7 +1067,6 @@
       </div>
     </section>
 
-    <!-- 7. Word 转 PDF -->
     <section class="panel" id="panel-word2pdf" data-theme="convert">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择 Word 文档</span></h2>
@@ -1095,7 +1088,6 @@
       </div>
     </section>
 
-    <!-- 8. PDF 合并 -->
     <section class="panel" id="panel-merge" data-theme="organize">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择要合并的 PDF</span></h2>
@@ -1118,7 +1110,6 @@
       </div>
     </section>
 
-    <!-- 9. PDF 拆分 -->
     <section class="panel" id="panel-extract" data-theme="organize">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择 PDF</span></h2>
@@ -1144,7 +1135,6 @@
   </main>
 </div>
 
-<!-- 全屏相机 -->
 <div class="scan-fullscreen" id="scanFullscreen">
   <div class="scan-fs-topbar">
     <button class="scan-fs-close" id="scanFsClose" type="button">✕</button>
@@ -1170,24 +1160,18 @@
     <button class="scan-fs-thumb" id="scanFsThumb" type="button">
       <span class="placeholder">🖼️</span>
     </button>
-
     <button class="scan-fs-shutter" id="scanFsShutter" type="button">
       <div class="inner"></div>
     </button>
-
     <button class="scan-fs-action" id="scanFsSwitch" type="button" title="切换前后摄像头">🔄</button>
   </div>
 </div>
 
-<!-- 拍照白闪 -->
 <div class="scan-flash-screen" id="scanFlash"></div>
-
-<!-- 拍照成功提示 -->
 <div class="scan-toast" id="scanToast">
   <span>✓</span><span id="scanToastText">已添加到扫描列表</span>
 </div>
 
-<!-- 照片处理弹层 -->
 <div class="scan-edit-overlay" id="scanEditOverlay">
   <div class="scan-edit-header">
     <div class="title">处理当前照片</div>
@@ -1213,7 +1197,6 @@
   </div>
 </div>
 
-<!-- 扫描图片编辑器 -->
 <div class="scan-img-editor" id="scanImgEditor">
   <div class="scan-ie-header">
     <button class="close-btn" id="scanIeClose" type="button">✕</button>
@@ -1244,7 +1227,6 @@
   </div>
 </div>
 
-<!-- 复制 PDF 数据弹窗 -->
 <div id="dataModal" class="modal hidden">
   <div class="modal-content">
     <h3>📋 复制 PDF 数据</h3>
@@ -1260,6 +1242,31 @@
 <script>
 (function () {
   'use strict';
+
+  /* ========== 调试浮层（正式使用时删掉这一整段即可） ========== */
+  window.__dbgLines = [];
+  window.__dbg = function () {
+    const parts = Array.prototype.slice.call(arguments).map(function (v) {
+      if (typeof v === 'object') { try { return JSON.stringify(v); } catch (e) { return String(v); } }
+      return String(v);
+    });
+    window.__dbgLines.push(parts.join(' '));
+    if (window.__dbgLines.length > 14) window.__dbgLines.shift();
+    let el = document.getElementById('__dbgPanel');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = '__dbgPanel';
+      el.style.cssText = 'position:fixed;left:6px;right:6px;top:6px;z-index:99999;' +
+        'background:rgba(0,0,0,.86);color:#7CFC00;font:11px/1.45 monospace;' +
+        'padding:8px 10px;border-radius:8px;white-space:pre-wrap;word-break:break-all;' +
+        'max-height:42vh;overflow-y:auto;pointer-events:auto;';
+      el.addEventListener('dblclick', function () { el.style.display = 'none'; });
+      document.body.appendChild(el);
+    }
+    el.style.display = 'block';
+    el.textContent = window.__dbgLines.join('\n');
+  };
+  /* ============================================================ */
 
   const LOCAL = {
     pdfLib:    ['./libs/pdf-lib.min.js',         './pdf-lib.min.js'],
@@ -1475,9 +1482,6 @@
     finishLoading();
   }
 
-  /* ============================================================
-   *  应用主逻辑
-   * ============================================================ */
   function startApp() {
     const { PDFDocument, degrees } = window.PDFLib;
     const pdfjsLib = window.pdfjsLib;
@@ -1673,7 +1677,6 @@
     const sharedSave = {
       async saveAsPdf(bytes, filename, sayFn) {
         const blob = new Blob([bytes], { type: 'application/pdf' });
-
         if (hasSavePicker) {
           try {
             const handle = await window.showSaveFilePicker({
@@ -1690,7 +1693,6 @@
             console.warn('[save] showSaveFilePicker 失败，回退到 Blob 下载：', err);
           }
         }
-
         let url = null;
         try {
           url = URL.createObjectURL(blob);
@@ -1701,7 +1703,6 @@
           a.target = '_self';
           a.style.display = 'none';
           document.body.appendChild(a);
-
           if (typeof a.click === 'function') {
             a.click();
           } else {
@@ -1710,19 +1711,16 @@
               false, false, false, false, 0, null);
             a.dispatchEvent(evt);
           }
-
           setTimeout(() => {
             try { document.body.removeChild(a); } catch (_) {}
             setTimeout(() => { try { URL.revokeObjectURL(url); } catch (_) {} }, 60000);
           }, 5000);
-
           sayFn('已触发下载：' + filename + '。如浏览器未弹出保存提示，请用「↗ 新窗口打开」后手动保存。', false, true);
           return;
         } catch (err) {
           console.warn('[save] Blob 下载失败：', err);
           if (url) { try { URL.revokeObjectURL(url); } catch (_) {} }
         }
-
         try {
           const dataUrl = await bytesToDataUrl(bytes);
           showDataModalDirect(dataUrl);
@@ -3038,9 +3036,7 @@
       say('#arrangeStatus2', '');
     }
 
-    /* ============================================================
-     * 模块 4：扫描文档（全屏相机 + 结果编辑）
-     * ============================================================ */
+    /* ===== 模块 4：扫描文档 ===== */
     const scan = {
       stream: null,
       facingMode: 'environment',
@@ -3067,7 +3063,6 @@
       if (scan._refresh) scan._refresh();
     }
 
-    /* ---------- 打开/关闭摄像头 ---------- */
     async function openScanCamera() {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         say('#scanStatus', '当前浏览器不支持摄像头调用，请使用最新版 Chrome / Safari，并确保是 HTTPS 环境。', true);
@@ -3150,7 +3145,6 @@
       openScanCamera();
     });
 
-    /* ---------- 拍照视觉反馈 ---------- */
     function flashScreen() {
       const el = $('#scanFlash');
       if (!el) return;
@@ -3185,97 +3179,101 @@
       el.classList.toggle('hidden', !show);
     }
 
-    /* ---------- 关键：按取景框位置从视频帧裁剪（以 wrap 为统一参考系，绝不偏移） ---------- */
     function captureVideoWithFrame(videoEl) {
-  const vw = videoEl.videoWidth;
-  const vh = videoEl.videoHeight;
-  if (!vw || !vh) throw new Error('视频尚未就绪');
+      const vw = videoEl.videoWidth;
+      const vh = videoEl.videoHeight;
+      if (!vw || !vh) throw new Error('视频尚未就绪');
 
-  const wrap = $('#scanFsVideoWrap');
-  const wrapRect = wrap.getBoundingClientRect();
-  const displayW = wrapRect.width;
-  const displayH = wrapRect.height;
-  if (displayW <= 0 || displayH <= 0) throw new Error('显示区域异常');
+      const wrap = $('#scanFsVideoWrap');
+      const wrapRect = wrap.getBoundingClientRect();
+      const displayW = wrapRect.width;
+      const displayH = wrapRect.height;
+      if (displayW <= 0 || displayH <= 0) throw new Error('显示区域异常');
 
-  const frameRect = $('#scanFsFrame').getBoundingClientRect();
+      const frameRect = $('#scanFsFrame').getBoundingClientRect();
 
-  let fx = frameRect.left - wrapRect.left;
-  let fy = frameRect.top - wrapRect.top;
-  let fw = frameRect.width;
-  let fh = frameRect.height;
-  fx = clamp(fx, 0, displayW);
-  fy = clamp(fy, 0, displayH);
-  fw = clamp(fw, 1, displayW - fx);
-  fh = clamp(fh, 1, displayH - fy);
+      let fx = frameRect.left - wrapRect.left;
+      let fy = frameRect.top - wrapRect.top;
+      let fw = frameRect.width;
+      let fh = frameRect.height;
 
-  // object-fit: cover 映射：display 坐标 → video 原始像素坐标
-  const videoRatio = vw / vh;
-  const displayRatio = displayW / displayH;
-  let drawW, drawH, drawX, drawY;
-  if (videoRatio > displayRatio) {
-    drawH = displayH;
-    drawW = displayH * videoRatio;
-    drawX = (displayW - drawW) / 2;
-    drawY = 0;
-  } else {
-    drawW = displayW;
-    drawH = displayW / videoRatio;
-    drawX = 0;
-    drawY = (displayH - drawH) / 2;
-  }
+      fx = clamp(fx, 0, displayW);
+      fy = clamp(fy, 0, displayH);
+      fw = clamp(fw, 1, displayW - fx);
+      fh = clamp(fh, 1, displayH - fy);
 
-  // 取景框 → video 原始像素的源矩形
-  const sx = clamp((fx - drawX) / drawW * vw, 0, vw);
-  const sy = clamp((fy - drawY) / drawH * vh, 0, vh);
-  const sw = clamp(fw / drawW * vw, 1, vw - sx);
-  const sh = clamp(fh / drawH * vh, 1, vh - sy);
+      const videoRatio = vw / vh;
+      const displayRatio = displayW / displayH;
+      let drawW, drawH, drawX, drawY;
+      if (videoRatio > displayRatio) {
+        drawH = displayH; drawW = displayH * videoRatio;
+        drawX = (displayW - drawW) / 2; drawY = 0;
+      } else {
+        drawW = displayW; drawH = displayW / videoRatio;
+        drawX = 0; drawY = (displayH - drawH) / 2;
+      }
 
-  const outW = Math.max(1, Math.round(sw));
-  const outH = Math.max(1, Math.round(sh));
-  const outCv = document.createElement('canvas');
-  outCv.width = outW;
-  outCv.height = outH;
-  outCv.getContext('2d').drawImage(videoEl, sx, sy, sw, sh, 0, 0, outW, outH);
+      const sx = clamp((fx - drawX) / drawW * vw, 0, vw);
+      const sy = clamp((fy - drawY) / drawH * vh, 0, vh);
+      const sw = clamp(fw / drawW * vw, 1, vw - sx);
+      const sh = clamp(fh / drawH * vh, 1, vh - sy);
 
-  // 限制尺寸
-  const maxDim = 2400;
-  if (Math.max(outW, outH) > maxDim) {
-    const k = maxDim / Math.max(outW, outH);
-    const scaled = document.createElement('canvas');
-    scaled.width = Math.max(1, Math.round(outW * k));
-    scaled.height = Math.max(1, Math.round(outH * k));
-    scaled.getContext('2d').drawImage(outCv, 0, 0, scaled.width, scaled.height);
-    return scaled;
-  }
-  return outCv;
-}
+      const outW = Math.max(1, Math.round(sw));
+      const outH = Math.max(1, Math.round(sh));
+      const outCv = document.createElement('canvas');
+      outCv.width = outW;
+      outCv.height = outH;
+      outCv.getContext('2d').drawImage(videoEl, sx, sy, sw, sh, 0, 0, outW, outH);
 
-    /* ---------- 拍照 ---------- */
+      window.__dbg('capture',
+        'video=' + vw + 'x' + vh,
+        'display=' + Math.round(displayW) + 'x' + Math.round(displayH),
+        'frame=' + Math.round(fx) + ',' + Math.round(fy) + ',' + Math.round(fw) + ',' + Math.round(fh),
+        'draw=' + Math.round(drawX) + ',' + Math.round(drawY) + ',' + Math.round(drawW) + ',' + Math.round(drawH),
+        'src=' + Math.round(sx) + ',' + Math.round(sy) + ',' + Math.round(sw) + ',' + Math.round(sh),
+        'out=' + outW + 'x' + outH);
+
+      const maxDim = 2400;
+      if (Math.max(outW, outH) > maxDim) {
+        const k = maxDim / Math.max(outW, outH);
+        const scaled = document.createElement('canvas');
+        scaled.width = Math.max(1, Math.round(outW * k));
+        scaled.height = Math.max(1, Math.round(outH * k));
+        scaled.getContext('2d').drawImage(outCv, 0, 0, scaled.width, scaled.height);
+        return scaled;
+      }
+      return outCv;
+    }
+
     async function takePhoto() {
-  const v = $('#scanFsVideo');
-  if (!v || !v.videoWidth) {
-    say('#scanStatus', '摄像头尚未准备好', true);
-    return;
-  }
-  flashScreen();
-  shutterPulse();
-  showProcessing(true);
-  try {
-    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-    const cv = captureVideoWithFrame(v);
-    scan.currentCanvas = cv;
-    scan.currentProcessed = cv;   // 默认先用原图，保证预览有内容
-    // 先打开弹层（display:flex），再渲染预览，确保 canvas 在可见容器里
-    openScanEditOverlay();
-    // 弹层打开后再按当前模式处理一次（applyScanMode 内部会重绘预览）
-    applyScanMode();
-    showToast('已拍照，请确认或调整处理模式');
-  } catch (err) {
-    say('#scanStatus', '拍照失败：' + (err && err.message ? err.message : err), true);
-  } finally {
-    showProcessing(false);
-  }
-}
+      const v = $('#scanFsVideo');
+      if (!v || !v.videoWidth) {
+        say('#scanStatus', '摄像头尚未准备好', true);
+        return;
+      }
+      flashScreen();
+      shutterPulse();
+      showProcessing(true);
+      try {
+        await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+        const cv = captureVideoWithFrame(v);
+
+        scan.currentCanvas = cv;
+        scan.currentProcessed = null;
+
+        $('#scanEditOverlay').classList.add('show');
+
+        await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+        applyScanMode();
+
+        showToast('已拍照，请确认或调整处理模式');
+      } catch (err) {
+        say('#scanStatus', '拍照失败：' + (err && err.message ? err.message : err), true);
+      } finally {
+        showProcessing(false);
+      }
+    }
 
     $('#scanFsShutter').addEventListener('click', takePhoto);
 
@@ -3288,19 +3286,6 @@
       }
     });
 
-    /* ---------- 照片处理弹层 ---------- */
-    function openScanEditOverlay() {
-  const overlay = $('#scanEditOverlay');
-  if (!overlay) return;
-  overlay.classList.add('show');
-  // 等布局完成后重绘一次，保证 canvas 在可见容器里尺寸正确
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      renderScanEditPreview();
-    });
-  });
-}
-
     function closeScanEditOverlay() {
       const overlay = $('#scanEditOverlay');
       if (!overlay) return;
@@ -3308,17 +3293,20 @@
     }
 
     function renderScanEditPreview() {
-  const canvas = $('#scanEditPreview');
-  const src = scan.currentProcessed || scan.currentCanvas;
-  if (!canvas || !src || !src.width || !src.height) return;
-  canvas.width = src.width;
-  canvas.height = src.height;
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.drawImage(src, 0, 0, canvas.width, canvas.height);
-}
+      const canvas = $('#scanEditPreview');
+      const src = scan.currentProcessed || scan.currentCanvas;
+      window.__dbg('preview',
+        'src=' + (src && src.width) + 'x' + (src && src.height),
+        'processed=' + (scan.currentProcessed && scan.currentProcessed.width) + 'x' + (scan.currentProcessed && scan.currentProcessed.height),
+        'currentCanvas=' + (scan.currentCanvas && scan.currentCanvas.width) + 'x' + (scan.currentCanvas && scan.currentCanvas.height));
+      if (!canvas || !src || !src.width || !src.height) return;
+      canvas.width = src.width;
+      canvas.height = src.height;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(src, 0, 0, canvas.width, canvas.height);
+    }
 
     function processImageForScan(srcCanvas, mode) {
       if (mode === 'original') {
@@ -3394,10 +3382,11 @@
       const mode = $('#scanEditMode').value;
       try {
         scan.currentProcessed = processImageForScan(scan.currentCanvas, mode);
-        renderScanEditPreview();
       } catch (err) {
-        console.error('[scan process]', err);
+        console.error('[scan process] 失败，回退原图', err);
+        scan.currentProcessed = scan.currentCanvas;
       }
+      renderScanEditPreview();
     }
 
     $('#scanEditMode').addEventListener('change', applyScanMode);
@@ -3451,9 +3440,6 @@
       }
     }
 
-    /* ============================================================
-     * 扫描结果列表
-     * ============================================================ */
     function renderScanResultGrid() {
       const grid = $('#scanResultGrid');
       if (!grid) return;
@@ -3512,7 +3498,6 @@
       });
     }
 
-    /* 直接旋转某张扫描图 */
     async function rotateScanItem(idx, delta) {
       const item = scan.items[idx];
       if (!item) return;
@@ -3553,9 +3538,6 @@
       return cv;
     }
 
-    /* ============================================================
-     * 扫描图片编辑器
-     * ============================================================ */
     const editor = {
       baseCanvas: null,
       crop: null,
@@ -3721,7 +3703,6 @@
       } catch (err) {}
     });
 
-    /* 编辑器内拖拽裁剪框 */
     (function bindEditorCropDrag() {
       const stage = $('#scanIeStage');
 
@@ -3840,7 +3821,6 @@
       stage.addEventListener('pointercancel', endDrag);
     })();
 
-    /* 保存编辑 */
     $('#scanIeSave').addEventListener('click', async () => {
       const idx = scan.editIndex;
       const item = scan.items[idx];
@@ -3889,7 +3869,6 @@
       $('#scanImgEditor').classList.remove('show');
     });
 
-    /* 扫描结果清空 */
     $('#scanClearBtn').addEventListener('click', () => {
       if (scan.items.length === 0) return;
       if (!confirm('确定要清空全部扫描页吗？')) return;
@@ -3902,7 +3881,6 @@
       markScanDirty();
     });
 
-    /* 生成扫描 PDF */
     $('#scanPdfBtn').addEventListener('click', async () => {
       if (scan.items.length === 0) { say('#scanListStatus', '请先拍照并添加到扫描列表', true); return; }
       const btn = $('#scanPdfBtn'); btn.disabled = true;
@@ -4535,7 +4513,6 @@
       $('#extractResultCard').classList.remove('hidden');
     }
 
-    /* ===== 窗口尺寸变化 ===== */
     let rt = null;
     window.addEventListener('resize', () => {
       clearTimeout(rt);
