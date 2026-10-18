@@ -4,14 +4,13 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
-<title>PDF 工具箱 · 8 合 1</title>
+<title>PDF 工具箱 · 9 合 1</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
     background: #eef1f6; color: #0f172a; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; min-height: 100vh; }
 
-  /* ===== 顶部 ===== */
   .app-header { background: linear-gradient(135deg, #2563eb 0%, #7c3aed 60%, #a855f7 100%);
     color: #fff; padding: 22px 20px 18px; text-align: center;
     box-shadow: 0 6px 20px rgba(37,99,235,.25); position: relative; overflow: hidden; }
@@ -24,7 +23,6 @@
   .app-header .badges span { font-size: 10px; padding: 3px 9px; background: rgba(255,255,255,.18);
     border: 1px solid rgba(255,255,255,.25); border-radius: 999px; }
 
-  /* ===== 功能目录 ===== */
   .feature-catalog { max-width: 900px; margin: 0 auto; padding: 16px 16px 0; }
   .catalog-group { margin-bottom: 14px; }
   .catalog-title { display: flex; align-items: center; gap: 8px; padding: 0 2px 8px;
@@ -52,7 +50,6 @@
   .feature-desc { font-size: 10px; color: #94a3b8; line-height: 1.2;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-  /* 分类激活色 */
   .catalog-group[data-category="edit"] .feature-card.active { border-color: #2563eb;
     background: linear-gradient(135deg, #eff6ff, #fff);
     box-shadow: 0 0 0 3px rgba(37,99,235,.1), 0 3px 10px rgba(37,99,235,.1); }
@@ -66,7 +63,6 @@
     box-shadow: 0 0 0 3px rgba(5,150,105,.1), 0 3px 10px rgba(5,150,105,.1); }
   .catalog-group[data-category="organize"] .feature-card.active .feature-icon { background: linear-gradient(135deg, #d1fae5, #a7f3d0); }
 
-  /* ===== 工作区 ===== */
   #workspace { max-width: 900px; margin: 0 auto; padding: 4px 16px 80px; scroll-margin-top: 16px; }
   .workspace-header { display: flex; align-items: center; gap: 10px; padding: 6px 4px 12px; }
   .workspace-title { font-size: 15px; font-weight: 700; color: #0f172a;
@@ -90,7 +86,6 @@
   #envBanner code { background: rgba(0,0,0,.07); padding: 1px 5px; border-radius: 4px;
     font-family: ui-monospace, Menlo, monospace; font-size: 11px; }
 
-  /* ===== 卡片 ===== */
   .card { background: #fff; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px;
     box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 4px 14px rgba(15,23,42,.05);
     border: 1px solid #f1f5f9; position: relative; overflow: hidden; }
@@ -99,7 +94,6 @@
   .card h2 { margin: 0 0 12px; font-size: 14px; font-weight: 700;
     color: #0f172a; display: flex; align-items: center; gap: 10px; }
 
-  /* ===== 步骤标签 ===== */
   .step-label { display: inline-flex; align-items: center; justify-content: center;
     padding: 4px 10px; background: linear-gradient(135deg, #2563eb, #7c3aed); color: #fff;
     border-radius: 7px; font-size: 11px; font-weight: 700; letter-spacing: .3px;
@@ -108,7 +102,6 @@
     box-shadow: 0 1px 3px rgba(5,150,105,.3); }
   .step-title { font-size: 14px; font-weight: 700; color: #0f172a; }
 
-  /* ===== 表单 ===== */
   .field { margin-bottom: 12px; }
   .field label { display: block; font-size: 12px; color: #475569; margin-bottom: 5px; font-weight: 500; }
   input[type=file] { width: 100%; font-size: 16px; padding: 12px 10px;
@@ -135,7 +128,6 @@
   select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
 
-  /* ===== 按钮 ===== */
   .btn { display: inline-flex; align-items: center; justify-content: center;
     padding: 11px 16px; border: none; border-radius: 9px;
     background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff;
@@ -333,7 +325,64 @@
   .zip-result .zip-title { font-size: 14px; font-weight: 700; margin-bottom: 5px; color: #065f46; }
   .zip-result .zip-sub { font-size: 11px; color: #64748b; margin-bottom: 16px; }
 
-  /* 面板主题色 */
+  /* ===== 扫描文档 ===== */
+  .scan-camera-wrap { position: relative; width: 100%; border-radius: 10px;
+    overflow: hidden; background: #000; border: 1px solid #e2e8f0; line-height: 0; }
+  .scan-camera-wrap video { display: block; width: 100%; height: auto;
+    max-height: 60vh; object-fit: cover; background: #000; }
+  .scan-camera-wrap .scan-overlay { position: absolute; inset: 0; pointer-events: none; }
+  .scan-camera-wrap .scan-corner { position: absolute; width: 32px; height: 32px;
+    border-color: #fff; border-style: solid; border-width: 0;
+    opacity: .85; filter: drop-shadow(0 0 4px rgba(0,0,0,.35)); }
+  .scan-camera-wrap .scan-corner.tl { top: 8%; left: 6%; border-top-width: 3px; border-left-width: 3px; border-top-left-radius: 6px; }
+  .scan-camera-wrap .scan-corner.tr { top: 8%; right: 6%; border-top-width: 3px; border-right-width: 3px; border-top-right-radius: 6px; }
+  .scan-camera-wrap .scan-corner.bl { bottom: 8%; left: 6%; border-bottom-width: 3px; border-left-width: 3px; border-bottom-left-radius: 6px; }
+  .scan-camera-wrap .scan-corner.br { bottom: 8%; right: 6%; border-bottom-width: 3px; border-right-width: 3px; border-bottom-right-radius: 6px; }
+  .scan-camera-hint { position: absolute; left: 0; right: 0; bottom: 12px;
+    text-align: center; color: #fff; font-size: 12px;
+    text-shadow: 0 1px 4px rgba(0,0,0,.6); pointer-events: none; }
+  .scan-shot-btn { width: 68px; height: 68px; border-radius: 50%;
+    border: 4px solid #fff; background: rgba(255,255,255,.25);
+    margin: 14px auto 0; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,.3);
+    transition: all .15s; }
+  .scan-shot-btn:active { transform: scale(.92); background: rgba(255,255,255,.5); }
+  .scan-shot-btn .inner { width: 48px; height: 48px; border-radius: 50%;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    box-shadow: inset 0 2px 6px rgba(255,255,255,.4); }
+
+  .scan-result-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 8px; padding: 10px; background: #f8fafc;
+    border: 1px solid #e2e8f0; border-radius: 10px;
+    max-height: 360px; overflow-y: auto;
+    -webkit-overflow-scrolling: touch; }
+  .scan-result-item { position: relative; background: #fff; border: 1.5px solid #e2e8f0;
+    border-radius: 9px; padding: 6px; display: flex;
+    flex-direction: column; gap: 4px; cursor: pointer;
+    transition: all .15s; }
+  .scan-result-item:hover { border-color: #cbd5e1; box-shadow: 0 2px 8px rgba(15,23,42,.08); }
+  .scan-result-item.selected { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.13); }
+  .scan-result-item .thumb { width: 100%; height: 100px; object-fit: contain;
+    background: #fff; border-radius: 5px; display: block; border: 1px solid #f1f5f9; }
+  .scan-result-item .num { position: absolute; top: 8px; left: 8px;
+    background: rgba(15,23,42,.85); color: #fff;
+    font-size: 10px; font-weight: 700; padding: 2px 7px;
+    border-radius: 999px; }
+  .scan-result-item .actions { display: flex; gap: 2px; }
+  .scan-result-item .actions button { flex: 1; padding: 4px 0; font-size: 11px;
+    border: none; border-radius: 4px;
+    background: #f1f5f9; color: #334155;
+    cursor: pointer; font-family: inherit;
+    font-weight: 600; min-height: 26px;
+    touch-action: manipulation;
+    -webkit-appearance: none; appearance: none; }
+  .scan-result-item .actions button.danger { background: #fee2e2; color: #b91c1c; }
+
+  .scan-preview-wrap { position: relative; width: 100%; border-radius: 10px;
+    overflow: hidden; background: #f1f5f9;
+    border: 1px solid #e2e8f0; line-height: 0; }
+  .scan-preview-wrap canvas { display: block; width: 100%; height: auto; }
+
   .panel[data-theme="edit"] .card::before { background: linear-gradient(90deg, #2563eb, #3b82f6); }
   .panel[data-theme="edit"] .step-label:not(.step-ok) { background: linear-gradient(135deg, #2563eb, #3b82f6); }
   .panel[data-theme="convert"] .card::before { background: linear-gradient(90deg, #7c3aed, #a855f7); }
@@ -345,7 +394,6 @@
   .panel[data-theme="organize"] input[type=file]::file-selector-button { background: linear-gradient(135deg, #059669, #10b981); }
   .panel[data-theme="organize"] input[type=file]::-webkit-file-upload-button { background: linear-gradient(135deg, #059669, #10b981); }
 
-  /* 手机适配 */
   @media (max-width: 640px) {
     .app-header { padding: 18px 16px 16px; }
     .app-header h1 { font-size: 20px; }
@@ -377,6 +425,8 @@
     .page-actions button { font-size: 11px; padding: 4px 0; }
     .img-list { grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); gap: 6px; padding: 8px; }
     .img-item .thumb { height: 70px; }
+    .scan-shot-btn { width: 60px; height: 60px; }
+    .scan-shot-btn .inner { width: 42px; height: 42px; }
   }
   @supports (padding: env(safe-area-inset-bottom)) {
     #workspace { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
@@ -387,7 +437,7 @@
 
 <header class="app-header">
   <h1>📄 PDF 工具箱</h1>
-  <p class="sub">8 个实用工具 · 全部在浏览器本地处理 · 文件不上传</p>
+  <p class="sub">9 个实用工具 · 全部在浏览器本地处理 · 文件不上传</p>
   <div class="badges">
     <span>🔒 本地安全</span>
     <span>⚡ 无需安装</span>
@@ -395,7 +445,6 @@
   </div>
 </header>
 
-<!-- 功能目录 -->
 <div class="feature-catalog">
   <div class="catalog-group" data-category="edit">
     <div class="catalog-title">
@@ -423,6 +472,13 @@
         <span class="feature-text">
           <span class="feature-name">页面调整</span>
           <span class="feature-desc">排序 · 旋转 · 插页</span>
+        </span>
+      </button>
+      <button class="feature-card" data-tab="scan" type="button">
+        <span class="feature-icon">📷</span>
+        <span class="feature-text">
+          <span class="feature-name">扫描文档</span>
+          <span class="feature-desc">拍照去底色 · 白底黑字</span>
         </span>
       </button>
     </div>
@@ -484,7 +540,6 @@
   </div>
 </div>
 
-<!-- 工作区 -->
 <div id="workspace">
   <div class="workspace-header">
     <div class="workspace-title">
@@ -503,8 +558,20 @@
         <input type="file" id="splitFile" accept=".pdf,application/pdf" />
         <p class="hint">适用于「一张 A3 大纸上印了 2 页 / 3 页试卷」的扫描件。</p>
       </div>
+      <div class="card hidden" id="splitOptCard">
+        <h2><span class="step-label">第 2 步</span><span class="step-title">设置拆分模式</span></h2>
+        <div class="field">
+          <label>每页拆成几份</label>
+          <select id="splitParts"><option value="2">拆 2 页（对半）</option><option value="3">拆 3 页（三等分）</option></select>
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label>切分方向</label>
+          <select id="splitDir"><option value="vertical">左右切分（竖线）</option><option value="horizontal">上下切分（横线）</option></select>
+        </div>
+        <p class="hint">选择拆分模式后，第 3 步会按此模式显示拆分线。改变模式会重置拆分线。</p>
+      </div>
       <div class="card hidden" id="splitCard">
-        <h2><span class="step-label">第 2 步</span><span class="step-title">预览与调整拆分线</span></h2>
+        <h2><span class="step-label">第 3 步</span><span class="step-title">预览与调整拆分线</span></h2>
         <div class="pager">
           <button class="btn gray" id="splitPrev" type="button">上一页</button>
           <span class="info" id="splitPageInfo">1 / 1</span>
@@ -520,16 +587,8 @@
           <button class="btn ghost" id="splitApplyAll" type="button">应用到全部页</button>
         </div>
       </div>
-      <div class="card hidden" id="splitOptCard">
-        <h2><span class="step-label">第 3 步</span><span class="step-title">设置拆分份数并生成</span></h2>
-        <div class="field">
-          <label>每页拆成几份</label>
-          <select id="splitParts"><option value="2">拆 2 页（对半）</option><option value="3">拆 3 页（三等分）</option></select>
-        </div>
-        <div class="field">
-          <label>切分方向</label>
-          <select id="splitDir"><option value="vertical">左右切分（竖线）</option><option value="horizontal">上下切分（横线）</option></select>
-        </div>
+      <div class="card hidden" id="splitGenCard">
+        <h2><span class="step-label">第 4 步</span><span class="step-title">生成 PDF</span></h2>
         <button class="btn big" id="splitBtn" type="button">生成 PDF</button>
         <div class="status" id="splitStatus"></div>
       </div>
@@ -626,7 +685,81 @@
       </div>
     </section>
 
-    <!-- 4. 图片转 PDF -->
+    <!-- 4. 扫描文档 -->
+    <section class="panel" id="panel-scan" data-theme="edit">
+      <div class="card">
+        <h2><span class="step-label">第 1 步</span><span class="step-title">调用摄像头</span></h2>
+        <div class="btn-row" id="scanStartRow">
+          <button class="btn big" id="scanStartBtn" type="button">📷 打开摄像头扫描</button>
+        </div>
+        <div class="btn-row hidden" id="scanStopRow">
+          <button class="btn gray" id="scanStopBtn" type="button">关闭摄像头</button>
+          <button class="btn ghost" id="scanSwitchBtn" type="button">切换前后摄像头</button>
+        </div>
+        <div class="scan-camera-wrap hidden" id="scanCamWrap">
+          <video id="scanVideo" playsinline autoplay muted></video>
+          <div class="scan-overlay">
+            <div class="scan-corner tl"></div>
+            <div class="scan-corner tr"></div>
+            <div class="scan-corner bl"></div>
+            <div class="scan-corner br"></div>
+          </div>
+          <div class="scan-camera-hint">将文档对准取景框，点击下方按钮拍照</div>
+        </div>
+        <div class="scan-shot-btn hidden" id="scanShotBtn">
+          <div class="inner"></div>
+        </div>
+        <p class="hint">摄像头需要 HTTPS 环境（或 localhost）。首次使用会请求相机权限。</p>
+        <div class="status" id="scanStatus"></div>
+      </div>
+
+      <div class="card hidden" id="scanEditCard">
+        <h2><span class="step-label">第 2 步</span><span class="step-title">处理当前照片</span></h2>
+        <div class="scan-preview-wrap">
+          <canvas id="scanPreview"></canvas>
+        </div>
+        <div class="field" style="margin-top:12px">
+          <label>处理模式</label>
+          <select id="scanMode">
+            <option value="enhance" selected>增强去底色（推荐）</option>
+            <option value="bw">黑白二值化（最清晰）</option>
+            <option value="gray">灰度增强</option>
+            <option value="original">保留原图</option>
+          </select>
+        </div>
+        <div class="btn-row">
+          <button class="btn ghost" id="scanRetakeBtn" type="button">重拍</button>
+          <button class="btn green big" id="scanAddBtn" type="button" style="flex:1">✓ 添加到扫描列表</button>
+        </div>
+        <div class="status" id="scanEditStatus"></div>
+      </div>
+
+      <div class="card hidden" id="scanListCard">
+        <h2><span class="step-label">第 3 步</span><span class="step-title">扫描结果</span></h2>
+        <div class="scan-result-grid" id="scanResultGrid"></div>
+        <div class="field" style="margin-top:12px">
+          <label>PDF 页面尺寸</label>
+          <select id="scanPdfSize">
+            <option value="a4" selected>A4 纵向（自动缩放居中）</option>
+            <option value="a4l">A4 横向</option>
+            <option value="original">按图片原始尺寸</option>
+          </select>
+        </div>
+        <div class="btn-row">
+          <button class="btn ghost" id="scanClearBtn" type="button">清空全部</button>
+          <button class="btn big" id="scanPdfBtn" type="button" style="flex:1">生成 PDF</button>
+        </div>
+        <div class="status" id="scanListStatus"></div>
+      </div>
+
+      <div class="card result-card hidden" id="scanResultCard">
+        <h2><span class="step-label step-ok">✓ 完成</span><span class="step-title">PDF 已生成</span></h2>
+        <div id="scanPdfResultBody"></div>
+        <div class="status" id="scanPdfStatus2"></div>
+      </div>
+    </section>
+
+    <!-- 5. 图片转 PDF -->
     <section class="panel" id="panel-img2pdf" data-theme="convert">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择图片</span></h2>
@@ -666,7 +799,7 @@
       </div>
     </section>
 
-    <!-- 5. PDF 转图片 -->
+    <!-- 6. PDF 转图片 -->
     <section class="panel" id="panel-pdf2img" data-theme="convert">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择 PDF</span></h2>
@@ -697,7 +830,7 @@
       </div>
     </section>
 
-    <!-- 6. Word 转 PDF -->
+    <!-- 7. Word 转 PDF -->
     <section class="panel" id="panel-word2pdf" data-theme="convert">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择 Word 文档</span></h2>
@@ -719,7 +852,7 @@
       </div>
     </section>
 
-    <!-- 7. PDF 合并 -->
+    <!-- 8. PDF 合并 -->
     <section class="panel" id="panel-merge" data-theme="organize">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择要合并的 PDF</span></h2>
@@ -742,7 +875,7 @@
       </div>
     </section>
 
-    <!-- 8. PDF 拆分 -->
+    <!-- 9. PDF 拆分 -->
     <section class="panel" id="panel-extract" data-theme="organize">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择 PDF</span></h2>
@@ -781,9 +914,6 @@
 </div>
 
 <script>
-/* ============================================================
- *  依赖加载：本地优先 + CDN 回退
- * ============================================================ */
 (function () {
   'use strict';
 
@@ -1050,12 +1180,12 @@
     renderEnvBanner();
 
     const toolNames = {
-      split: '试卷拆分', crop: 'PDF 裁剪', arrange: '页面调整',
+      split: '试卷拆分', crop: 'PDF 裁剪', arrange: '页面调整', scan: '扫描文档',
       img2pdf: '图片转 PDF', pdf2img: 'PDF 转图片', word2pdf: 'Word 转 PDF',
       merge: 'PDF 合并', extract: 'PDF 拆分'
     };
     const toolIcons = {
-      split: '📝', crop: '✂️', arrange: '📄',
+      split: '📝', crop: '✂️', arrange: '📄', scan: '📷',
       img2pdf: '🖼️', pdf2img: '📷', word2pdf: '📘',
       merge: '🔗', extract: '📑'
     };
@@ -1093,6 +1223,8 @@
       btn.addEventListener('click', function (e) {
         e.preventDefault();
         showTool(btn.dataset.tab, true);
+        // 离开扫描面板时关闭摄像头
+        if (btn.dataset.tab !== 'scan' && scan.stream) closeCamera();
       });
     });
 
@@ -1483,19 +1615,23 @@
     $('#splitFile').addEventListener('change', async (e) => {
       const f = e.target.files[0]; if (!f) return;
       say('#splitStatus', '');
-      $('#splitCard').classList.add('hidden');
       $('#splitOptCard').classList.add('hidden');
+      $('#splitCard').classList.add('hidden');
+      $('#splitGenCard').classList.add('hidden');
       $('#splitResultCard').classList.add('hidden');
       revokeSplitResult();
       split.resultBytes = null; split.hasResult = false; split.previewOpen = false;
       try {
         const buf = await readBuffer(f);
         split.file = f; split.buf = buf; split.pageNum = 1; split.ratios = {};
+        split.parts = parseInt($('#splitParts').value, 10) || 2;
+        split.dir = $('#splitDir').value || 'vertical';
         split.doc = await pdfjsLib.getDocument({ data: new Uint8Array(buf.slice(0)) }).promise;
-        $('#splitCard').classList.remove('hidden');
         $('#splitOptCard').classList.remove('hidden');
+        $('#splitCard').classList.remove('hidden');
+        $('#splitGenCard').classList.remove('hidden');
         await splitRender();
-        say('#splitStatus', '已载入 ' + split.doc.numPages + ' 页，可拖动虚线调整后生成');
+        say('#splitStatus', '已载入 ' + split.doc.numPages + ' 页，确认拆分模式后点击「生成 PDF」');
       } catch (err) {
         say('#splitStatus', '载入失败：' + (err && err.message ? err.message : err), true);
       }
@@ -1650,16 +1786,19 @@
       markSplitDirty();
       say('#splitStatus', '已把本页拆分位置应用到全部 ' + split.doc.numPages + ' 页');
     });
-    $('#splitParts').addEventListener('change', () => {
+    $('#splitParts').addEventListener('change', async () => {
       split.parts = parseInt($('#splitParts').value, 10);
       split.ratios = {};
-      drawSplitLines(); markSplitDirty();
-      say('#splitStatus', '份数已改变，拆分线重置为均匀分布');
+      if (split.doc) await splitRender();
+      markSplitDirty();
+      say('#splitStatus', '拆分份数已改为 ' + split.parts + '，拆分线已重置为均匀分布');
     });
-    $('#splitDir').addEventListener('change', () => {
+    $('#splitDir').addEventListener('change', async () => {
       split.dir = $('#splitDir').value;
-      drawSplitLines(); markSplitDirty();
-      say('#splitStatus', '');
+      split.ratios = {};
+      if (split.doc) await splitRender();
+      markSplitDirty();
+      say('#splitStatus', '切分方向已更新，拆分线已重置');
     });
 
     $('#splitBtn').addEventListener('click', async () => {
@@ -2515,7 +2654,362 @@
       say('#arrangeStatus2', '');
     }
 
-    /* ===== 模块 4：图片转 PDF ===== */
+    /* ===== 模块 4：扫描文档 ===== */
+    const scan = {
+      stream: null,
+      facingMode: 'environment',
+      currentCanvas: null,
+      currentProcessed: null,
+      items: [],
+      idCounter: 0,
+      resultBytes: null, resultUrl: null,
+      resultFilename: '', resultSize: 0, resultOutPages: 0,
+      hasResult: false, dirty: false,
+      previewDoc: null, previewOpen: false
+    };
+    $('#scanPdfResultBody').innerHTML = buildResultCardHtml('scanRes');
+    bindResultCard('scanRes', scan, (t, e, o) => say('#scanPdfStatus2', t, e, o), true);
+
+    function revokeScanResult() {
+      if (scan.resultUrl) { try { URL.revokeObjectURL(scan.resultUrl); } catch (_) {} scan.resultUrl = null; }
+      if (scan.previewDoc) { try { scan.previewDoc.destroy(); } catch (_) {} scan.previewDoc = null; }
+    }
+    function markScanDirty() {
+      if (!scan.hasResult) return;
+      scan.dirty = true;
+      if (scan._refresh) scan._refresh();
+    }
+
+    async function openCamera() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        say('#scanStatus', '当前浏览器不支持摄像头调用，请使用最新版 Chrome / Safari，并确保是 HTTPS 环境。', true);
+        return;
+      }
+      if (!env.isSecure) {
+        say('#scanStatus', '⚠️ 摄像头需要在 HTTPS 或 localhost 环境才能使用。', true);
+        return;
+      }
+      say('#scanStatus', '正在打开摄像头…');
+      try {
+        if (scan.stream) { scan.stream.getTracks().forEach(t => t.stop()); scan.stream = null; }
+        scan.stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: scan.facingMode },
+            width: { ideal: 1920 },
+            height: { ideal: 1080 }
+          },
+          audio: false
+        });
+        const v = $('#scanVideo');
+        v.srcObject = scan.stream;
+        await v.play();
+        $('#scanCamWrap').classList.remove('hidden');
+        $('#scanShotBtn').classList.remove('hidden');
+        $('#scanStartRow').classList.add('hidden');
+        $('#scanStopRow').classList.remove('hidden');
+        say('#scanStatus', '摄像头已就绪，将文档对准取景框后点击下方快门按钮。');
+      } catch (err) {
+        console.error('[camera]', err);
+        let msg = '无法打开摄像头：' + (err && err.message ? err.message : err);
+        if (err && (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError')) {
+          msg = '摄像头权限被拒绝。请在浏览器地址栏的权限设置中允许本站使用摄像头，然后重试。';
+        } else if (err && err.name === 'NotFoundError') {
+          msg = '未检测到摄像头设备。';
+        } else if (err && err.name === 'NotReadableError') {
+          msg = '摄像头被其他应用占用，请关闭其他使用摄像头的 App 后重试。';
+        }
+        say('#scanStatus', msg, true);
+      }
+    }
+    function closeCamera() {
+      if (scan.stream) {
+        scan.stream.getTracks().forEach(t => t.stop());
+        scan.stream = null;
+      }
+      const v = $('#scanVideo');
+      if (v) v.srcObject = null;
+      $('#scanCamWrap').classList.add('hidden');
+      $('#scanShotBtn').classList.add('hidden');
+      $('#scanStartRow').classList.remove('hidden');
+      $('#scanStopRow').classList.add('hidden');
+    }
+
+    $('#scanStartBtn').addEventListener('click', openCamera);
+    $('#scanStopBtn').addEventListener('click', () => {
+      closeCamera();
+      say('#scanStatus', '摄像头已关闭');
+    });
+    $('#scanSwitchBtn').addEventListener('click', async () => {
+      scan.facingMode = scan.facingMode === 'environment' ? 'user' : 'environment';
+      await openCamera();
+    });
+
+    function drawImageToCanvas(img, maxDim) {
+      const w = img.naturalWidth || img.videoWidth || img.width;
+      const h = img.naturalHeight || img.videoHeight || img.height;
+      const scale = Math.min(1, (maxDim || 2400) / Math.max(w, h));
+      const cw = Math.max(1, Math.round(w * scale));
+      const ch = Math.max(1, Math.round(h * scale));
+      const cv = document.createElement('canvas');
+      cv.width = cw; cv.height = ch;
+      const ctx = cv.getContext('2d');
+      ctx.drawImage(img, 0, 0, cw, ch);
+      return cv;
+    }
+
+    function renderScanPreview() {
+      const canvas = $('#scanPreview');
+      const src = scan.currentProcessed || scan.currentCanvas;
+      if (!src) return;
+      const maxW = Math.min(canvas.parentElement.clientWidth || 600, 800);
+      const scale = Math.min(1, maxW / src.width);
+      canvas.width = Math.round(src.width * scale);
+      canvas.height = Math.round(src.height * scale);
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(src, 0, 0, canvas.width, canvas.height);
+    }
+
+    function processImageForScan(srcCanvas, mode) {
+      if (mode === 'original') {
+        const cv = document.createElement('canvas');
+        cv.width = srcCanvas.width; cv.height = srcCanvas.height;
+        cv.getContext('2d').drawImage(srcCanvas, 0, 0);
+        return cv;
+      }
+
+      const cv = document.createElement('canvas');
+      cv.width = srcCanvas.width; cv.height = srcCanvas.height;
+      const ctx = cv.getContext('2d');
+      ctx.drawImage(srcCanvas, 0, 0);
+      const imgData = ctx.getImageData(0, 0, cv.width, cv.height);
+      const d = imgData.data;
+      const n = d.length / 4;
+
+      const gray = new Uint8ClampedArray(n);
+      for (let i = 0, j = 0; i < d.length; i += 4, j++) {
+        gray[j] = (d[i] * 0.299 + d[i + 1] * 0.587 + d[i + 2] * 0.114) | 0;
+      }
+
+      const hist = new Uint32Array(256);
+      for (let j = 0; j < n; j++) hist[gray[j]]++;
+
+      const lowCut = n * 0.02, highCut = n * 0.02;
+      let acc = 0, lo = 0, hi = 255;
+      for (let i = 0; i < 256; i++) { acc += hist[i]; if (acc >= lowCut) { lo = i; break; } }
+      acc = 0;
+      for (let i = 255; i >= 0; i--) { acc += hist[i]; if (acc >= highCut) { hi = i; break; } }
+      if (hi <= lo) hi = Math.min(255, lo + 1);
+      const range = hi - lo;
+      const LUT = new Uint8ClampedArray(256);
+      for (let i = 0; i < 256; i++) LUT[i] = clamp((i - lo) * 255 / range, 0, 255);
+
+      let threshold = -1;
+      if (mode === 'bw') {
+        const hist2 = new Uint32Array(256);
+        for (let j = 0; j < n; j++) hist2[LUT[gray[j]]]++;
+        let sum = 0;
+        for (let i = 0; i < 256; i++) sum += i * hist2[i];
+        let sumB = 0, wB = 0, maxVar = -1;
+        for (let t = 0; t < 256; t++) {
+          wB += hist2[t];
+          if (wB === 0) continue;
+          const wF = n - wB;
+          if (wF === 0) break;
+          sumB += t * hist2[t];
+          const mB = sumB / wB;
+          const mF = (sum - sumB) / wF;
+          const v = wB * wF * (mB - mF) * (mB - mF);
+          if (v > maxVar) { maxVar = v; threshold = t; }
+        }
+        if (threshold < 0) threshold = 128;
+      }
+
+      for (let i = 0, j = 0; i < d.length; i += 4, j++) {
+        let v = LUT[gray[j]];
+        if (mode === 'bw') v = v > threshold ? 255 : 0;
+        if (mode === 'enhance') {
+          if (v < 100) v = v * 0.85;
+          else if (v > 155) v = Math.min(255, 155 + (v - 155) * 1.2);
+        }
+        d[i] = d[i + 1] = d[i + 2] = v;
+        d[i + 3] = 255;
+      }
+      ctx.putImageData(imgData, 0, 0);
+      return cv;
+    }
+
+    function applyScanMode() {
+      if (!scan.currentCanvas) return;
+      const mode = $('#scanMode').value;
+      try {
+        scan.currentProcessed = processImageForScan(scan.currentCanvas, mode);
+        renderScanPreview();
+      } catch (err) {
+        console.error('[scan process]', err);
+        say('#scanEditStatus', '处理失败：' + (err && err.message ? err.message : err), true);
+      }
+    }
+    $('#scanMode').addEventListener('change', applyScanMode);
+
+    $('#scanShotBtn').addEventListener('click', () => {
+      const v = $('#scanVideo');
+      if (!v || !v.videoWidth) { say('#scanStatus', '摄像头尚未准备好', true); return; }
+      try {
+        const cv = drawImageToCanvas(v, 2400);
+        scan.currentCanvas = cv;
+        applyScanMode();
+        $('#scanEditCard').classList.remove('hidden');
+        say('#scanStatus', '已拍照，请在第 2 步选择处理模式并确认。');
+      } catch (err) {
+        say('#scanStatus', '拍照失败：' + (err && err.message ? err.message : err), true);
+      }
+    });
+
+    $('#scanRetakeBtn').addEventListener('click', () => {
+      scan.currentCanvas = null;
+      scan.currentProcessed = null;
+      $('#scanEditCard').classList.add('hidden');
+      say('#scanStatus', '已取消，可重新拍照。');
+    });
+
+    function renderScanResultGrid() {
+      const grid = $('#scanResultGrid');
+      grid.innerHTML = '';
+      scan.items.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = 'scan-result-item';
+        div.innerHTML =
+          '<span class="num">#' + (idx + 1) + '</span>'
+          + '<img class="thumb" src="' + item.dataUrl + '" alt="" />'
+          + '<div class="actions">'
+          +   '<button data-act="up" type="button">↑</button>'
+          +   '<button data-act="down" type="button">↓</button>'
+          +   '<button class="danger" data-act="del" type="button">✕</button>'
+          + '</div>';
+        div.querySelector('[data-act="up"]').addEventListener('click', () => {
+          if (idx === 0) return;
+          const [x] = scan.items.splice(idx, 1);
+          scan.items.splice(idx - 1, 0, x);
+          renderScanResultGrid(); markScanDirty();
+        });
+        div.querySelector('[data-act="down"]').addEventListener('click', () => {
+          if (idx === scan.items.length - 1) return;
+          const [x] = scan.items.splice(idx, 1);
+          scan.items.splice(idx + 1, 0, x);
+          renderScanResultGrid(); markScanDirty();
+        });
+        div.querySelector('[data-act="del"]').addEventListener('click', () => {
+          scan.items.splice(idx, 1);
+          renderScanResultGrid(); markScanDirty();
+          if (scan.items.length === 0) {
+            $('#scanListCard').classList.add('hidden');
+          }
+        });
+        grid.appendChild(div);
+      });
+    }
+
+    $('#scanAddBtn').addEventListener('click', () => {
+      if (!scan.currentProcessed) { say('#scanEditStatus', '请先拍照', true); return; }
+      try {
+        const dataUrl = scan.currentProcessed.toDataURL('image/jpeg', 0.92);
+        scan.items.push({
+          id: 's' + (++scan.idCounter),
+          dataUrl,
+          width: scan.currentProcessed.width,
+          height: scan.currentProcessed.height
+        });
+        $('#scanListCard').classList.remove('hidden');
+        renderScanResultGrid();
+        $('#scanEditCard').classList.add('hidden');
+        scan.currentCanvas = null;
+        scan.currentProcessed = null;
+        say('#scanStatus', '已添加 1 页，可继续拍照或生成 PDF。');
+        say('#scanEditStatus', '');
+        markScanDirty();
+        $('#scanListCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } catch (err) {
+        say('#scanEditStatus', '添加失败：' + (err && err.message ? err.message : err), true);
+      }
+    });
+
+    $('#scanClearBtn').addEventListener('click', () => {
+      if (scan.items.length === 0) return;
+      if (!confirm('确定要清空全部扫描页吗？')) return;
+      scan.items = [];
+      renderScanResultGrid();
+      $('#scanListCard').classList.add('hidden');
+      say('#scanListStatus', '已清空');
+      markScanDirty();
+    });
+
+    $('#scanPdfBtn').addEventListener('click', async () => {
+      if (scan.items.length === 0) { say('#scanListStatus', '请先拍照并添加到扫描列表', true); return; }
+      const btn = $('#scanPdfBtn'); btn.disabled = true;
+      const mode = $('#scanPdfSize').value;
+      say('#scanListStatus', '正在生成 PDF…');
+      try {
+        const doc = await PDFDocument.create();
+        const A4 = [595.28, 841.89];
+        for (let i = 0; i < scan.items.length; i++) {
+          const item = scan.items[i];
+          say('#scanListStatus', '正在生成… ' + (i + 1) + '/' + scan.items.length);
+          const img = await loadImage(item.dataUrl);
+          const cv = document.createElement('canvas');
+          cv.width = item.width; cv.height = item.height;
+          const ctx = cv.getContext('2d');
+          ctx.fillStyle = '#fff';
+          ctx.fillRect(0, 0, cv.width, cv.height);
+          ctx.drawImage(img, 0, 0);
+          const blob = await new Promise(res => cv.toBlob(res, 'image/jpeg', 0.9));
+          const jpgBytes = new Uint8Array(await blob.arrayBuffer());
+          const jpg = await doc.embedJpg(jpgBytes);
+
+          let pageW, pageH;
+          if (mode === 'a4') { pageW = A4[0]; pageH = A4[1]; }
+          else if (mode === 'a4l') { pageW = A4[1]; pageH = A4[0]; }
+          else { pageW = item.width; pageH = item.height; }
+
+          const page = doc.addPage([pageW, pageH]);
+          const k = Math.min(pageW / jpg.width, pageH / jpg.height);
+          const w = jpg.width * k, h = jpg.height * k;
+          page.drawImage(jpg, {
+            x: (pageW - w) / 2,
+            y: (pageH - h) / 2,
+            width: w, height: h
+          });
+          if (i % 2 === 1) await new Promise(r => setTimeout(r, 0));
+        }
+        const bytes = await doc.save();
+        const filename = '扫描文档_' + Date.now() + '.pdf';
+        await showScanPdfResult(bytes, filename, scan.items.length);
+        say('#scanListStatus', '生成完成！请选择一种保存方式', false, true);
+        $('#scanResultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } catch (err) {
+        console.error(err);
+        say('#scanListStatus', '生成失败：' + (err && err.message ? err.message : err), true);
+      } finally { btn.disabled = false; }
+    });
+
+    async function showScanPdfResult(bytes, filename, outPages) {
+      revokeScanResult();
+      scan.resultBytes = bytes;
+      scan.resultFilename = filename;
+      scan.resultSize = new Blob([bytes]).size;
+      scan.resultOutPages = outPages;
+      scan.hasResult = true; scan.dirty = false;
+      const blob = new Blob([bytes], { type: 'application/pdf' });
+      scan.resultUrl = URL.createObjectURL(blob);
+      try {
+        scan.previewDoc = await pdfjsLib.getDocument({ data: new Uint8Array(bytes.slice(0)) }).promise;
+      } catch (e) { scan.previewDoc = null; }
+      $('#scanResultCard').classList.remove('hidden');
+      if (scan._refresh) scan._refresh();
+      say('#scanPdfStatus2', '');
+    }
+
+    /* ===== 模块 5：图片转 PDF ===== */
     const img2pdf = {
       items: [], idCounter: 0,
       resultBytes: null, resultUrl: null,
@@ -2671,7 +3165,7 @@
       say('#img2pdfStatus2', '');
     }
 
-    /* ===== 模块 5：PDF 转图片 ===== */
+    /* ===== 模块 6：PDF 转图片 ===== */
     const pdf2img = {
       file: null, buf: null, doc: null,
       resultFiles: [], resultZipBlob: null, resultZipName: '', hasResult: false
@@ -2775,7 +3269,7 @@
       $('#pdf2imgResultCard').classList.remove('hidden');
     }
 
-    /* ===== 模块 6：Word 转 PDF ===== */
+    /* ===== 模块 7：Word 转 PDF ===== */
     let word2pdfFile = null;
 
     $('#word2pdfFile').addEventListener('change', (e) => {
@@ -2835,7 +3329,7 @@
       } finally { btn.disabled = false; }
     });
 
-    /* ===== 模块 7：PDF 合并 ===== */
+    /* ===== 模块 8：PDF 合并 ===== */
     const merge = {
       files: [], idCounter: 0,
       resultBytes: null, resultUrl: null,
@@ -2968,7 +3462,7 @@
       say('#mergeStatus2', '');
     }
 
-    /* ===== 模块 8：PDF 拆分 ===== */
+    /* ===== 模块 9：PDF 拆分 ===== */
     const extract = {
       file: null, buf: null, doc: null,
       resultFiles: [], resultZipBlob: null, resultZipName: '', hasResult: false
@@ -3090,6 +3584,7 @@
         try {
           if (document.querySelector('#panel-split.active') && split.doc) splitRender();
           if (document.querySelector('#panel-crop.active') && crop.doc) cropRender();
+          if (document.querySelector('#panel-scan.active') && scan.currentProcessed) renderScanPreview();
         } catch (e) {}
       }, 200);
     });
@@ -3098,6 +3593,7 @@
         try {
           if (document.querySelector('#panel-split.active') && split.doc) splitRender();
           if (document.querySelector('#panel-crop.active') && crop.doc) cropRender();
+          if (document.querySelector('#panel-scan.active') && scan.currentProcessed) renderScanPreview();
         } catch (e) {}
       }, 300);
     });
@@ -3106,8 +3602,12 @@
       revokeSplitResult();
       revokeCropResult();
       revokeArrangeResult();
+      revokeScanResult();
       revokeImg2PdfResult();
       revokeMergeResult();
+      if (scan.stream) {
+        try { scan.stream.getTracks().forEach(t => t.stop()); } catch (_) {}
+      }
     });
   }
 
