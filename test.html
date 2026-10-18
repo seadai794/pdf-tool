@@ -27,20 +27,28 @@
   .cam-full.show { display: flex; }
   .cam-top { position: absolute; top: 0; left: 0; right: 0; padding: 20px; display: flex; justify-content: space-between; color: #fff; z-index: 10; background: linear-gradient(180deg, rgba(0,0,0,0.7), transparent); font-size: 16px; font-weight: bold;}
   .cam-close { background: rgba(255,255,255,0.2); border: none; color: #fff; width: 36px; height: 36px; border-radius: 50%; font-size: 18px; }
-  .cam-video-wrap { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; }
+  .cam-video-wrap { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden;}
   .cam-video-wrap video { width: 100%; height: 100%; object-fit: cover; position: absolute; }
   
-  /* 身份证取景框 */
-  .id-frame { position: absolute; width: 80%; height: 50%; top: 25%; left: 10%; border: 2px solid rgba(255,255,255,0.5); border-radius: 12px; pointer-events: none; box-shadow: 0 0 0 4000px rgba(0,0,0,0.5); display: none;}
+  /* 身份证精准取景框 (1.585:1) */
+  .id-frame { position: absolute; width: 90%; aspect-ratio: 1.585; border: 2px solid rgba(255,255,255,0.5); border-radius: 8px; pointer-events: none; box-shadow: 0 0 0 4000px rgba(0,0,0,0.6); display: none; overflow: hidden;}
   .id-frame.show { display: block; }
-  .id-frame::before, .id-frame::after { content: ''; position: absolute; width: 30px; height: 30px; border-color: #fff; border-style: solid; }
-  .id-frame::before { top: -2px; left: -2px; border-width: 4px 0 0 4px; border-top-left-radius: 12px; }
-  .id-frame::after { bottom: -2px; right: -2px; border-width: 0 4px 4px 0; border-bottom-right-radius: 12px; }
+  .id-frame::before, .id-frame::after { content: ''; position: absolute; width: 30px; height: 30px; border-color: #60a5fa; border-style: solid; }
+  .id-frame::before { top: -2px; left: -2px; border-width: 4px 0 0 4px; border-top-left-radius: 8px; }
+  .id-frame::after { bottom: -2px; right: -2px; border-width: 0 4px 4px 0; border-bottom-right-radius: 8px; }
   
-  .cam-bottom { position: absolute; bottom: 0; left: 0; right: 0; height: 140px; display: flex; align-items: center; justify-content: center; background: linear-gradient(0deg, rgba(0,0,0,0.8), transparent); z-index: 10;}
+  /* 证件照对焦框 */
+  .focus-box { position: absolute; width: 80px; height: 80px; border: 2px solid #60a5fa; border-radius: 8px; display: none; pointer-events: none; animation: focusAnim 0.5s ease-out; }
+  @keyframes focusAnim {
+    0% { transform: scale(1.2); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  
+  .cam-bottom { position: absolute; bottom: 0; left: 0; right: 0; height: 140px; display: flex; align-items: center; justify-content: space-around; background: linear-gradient(0deg, rgba(0,0,0,0.8), transparent); z-index: 10;}
   .shutter { width: 70px; height: 70px; border-radius: 50%; border: 4px solid #fff; background: rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; }
   .shutter:active { background: rgba(255,255,255,0.6); }
   .shutter-in { width: 54px; height: 54px; border-radius: 50%; background: #fff; }
+  .switch-cam { width: 50px; height: 50px; background: rgba(255,255,255,0.15); border: none; color: #fff; border-radius: 50%; font-size: 24px; display: flex; align-items: center; justify-content: center; }
   
   .loading-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; color: #fff; }
   .loading-mask.show { display: flex; }
@@ -54,7 +62,7 @@
 
 <!-- 模块 1：身份证 -->
 <div class="card">
-  <h3>🪪 身份证正反面拍照合成</h3>
+  <h3>🪪 身份证精准拍照合成</h3>
   <div class="flex-row" style="margin-bottom: 12px;">
     <div class="preview-box" id="prevFront">正面未拍</div>
     <div class="preview-box" id="prevBack">反面未拍</div>
@@ -70,15 +78,15 @@
   <h3>👤 证件照 AI 抠图去背景</h3>
   <input type="file" id="idPhotoInput" accept="image/*" style="display: none;" onchange="handleIdPhoto(event)">
   <button class="btn gray" onclick="document.getElementById('idPhotoInput').click()">🖼️ 从相册选照片</button>
-  <button class="btn blue" onclick="openCam('photo')">📷 直接拍照</button>
+  <button class="btn blue" onclick="openCam('photo')">📷 直接拍照（可对焦）</button>
   
   <div class="preview-box" id="idPhotoPrev" style="height: 250px; background: #e2e8f0;">未选择照片</div>
   
   <div class="flex-row" style="margin-bottom: 12px;">
     <select id="bgColor" style="padding:10px; border-radius:8px; border:1px solid #cbd5e1;">
-      <option value="#ffffff">白色</option>
-      <option value="#d92b2b">红色</option>
-      <option value="#1d4ed8">蓝色</option>
+      <option value="#ffffff">白色背景</option>
+      <option value="#d92b2b">红色背景</option>
+      <option value="#1d4ed8">蓝色背景</option>
     </select>
     <button class="btn green" id="btnRemoveBg" onclick="removeBg()">✨ 一键去背景</button>
   </div>
@@ -91,14 +99,19 @@
     <span id="camTitle">拍照</span>
     <button class="cam-close" onclick="closeCam()">✕</button>
   </div>
-  <div class="cam-video-wrap">
+  <div class="cam-video-wrap" id="videoWrap">
     <video id="video" playsinline autoplay muted></video>
+    <!-- 身份证精准取景框 -->
     <div class="id-frame" id="idFrame"></div>
+    <!-- 点击对焦框 -->
+    <div class="focus-box" id="focusBox"></div>
   </div>
   <div class="cam-bottom">
+    <button class="switch-cam" onclick="switchCamera()">🔄</button>
     <div class="shutter" onclick="takePhoto()">
       <div class="shutter-in"></div>
     </div>
+    <div style="width: 50px;"></div> <!-- 占位对称 -->
   </div>
 </div>
 
@@ -112,6 +125,8 @@
 // ================= 相机核心逻辑 =================
 let stream = null;
 let camMode = ''; // 'front', 'back', 'photo'
+let facingMode = 'environment'; // 'user' 或 'environment'
+let currentFacing = 'environment';
 
 async function openCam(mode) {
   camMode = mode;
@@ -119,21 +134,80 @@ async function openCam(mode) {
     mode === 'front' ? '拍身份证正面' : 
     mode === 'back' ? '拍身份证反面' : '拍证件照';
   
-  // 拍身份证时显示矩形取景框
+  // 只有在拍身份证时显示矩形取景框
   document.getElementById('idFrame').classList.toggle('show', mode === 'front' || mode === 'back');
   
   try {
+    // 停止之前的流
+    if (stream) stream.getTracks().forEach(t => t.stop());
+    
+    // 证件照默认前置，身份证默认后置
+    facingMode = (mode === 'photo') ? 'user' : 'environment';
+    
     stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
+      video: { facingMode: facingMode, width: { ideal: 1920 }, height: { ideal: 1080 } },
       audio: false
     });
     const video = document.getElementById('video');
     video.srcObject = stream;
     await video.play();
+    
+    // 绑定点击对焦
+    setupFocus(video);
+    
     document.getElementById('camera').classList.add('show');
   } catch (err) {
     alert('无法打开相机，请确保是 HTTPS 环境：' + err.message);
   }
+}
+
+async function switchCamera() {
+  if (currentFacing === 'environment') currentFacing = 'user';
+  else currentFacing = 'environment';
+  
+  if (stream) stream.getTracks().forEach(t => t.stop());
+  
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: currentFacing, width: { ideal: 1920 }, height: { ideal: 1080 } },
+      audio: false
+    });
+    const video = document.getElementById('video');
+    video.srcObject = stream;
+    await video.play();
+  } catch (err) {
+    alert('切换摄像头失败');
+  }
+}
+
+// 对焦逻辑
+function setupFocus(video) {
+  const wrap = document.getElementById('videoWrap');
+  const focusBox = document.getElementById('focusBox');
+  
+  wrap.onclick = (e) => {
+    // 只有拍证件照时允许点击对焦
+    if (camMode !== 'photo') return;
+    
+    const rect = wrap.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    focusBox.style.left = (x - 40) + 'px';
+    focusBox.style.top = (y - 40) + 'px';
+    focusBox.style.display = 'block';
+    
+    // 尝试调用设备的硬件对焦
+    const track = stream.getVideoTracks()[0];
+    const capabilities = track.getCapabilities();
+    if (capabilities.focusMode && capabilities.focusMode.includes('single-shot')) {
+      track.applyConstraints({
+        advanced: [{ focusMode: 'single-shot', points: [{ x: x / rect.width, y: y / rect.height }] }]
+      }).catch(err => console.log('对焦失败', err));
+    }
+    
+    setTimeout(() => { focusBox.style.display = 'none'; }, 1000);
+  };
 }
 
 function closeCam() {
@@ -149,6 +223,13 @@ function takePhoto() {
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
   const ctx = canvas.getContext('2d');
+  
+  // 如果是前置摄像头，需要镜像翻转
+  if (currentFacing === 'user' && camMode === 'photo') {
+    ctx.translate(canvas.width, 0);
+    ctx.scale(-1, 1);
+  }
+  
   ctx.drawImage(video, 0, 0);
 
   // 如果是拍身份证，裁剪取景框内的内容
@@ -156,7 +237,6 @@ function takePhoto() {
     const frame = document.getElementById('idFrame').getBoundingClientRect();
     const videoRect = video.getBoundingClientRect();
     
-    // 计算取景框在原始视频像素中的位置
     const videoRatio = video.videoWidth / video.videoHeight;
     const displayRatio = videoRect.width / videoRect.height;
     let scaledW, scaledH, offsetX, offsetY;
@@ -212,35 +292,30 @@ async function genIdcard() {
     alert('请先拍正面和反面'); return;
   }
   
-  // 生成 A4 尺寸画布 (300dpi: 2480 x 3508)
   const a4 = document.createElement('canvas');
-  a4.width = 2480; a4.height = 3508;
+  a4.width = 2480; a4.height = 3508; // 300dpi A4
   const ctx = a4.getContext('2d');
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, a4.width, a4.height);
 
-  // 真实身份证尺寸 85.6 x 54 mm，在 A4(300dpi) 下大约 1011 x 638 像素
+  // 真实身份证比例 85.6:54 = 1.585
   const cardW = 1011;
   const cardH = 638;
   const centerX = (a4.width - cardW) / 2;
   const centerY = a4.height / 2;
 
-  // 绘制正面（中线上方）
   ctx.drawImage(window.idFrontImg, centerX, centerY - cardH - 50, cardW, cardH);
-  // 绘制反面（中线下方）
   ctx.drawImage(window.idBackImg, centerX, centerY + 50, cardW, cardH);
 
   const resBox = document.getElementById('idcardResult');
   resBox.style.display = 'flex';
   resBox.innerHTML = '';
   
-  // 缩小显示
   const showCv = document.createElement('canvas');
   showCv.width = 400; showCv.height = 566;
   showCv.getContext('2d').drawImage(a4, 0, 0, 400, 566);
   resBox.appendChild(showCv);
 
-  // 提供下载按钮
   const dlBtn = document.createElement('button');
   dlBtn.className = 'btn green';
   dlBtn.innerText = '💾 保存 A4 身份证复印';
@@ -274,14 +349,12 @@ function updatePhotoPreview() {
   if (!window.idPhotoCanvas) return;
   el.innerHTML = '';
   
-  // 为了不撑破界面，缩小显示
   const showCv = document.createElement('canvas');
   const scale = 250 / window.idPhotoCanvas.height;
   showCv.width = window.idPhotoCanvas.width * scale;
   showCv.height = 250;
   
   const ctx = showCv.getContext('2d');
-  // 背景色
   ctx.fillStyle = document.getElementById('bgColor').value;
   ctx.fillRect(0, 0, showCv.width, showCv.height);
   ctx.drawImage(window.idPhotoCanvas, 0, 0, showCv.width, showCv.height);
@@ -303,10 +376,8 @@ async function removeBg() {
   txt.innerText = '正在下载 AI 模型（约 40MB），首次可能较慢...\n请不要关闭页面';
 
   try {
-    // 将 canvas 转为 blob 交给 AI 处理
     const blob = await new Promise(res => window.idPhotoCanvas.toBlob(res, 'image/png'));
     
-    // 调用纯前端抠图库
     const resultBlob = await window.imglyRemoveBackground(blob, {
       progress: (key, current, total) => {
         if (key.includes('fetch')) {
@@ -315,7 +386,6 @@ async function removeBg() {
       }
     });
 
-    // 将去背景后的结果转为 Canvas
     const img = new Image();
     img.onload = () => {
       window.idPhotoCanvas = document.createElement('canvas');
