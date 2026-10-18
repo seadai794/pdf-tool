@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <title>PDF 工具箱 · 9 合 1</title>
 <style>
@@ -325,32 +325,172 @@
   .zip-result .zip-title { font-size: 14px; font-weight: 700; margin-bottom: 5px; color: #065f46; }
   .zip-result .zip-sub { font-size: 11px; color: #64748b; margin-bottom: 16px; }
 
-  /* ===== 扫描文档 ===== */
-  .scan-camera-wrap { position: relative; width: 100%; border-radius: 10px;
-    overflow: hidden; background: #000; border: 1px solid #e2e8f0; line-height: 0; }
-  .scan-camera-wrap video { display: block; width: 100%; height: auto;
-    max-height: 60vh; object-fit: cover; background: #000; }
-  .scan-camera-wrap .scan-overlay { position: absolute; inset: 0; pointer-events: none; }
-  .scan-camera-wrap .scan-corner { position: absolute; width: 32px; height: 32px;
-    border-color: #fff; border-style: solid; border-width: 0;
-    opacity: .85; filter: drop-shadow(0 0 4px rgba(0,0,0,.35)); }
-  .scan-camera-wrap .scan-corner.tl { top: 8%; left: 6%; border-top-width: 3px; border-left-width: 3px; border-top-left-radius: 6px; }
-  .scan-camera-wrap .scan-corner.tr { top: 8%; right: 6%; border-top-width: 3px; border-right-width: 3px; border-top-right-radius: 6px; }
-  .scan-camera-wrap .scan-corner.bl { bottom: 8%; left: 6%; border-bottom-width: 3px; border-left-width: 3px; border-bottom-left-radius: 6px; }
-  .scan-camera-wrap .scan-corner.br { bottom: 8%; right: 6%; border-bottom-width: 3px; border-right-width: 3px; border-bottom-right-radius: 6px; }
-  .scan-camera-hint { position: absolute; left: 0; right: 0; bottom: 12px;
-    text-align: center; color: #fff; font-size: 12px;
-    text-shadow: 0 1px 4px rgba(0,0,0,.6); pointer-events: none; }
-  .scan-shot-btn { width: 68px; height: 68px; border-radius: 50%;
-    border: 4px solid #fff; background: rgba(255,255,255,.25);
-    margin: 14px auto 0; display: flex; align-items: center; justify-content: center;
-    cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,.3);
-    transition: all .15s; }
-  .scan-shot-btn:active { transform: scale(.92); background: rgba(255,255,255,.5); }
-  .scan-shot-btn .inner { width: 48px; height: 48px; border-radius: 50%;
-    background: linear-gradient(135deg, #2563eb, #7c3aed);
-    box-shadow: inset 0 2px 6px rgba(255,255,255,.4); }
+  /* ===== 扫描文档 - 全屏相机模式 ===== */
+  .scan-fullscreen {
+    position: fixed; inset: 0; z-index: 9000; background: #000;
+    display: none; flex-direction: column;
+    -webkit-user-select: none; user-select: none;
+    touch-action: none;
+  }
+  .scan-fullscreen.show { display: flex; }
 
+  .scan-fs-video-wrap {
+    flex: 1; position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .scan-fullscreen video {
+    display: block; width: 100%; height: 100%;
+    object-fit: cover; background: #000;
+  }
+
+  /* 取景框角标（全屏版，更大更醒目） */
+  .scan-fs-frame {
+    position: absolute; inset: 0; pointer-events: none;
+  }
+  .scan-fs-frame::before {
+    content: ''; position: absolute;
+    top: 12%; left: 8%; right: 8%; bottom: 22%;
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 8px;
+  }
+  .scan-fs-corner {
+    position: absolute; width: 44px; height: 44px;
+    border-color: #fff; border-style: solid; border-width: 0;
+    filter: drop-shadow(0 0 6px rgba(0,0,0,.6));
+  }
+  .scan-fs-corner.tl { top: 12%; left: 8%; border-top-width: 4px; border-left-width: 4px; border-top-left-radius: 8px; }
+  .scan-fs-corner.tr { top: 12%; right: 8%; border-top-width: 4px; border-right-width: 4px; border-top-right-radius: 8px; }
+  .scan-fs-corner.bl { bottom: 22%; left: 8%; border-bottom-width: 4px; border-left-width: 4px; border-bottom-left-radius: 8px; }
+  .scan-fs-corner.br { bottom: 22%; right: 8%; border-bottom-width: 4px; border-right-width: 4px; border-bottom-right-radius: 8px; }
+
+  /* 顶部提示 */
+  .scan-fs-topbar {
+    position: absolute; top: 0; left: 0; right: 0;
+    padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;
+    background: linear-gradient(180deg, rgba(0,0,0,.55), transparent);
+    color: #fff; z-index: 10;
+  }
+  .scan-fs-topbar .title { font-size: 14px; font-weight: 700; }
+  .scan-fs-topbar .page-count {
+    font-size: 12px; background: rgba(255,255,255,.22);
+    padding: 4px 10px; border-radius: 999px; font-weight: 600;
+  }
+  .scan-fs-close {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.25);
+    color: #fff; font-size: 20px; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; -webkit-appearance: none; appearance: none;
+    touch-action: manipulation;
+  }
+
+  /* 底部工具栏 */
+  .scan-fs-bottombar {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: 16px 20px calc(24px + env(safe-area-inset-bottom));
+    display: flex; align-items: center; justify-content: space-between;
+    background: linear-gradient(0deg, rgba(0,0,0,.7), transparent);
+    z-index: 10;
+  }
+  .scan-fs-thumb {
+    width: 54px; height: 54px; border-radius: 8px;
+    background: rgba(255,255,255,.1); border: 2px solid rgba(255,255,255,.35);
+    overflow: hidden; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; -webkit-appearance: none; appearance: none;
+    touch-action: manipulation; padding: 0;
+  }
+  .scan-fs-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .scan-fs-thumb .placeholder { color: rgba(255,255,255,.6); font-size: 20px; }
+
+  /* 快门按钮（全屏版，更大） */
+  .scan-fs-shutter {
+    width: 78px; height: 78px; border-radius: 50%;
+    border: 5px solid #fff; background: rgba(255,255,255,.2);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; -webkit-appearance: none; appearance: none;
+    touch-action: manipulation; padding: 0;
+    transition: all .12s;
+    box-shadow: 0 6px 20px rgba(0,0,0,.4);
+    position: relative;
+  }
+  .scan-fs-shutter .inner {
+    width: 58px; height: 58px; border-radius: 50%;
+    background: #fff;
+    transition: all .12s;
+  }
+  .scan-fs-shutter:active {
+    transform: scale(.92);
+    background: rgba(255,255,255,.5);
+  }
+  .scan-fs-shutter:active .inner { background: #e5e7eb; }
+  /* 快门点击闪光动画 */
+  .scan-fs-shutter.flash::after {
+    content: ''; position: absolute; inset: -8px;
+    border-radius: 50%; border: 3px solid #60a5fa;
+    animation: shutterFlash .5s ease-out;
+  }
+  @keyframes shutterFlash {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(1.8); opacity: 0; }
+  }
+
+  .scan-fs-action {
+    width: 54px; height: 54px; border-radius: 50%;
+    background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3);
+    color: #fff; font-size: 22px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; -webkit-appearance: none; appearance: none;
+    touch-action: manipulation;
+  }
+
+  /* 拍照闪白 */
+  .scan-flash-screen {
+    position: fixed; inset: 0; z-index: 9500; background: #fff;
+    opacity: 0; pointer-events: none;
+  }
+  .scan-flash-screen.animate {
+    animation: flashWhite .35s ease-out;
+  }
+  @keyframes flashWhite {
+    0% { opacity: 0; }
+    20% { opacity: .85; }
+    100% { opacity: 0; }
+  }
+
+  /* 拍照成功提示 */
+  .scan-toast {
+    position: fixed; left: 50%; bottom: 130px; z-index: 9600;
+    transform: translateX(-50%);
+    background: rgba(15,23,42,.92); color: #fff;
+    padding: 10px 18px; border-radius: 999px;
+    font-size: 13px; font-weight: 600;
+    box-shadow: 0 6px 24px rgba(0,0,0,.4);
+    opacity: 0; pointer-events: none;
+    transition: opacity .25s ease, transform .25s ease;
+    white-space: nowrap;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .scan-toast.show {
+    opacity: 1; transform: translateX(-50%) translateY(-8px);
+  }
+
+  /* 处理中遮罩（全屏相机上叠加） */
+  .scan-fs-processing {
+    position: absolute; inset: 0; z-index: 20;
+    background: rgba(0,0,0,.6);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: #fff; gap: 14px;
+  }
+  .scan-fs-processing .spinner {
+    width: 44px; height: 44px; border-radius: 50%;
+    border: 4px solid rgba(255,255,255,.25);
+    border-top-color: #fff;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .scan-fs-processing .txt { font-size: 14px; font-weight: 600; }
+
+  /* ===== 非全屏的扫描列表（预览/列表） ===== */
   .scan-result-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     gap: 8px; padding: 10px; background: #f8fafc;
     border: 1px solid #e2e8f0; border-radius: 10px;
@@ -361,7 +501,6 @@
     flex-direction: column; gap: 4px; cursor: pointer;
     transition: all .15s; }
   .scan-result-item:hover { border-color: #cbd5e1; box-shadow: 0 2px 8px rgba(15,23,42,.08); }
-  .scan-result-item.selected { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.13); }
   .scan-result-item .thumb { width: 100%; height: 100px; object-fit: contain;
     background: #fff; border-radius: 5px; display: block; border: 1px solid #f1f5f9; }
   .scan-result-item .num { position: absolute; top: 8px; left: 8px;
@@ -378,10 +517,62 @@
     -webkit-appearance: none; appearance: none; }
   .scan-result-item .actions button.danger { background: #fee2e2; color: #b91c1c; }
 
-  .scan-preview-wrap { position: relative; width: 100%; border-radius: 10px;
-    overflow: hidden; background: #f1f5f9;
-    border: 1px solid #e2e8f0; line-height: 0; }
-  .scan-preview-wrap canvas { display: block; width: 100%; height: auto; }
+  /* 处理模式浮层（全屏预览时） */
+  .scan-edit-overlay {
+    position: fixed; inset: 0; z-index: 9100; background: #0f172a;
+    display: none; flex-direction: column;
+  }
+  .scan-edit-overlay.show { display: flex; }
+  .scan-edit-header {
+    padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;
+    background: #0f172a; color: #fff; flex: 0 0 auto;
+  }
+  .scan-edit-header .title { font-size: 14px; font-weight: 700; }
+  .scan-edit-header .close-btn {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+    color: #fff; font-size: 18px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; -webkit-appearance: none; appearance: none;
+  }
+  .scan-edit-body {
+    flex: 1; overflow-y: auto; padding: 12px;
+    display: flex; flex-direction: column; gap: 12px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .scan-edit-preview {
+    border-radius: 10px; overflow: hidden; background: #fff;
+    box-shadow: 0 4px 20px rgba(0,0,0,.4);
+    line-height: 0;
+  }
+  .scan-edit-preview canvas { display: block; width: 100%; height: auto; }
+  .scan-edit-controls {
+    background: #1e293b; border-radius: 10px; padding: 14px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .scan-edit-controls label { font-size: 12px; color: #cbd5e1; font-weight: 600; }
+  .scan-edit-controls select {
+    width: 100%; padding: 12px; border-radius: 8px;
+    border: 1px solid #334155; background: #0f172a; color: #fff;
+    font-size: 15px; -webkit-appearance: none; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px;
+  }
+  .scan-edit-actions {
+    display: flex; gap: 8px; flex: 0 0 auto;
+    padding: 12px 16px calc(20px + env(safe-area-inset-bottom));
+    background: #0f172a; border-top: 1px solid #1e293b;
+  }
+  .scan-edit-actions .btn {
+    flex: 1; min-height: 50px; border-radius: 10px; font-size: 15px;
+  }
+  .scan-edit-actions .btn.gray {
+    background: #334155; color: #fff; border: 1px solid #475569;
+    box-shadow: none;
+  }
+  .scan-edit-actions .btn.green {
+    background: linear-gradient(135deg, #059669, #10b981);
+    box-shadow: 0 2px 8px rgba(5,150,105,.35);
+  }
 
   .panel[data-theme="edit"] .card::before { background: linear-gradient(90deg, #2563eb, #3b82f6); }
   .panel[data-theme="edit"] .step-label:not(.step-ok) { background: linear-gradient(135deg, #2563eb, #3b82f6); }
@@ -425,8 +616,6 @@
     .page-actions button { font-size: 11px; padding: 4px 0; }
     .img-list { grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); gap: 6px; padding: 8px; }
     .img-item .thumb { height: 70px; }
-    .scan-shot-btn { width: 60px; height: 60px; }
-    .scan-shot-btn .inner { width: 42px; height: 42px; }
   }
   @supports (padding: env(safe-area-inset-bottom)) {
     #workspace { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
@@ -688,7 +877,7 @@
     <!-- 4. 扫描文档 -->
     <section class="panel" id="panel-scan" data-theme="edit">
       <div class="card">
-        <h2><span class="step-label">第 1 步</span><span class="step-title">调用摄像头</span></h2>
+        <h2><span class="step-label">第 1 步</span><span class="step-title">打开全屏相机</span></h2>
         <div class="btn-row" id="scanStartRow">
           <button class="btn big" id="scanStartBtn" type="button">📷 打开摄像头扫描</button>
         </div>
@@ -696,46 +885,12 @@
           <button class="btn gray" id="scanStopBtn" type="button">关闭摄像头</button>
           <button class="btn ghost" id="scanSwitchBtn" type="button">切换前后摄像头</button>
         </div>
-        <div class="scan-camera-wrap hidden" id="scanCamWrap">
-          <video id="scanVideo" playsinline autoplay muted></video>
-          <div class="scan-overlay">
-            <div class="scan-corner tl"></div>
-            <div class="scan-corner tr"></div>
-            <div class="scan-corner bl"></div>
-            <div class="scan-corner br"></div>
-          </div>
-          <div class="scan-camera-hint">将文档对准取景框，点击下方按钮拍照</div>
-        </div>
-        <div class="scan-shot-btn hidden" id="scanShotBtn">
-          <div class="inner"></div>
-        </div>
-        <p class="hint">摄像头需要 HTTPS 环境（或 localhost）。首次使用会请求相机权限。</p>
+        <p class="hint">摄像头需要 HTTPS 环境（或 localhost）。首次使用会请求相机权限。<br>打开后是<b>全屏取景</b>，拍照有白闪反馈，连拍更方便。</p>
         <div class="status" id="scanStatus"></div>
       </div>
 
-      <div class="card hidden" id="scanEditCard">
-        <h2><span class="step-label">第 2 步</span><span class="step-title">处理当前照片</span></h2>
-        <div class="scan-preview-wrap">
-          <canvas id="scanPreview"></canvas>
-        </div>
-        <div class="field" style="margin-top:12px">
-          <label>处理模式</label>
-          <select id="scanMode">
-            <option value="enhance" selected>增强去底色（推荐）</option>
-            <option value="bw">黑白二值化（最清晰）</option>
-            <option value="gray">灰度增强</option>
-            <option value="original">保留原图</option>
-          </select>
-        </div>
-        <div class="btn-row">
-          <button class="btn ghost" id="scanRetakeBtn" type="button">重拍</button>
-          <button class="btn green big" id="scanAddBtn" type="button" style="flex:1">✓ 添加到扫描列表</button>
-        </div>
-        <div class="status" id="scanEditStatus"></div>
-      </div>
-
       <div class="card hidden" id="scanListCard">
-        <h2><span class="step-label">第 3 步</span><span class="step-title">扫描结果与导出</span></h2>
+        <h2><span class="step-label">第 2 步</span><span class="step-title">扫描结果与导出</span></h2>
         <div class="scan-result-grid" id="scanResultGrid"></div>
         <div class="field" style="margin-top:12px">
           <label>PDF 页面尺寸</label>
@@ -901,6 +1056,76 @@
   </main>
 </div>
 
+<!-- 全屏相机 -->
+<div class="scan-fullscreen" id="scanFullscreen">
+  <div class="scan-fs-topbar">
+    <button class="scan-fs-close" id="scanFsClose" type="button">✕</button>
+    <div class="title">扫描文档</div>
+    <div class="page-count" id="scanFsCount">已拍 0 页</div>
+  </div>
+
+  <div class="scan-fs-video-wrap">
+    <video id="scanFsVideo" playsinline autoplay muted></video>
+    <div class="scan-fs-frame">
+      <div class="scan-fs-corner tl"></div>
+      <div class="scan-fs-corner tr"></div>
+      <div class="scan-fs-corner bl"></div>
+      <div class="scan-fs-corner br"></div>
+    </div>
+    <div id="scanFsProcessing" class="scan-fs-processing hidden">
+      <div class="spinner"></div>
+      <div class="txt">正在处理…</div>
+    </div>
+  </div>
+
+  <div class="scan-fs-bottombar">
+    <button class="scan-fs-thumb" id="scanFsThumb" type="button">
+      <span class="placeholder">🖼️</span>
+    </button>
+
+    <button class="scan-fs-shutter" id="scanFsShutter" type="button">
+      <div class="inner"></div>
+    </button>
+
+    <button class="scan-fs-action" id="scanFsSwitch" type="button" title="切换前后摄像头">🔄</button>
+  </div>
+</div>
+
+<!-- 拍照白闪 -->
+<div class="scan-flash-screen" id="scanFlash"></div>
+
+<!-- 拍照成功提示 -->
+<div class="scan-toast" id="scanToast">
+  <span>✓</span><span id="scanToastText">已添加到扫描列表</span>
+</div>
+
+<!-- 照片处理弹层 -->
+<div class="scan-edit-overlay" id="scanEditOverlay">
+  <div class="scan-edit-header">
+    <div class="title">处理当前照片</div>
+    <button class="close-btn" id="scanEditClose" type="button">✕</button>
+  </div>
+  <div class="scan-edit-body">
+    <div class="scan-edit-preview">
+      <canvas id="scanEditPreview"></canvas>
+    </div>
+    <div class="scan-edit-controls">
+      <label>处理模式</label>
+      <select id="scanEditMode">
+        <option value="enhance" selected>增强去底色（推荐）</option>
+        <option value="bw">黑白二值化（最清晰）</option>
+        <option value="gray">灰度增强</option>
+        <option value="original">保留原图</option>
+      </select>
+    </div>
+  </div>
+  <div class="scan-edit-actions">
+    <button class="btn gray" id="scanEditRetake" type="button">重拍</button>
+    <button class="btn green" id="scanEditAdd" type="button">✓ 添加到扫描列表</button>
+  </div>
+</div>
+
+<!-- 复制 PDF 数据弹窗 -->
 <div id="dataModal" class="modal hidden">
   <div class="modal-content">
     <h3>📋 复制 PDF 数据</h3>
@@ -1223,7 +1448,7 @@
       btn.addEventListener('click', function (e) {
         e.preventDefault();
         showTool(btn.dataset.tab, true);
-        if (btn.dataset.tab !== 'scan' && scan.stream) closeCamera();
+        if (btn.dataset.tab !== 'scan' && scan.stream) closeScanCamera();
       });
     });
 
@@ -2694,7 +2919,9 @@
       say('#arrangeStatus2', '');
     }
 
-    /* ===== 模块 4：扫描文档 ===== */
+    /* ============================================================
+     * 模块 4：扫描文档（全屏相机模式）
+     * ============================================================ */
     const scan = {
       stream: null,
       facingMode: 'environment',
@@ -2720,7 +2947,8 @@
       if (scan._refresh) scan._refresh();
     }
 
-    async function openCamera() {
+    /* ---------- 打开/关闭摄像头（全屏版） ---------- */
+    async function openScanCamera() {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         say('#scanStatus', '当前浏览器不支持摄像头调用，请使用最新版 Chrome / Safari，并确保是 HTTPS 环境。', true);
         return;
@@ -2740,14 +2968,14 @@
           },
           audio: false
         });
-        const v = $('#scanVideo');
+        const v = $('#scanFsVideo');
         v.srcObject = scan.stream;
         await v.play();
-        $('#scanCamWrap').classList.remove('hidden');
-        $('#scanShotBtn').classList.remove('hidden');
+        $('#scanFullscreen').classList.add('show');
         $('#scanStartRow').classList.add('hidden');
         $('#scanStopRow').classList.remove('hidden');
-        say('#scanStatus', '摄像头已就绪，将文档对准取景框后点击下方快门按钮。');
+        updateScanCountBadge();
+        say('#scanStatus', '全屏相机已就绪，点击底部白色圆形按钮拍照。');
       } catch (err) {
         console.error('[camera]', err);
         let msg = '无法打开摄像头：' + (err && err.message ? err.message : err);
@@ -2761,28 +2989,136 @@
         say('#scanStatus', msg, true);
       }
     }
-    function closeCamera() {
+
+    function closeScanCamera() {
       if (scan.stream) {
         scan.stream.getTracks().forEach(t => t.stop());
         scan.stream = null;
       }
-      const v = $('#scanVideo');
+      const v = $('#scanFsVideo');
       if (v) v.srcObject = null;
-      $('#scanCamWrap').classList.add('hidden');
-      $('#scanShotBtn').classList.add('hidden');
+      $('#scanFullscreen').classList.remove('show');
       $('#scanStartRow').classList.remove('hidden');
       $('#scanStopRow').classList.add('hidden');
     }
 
-    $('#scanStartBtn').addEventListener('click', openCamera);
+    function updateScanCountBadge() {
+      const el = $('#scanFsCount');
+      if (el) el.textContent = '已拍 ' + scan.items.length + ' 页';
+    }
+
+    $('#scanStartBtn').addEventListener('click', openScanCamera);
     $('#scanStopBtn').addEventListener('click', () => {
-      closeCamera();
+      closeScanCamera();
+      say('#scanStatus', '摄像头已关闭');
+    });
+    $('#scanFsClose').addEventListener('click', () => {
+      closeScanCamera();
       say('#scanStatus', '摄像头已关闭');
     });
     $('#scanSwitchBtn').addEventListener('click', async () => {
       scan.facingMode = scan.facingMode === 'environment' ? 'user' : 'environment';
-      await openCamera();
+      await openScanCamera();
     });
+    $('#scanFsSwitch').addEventListener('click', async () => {
+      scan.facingMode = scan.facingMode === 'environment' ? 'user' : 'environment';
+      await openScanCamera();
+    });
+
+    /* ---------- 拍照视觉反馈 ---------- */
+    function flashScreen() {
+      const el = $('#scanFlash');
+      if (!el) return;
+      el.classList.remove('animate');
+      void el.offsetWidth; // 触发重排，重置动画
+      el.classList.add('animate');
+    }
+
+    function shutterPulse() {
+      const btn = $('#scanFsShutter');
+      if (!btn) return;
+      btn.classList.remove('flash');
+      void btn.offsetWidth;
+      btn.classList.add('flash');
+    }
+
+    function showToast(text) {
+      const el = $('#scanToast');
+      const txt = $('#scanToastText');
+      if (!el || !txt) return;
+      txt.textContent = text;
+      el.classList.add('show');
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(() => {
+        el.classList.remove('show');
+      }, 1500);
+    }
+
+    function showProcessing(show) {
+      const el = $('#scanFsProcessing');
+      if (!el) return;
+      el.classList.toggle('hidden', !show);
+    }
+
+    /* ---------- 拍照 ---------- */
+    async function takePhoto() {
+      const v = $('#scanFsVideo');
+      if (!v || !v.videoWidth) {
+        say('#scanStatus', '摄像头尚未准备好', true);
+        return;
+      }
+
+      // 视觉反馈：屏幕白闪 + 快门脉冲
+      flashScreen();
+      shutterPulse();
+
+      // 短暂处理中提示
+      showProcessing(true);
+
+      try {
+        // 稍等一帧让白闪动画呈现
+        await new Promise(r => setTimeout(r, 100));
+
+        const cv = drawImageToCanvas(v, 2400);
+        scan.currentCanvas = cv;
+        // 默认以当前处理模式处理
+        applyScanMode();
+        // 打开照片处理层（全屏）
+        openScanEditOverlay();
+        showToast('已拍照，请确认或调整处理模式');
+      } catch (err) {
+        say('#scanStatus', '拍照失败：' + (err && err.message ? err.message : err), true);
+      } finally {
+        showProcessing(false);
+      }
+    }
+
+    $('#scanFsShutter').addEventListener('click', takePhoto);
+
+    /* ---------- 缩略图查看（全屏相册角标） ---------- */
+    $('#scanFsThumb').addEventListener('click', () => {
+      // 缩略图显示最近一张，点击关闭相机并跳到列表
+      closeScanCamera();
+      const card = $('#scanListCard');
+      if (card) {
+        card.classList.remove('hidden');
+        card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+
+    /* ---------- 照片处理弹层 ---------- */
+    function openScanEditOverlay() {
+      const overlay = $('#scanEditOverlay');
+      if (!overlay) return;
+      overlay.classList.add('show');
+      renderScanEditPreview();
+    }
+
+    function closeScanEditOverlay() {
+      const overlay = $('#scanEditOverlay');
+      if (!overlay) return;
+      overlay.classList.remove('show');
+    }
 
     function drawImageToCanvas(img, maxDim) {
       const w = img.naturalWidth || img.videoWidth || img.width;
@@ -2797,11 +3133,11 @@
       return cv;
     }
 
-    function renderScanPreview() {
-      const canvas = $('#scanPreview');
+    function renderScanEditPreview() {
+      const canvas = $('#scanEditPreview');
       const src = scan.currentProcessed || scan.currentCanvas;
-      if (!src) return;
-      const maxW = Math.min(canvas.parentElement.clientWidth || 600, 800);
+      if (!canvas || !src) return;
+      const maxW = Math.min(window.innerWidth - 24, 800);
       const scale = Math.min(1, maxW / src.width);
       canvas.width = Math.round(src.width * scale);
       canvas.height = Math.round(src.height * scale);
@@ -2881,40 +3217,73 @@
 
     function applyScanMode() {
       if (!scan.currentCanvas) return;
-      const mode = $('#scanMode').value;
+      const mode = $('#scanEditMode').value;
       try {
         scan.currentProcessed = processImageForScan(scan.currentCanvas, mode);
-        renderScanPreview();
+        renderScanEditPreview();
       } catch (err) {
         console.error('[scan process]', err);
-        say('#scanEditStatus', '处理失败：' + (err && err.message ? err.message : err), true);
       }
     }
-    $('#scanMode').addEventListener('change', applyScanMode);
 
-    $('#scanShotBtn').addEventListener('click', () => {
-      const v = $('#scanVideo');
-      if (!v || !v.videoWidth) { say('#scanStatus', '摄像头尚未准备好', true); return; }
+    $('#scanEditMode').addEventListener('change', applyScanMode);
+
+    $('#scanEditRetake').addEventListener('click', () => {
+      scan.currentCanvas = null;
+      scan.currentProcessed = null;
+      closeScanEditOverlay();
+      // 保持相机开启，直接回到全屏取景重新拍
+      showToast('已取消，可重新拍照');
+    });
+
+    $('#scanEditClose').addEventListener('click', () => {
+      scan.currentCanvas = null;
+      scan.currentProcessed = null;
+      closeScanEditOverlay();
+    });
+
+    $('#scanEditAdd').addEventListener('click', () => {
+      if (!scan.currentProcessed) return;
       try {
-        const cv = drawImageToCanvas(v, 2400);
-        scan.currentCanvas = cv;
-        applyScanMode();
-        $('#scanEditCard').classList.remove('hidden');
-        say('#scanStatus', '已拍照，请在第 2 步选择处理模式并确认。');
+        const dataUrl = scan.currentProcessed.toDataURL('image/jpeg', 0.92);
+        scan.items.push({
+          id: 's' + (++scan.idCounter),
+          dataUrl,
+          width: scan.currentProcessed.width,
+          height: scan.currentProcessed.height
+        });
+        updateScanCountBadge();
+        updateScanThumbnail();
+        closeScanEditOverlay();
+        scan.currentCanvas = null;
+        scan.currentProcessed = null;
+        showToast('✓ 已添加第 ' + scan.items.length + ' 页');
+        say('#scanStatus', '已添加 1 页，共 ' + scan.items.length + ' 页，可继续拍照或关闭相机导出');
+        // 显示列表区
+        $('#scanListCard').classList.remove('hidden');
+        renderScanResultGrid();
+        markScanDirty();
       } catch (err) {
-        say('#scanStatus', '拍照失败：' + (err && err.message ? err.message : err), true);
+        say('#scanStatus', '添加失败：' + (err && err.message ? err.message : err), true);
       }
     });
 
-    $('#scanRetakeBtn').addEventListener('click', () => {
-      scan.currentCanvas = null;
-      scan.currentProcessed = null;
-      $('#scanEditCard').classList.add('hidden');
-      say('#scanStatus', '已取消，可重新拍照。');
-    });
+    /* ---------- 全屏相机缩略图（显示最新一张） ---------- */
+    function updateScanThumbnail() {
+      const btn = $('#scanFsThumb');
+      if (!btn) return;
+      const latest = scan.items[scan.items.length - 1];
+      if (latest) {
+        btn.innerHTML = '<img src="' + latest.dataUrl + '" alt="" />';
+      } else {
+        btn.innerHTML = '<span class="placeholder">🖼️</span>';
+      }
+    }
 
+    /* ---------- 扫描结果列表 ---------- */
     function renderScanResultGrid() {
       const grid = $('#scanResultGrid');
+      if (!grid) return;
       grid.innerHTML = '';
       scan.items.forEach((item, idx) => {
         const div = document.createElement('div');
@@ -2931,59 +3300,35 @@
           if (idx === 0) return;
           const [x] = scan.items.splice(idx, 1);
           scan.items.splice(idx - 1, 0, x);
-          renderScanResultGrid(); markScanDirty();
+          renderScanResultGrid(); markScanDirty(); updateScanThumbnail(); updateScanCountBadge();
         });
         div.querySelector('[data-act="down"]').addEventListener('click', () => {
           if (idx === scan.items.length - 1) return;
           const [x] = scan.items.splice(idx, 1);
           scan.items.splice(idx + 1, 0, x);
-          renderScanResultGrid(); markScanDirty();
+          renderScanResultGrid(); markScanDirty(); updateScanThumbnail();
         });
         div.querySelector('[data-act="del"]').addEventListener('click', () => {
           scan.items.splice(idx, 1);
-          renderScanResultGrid(); markScanDirty();
-          if (scan.items.length === 0) {
-            $('#scanListCard').classList.add('hidden');
-          }
+          renderScanResultGrid(); markScanDirty(); updateScanThumbnail(); updateScanCountBadge();
         });
         grid.appendChild(div);
       });
     }
-
-    $('#scanAddBtn').addEventListener('click', () => {
-      if (!scan.currentProcessed) { say('#scanEditStatus', '请先拍照', true); return; }
-      try {
-        const dataUrl = scan.currentProcessed.toDataURL('image/jpeg', 0.92);
-        scan.items.push({
-          id: 's' + (++scan.idCounter),
-          dataUrl,
-          width: scan.currentProcessed.width,
-          height: scan.currentProcessed.height
-        });
-        $('#scanListCard').classList.remove('hidden');
-        renderScanResultGrid();
-        $('#scanEditCard').classList.add('hidden');
-        scan.currentCanvas = null;
-        scan.currentProcessed = null;
-        say('#scanStatus', '已添加 1 页，可继续拍照或生成扫描 PDF。');
-        say('#scanEditStatus', '');
-        markScanDirty();
-        $('#scanListCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      } catch (err) {
-        say('#scanEditStatus', '添加失败：' + (err && err.message ? err.message : err), true);
-      }
-    });
 
     $('#scanClearBtn').addEventListener('click', () => {
       if (scan.items.length === 0) return;
       if (!confirm('确定要清空全部扫描页吗？')) return;
       scan.items = [];
       renderScanResultGrid();
+      updateScanThumbnail();
+      updateScanCountBadge();
       $('#scanListCard').classList.add('hidden');
       say('#scanListStatus', '已清空');
       markScanDirty();
     });
 
+    /* ---------- 生成扫描 PDF ---------- */
     $('#scanPdfBtn').addEventListener('click', async () => {
       if (scan.items.length === 0) { say('#scanListStatus', '请先拍照并添加到扫描列表', true); return; }
       const btn = $('#scanPdfBtn'); btn.disabled = true;
@@ -3624,7 +3969,6 @@
         try {
           if (document.querySelector('#panel-split.active') && split.doc) splitRender();
           if (document.querySelector('#panel-crop.active') && crop.doc) cropRender();
-          if (document.querySelector('#panel-scan.active') && scan.currentProcessed) renderScanPreview();
         } catch (e) {}
       }, 200);
     });
@@ -3633,7 +3977,6 @@
         try {
           if (document.querySelector('#panel-split.active') && split.doc) splitRender();
           if (document.querySelector('#panel-crop.active') && crop.doc) cropRender();
-          if (document.querySelector('#panel-scan.active') && scan.currentProcessed) renderScanPreview();
         } catch (e) {}
       }, 300);
     });
