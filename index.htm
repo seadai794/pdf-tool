@@ -588,12 +588,12 @@
         </div>
       </div>
       <div class="card hidden" id="splitGenCard">
-        <h2><span class="step-label">第 4 步</span><span class="step-title">生成 PDF</span></h2>
-        <button class="btn big" id="splitBtn" type="button">生成 PDF</button>
+        <h2><span class="step-label">第 4 步</span><span class="step-title">开始拆分</span></h2>
+        <button class="btn big" id="splitBtn" type="button">开始拆分</button>
         <div class="status" id="splitStatus"></div>
       </div>
       <div class="card result-card hidden" id="splitResultCard">
-        <h2><span class="step-label step-ok">✓ 完成</span><span class="step-title">文件已生成</span></h2>
+        <h2><span class="step-label step-ok">✓ 完成</span><span class="step-title">拆分完成</span></h2>
         <div id="splitResultBody"></div>
         <div class="status" id="splitStatus2"></div>
       </div>
@@ -627,7 +627,7 @@
         </div>
       </div>
       <div class="card hidden" id="cropOptCard">
-        <h2><span class="step-label">第 3 步</span><span class="step-title">选择输出尺寸并生成</span></h2>
+        <h2><span class="step-label">第 3 步</span><span class="step-title">选择输出尺寸并裁剪</span></h2>
         <div class="field">
           <label>输出页面尺寸</label>
           <select id="cropUnifySize">
@@ -641,11 +641,11 @@
           选择 A4 / Letter 时，裁剪结果会缩放到统一的页面上。<br>
           选择「保持原裁剪尺寸」时，保留每页原始大小，内容仍是矢量。
         </p>
-        <button class="btn big" id="cropBtn" type="button">生成 PDF</button>
+        <button class="btn big" id="cropBtn" type="button">开始裁剪</button>
         <div class="status" id="cropStatus"></div>
       </div>
       <div class="card result-card hidden" id="cropResultCard">
-        <h2><span class="step-label step-ok">✓ 完成</span><span class="step-title">文件已生成</span></h2>
+        <h2><span class="step-label step-ok">✓ 完成</span><span class="step-title">裁剪完成</span></h2>
         <div id="cropResultBody"></div>
         <div class="status" id="cropStatus2"></div>
       </div>
@@ -674,12 +674,12 @@
         <div id="arrangeGrid" class="arrange-grid"></div>
       </div>
       <div class="card hidden" id="arrangeOptCard">
-        <h2><span class="step-label">第 3 步</span><span class="step-title">生成调整后的 PDF</span></h2>
-        <button class="btn big" id="arrangeBtn" type="button">生成 PDF</button>
+        <h2><span class="step-label">第 3 步</span><span class="step-title">应用调整并导出</span></h2>
+        <button class="btn big" id="arrangeBtn" type="button">应用调整</button>
         <div class="status" id="arrangeStatus"></div>
       </div>
       <div class="card result-card hidden" id="arrangeResultCard">
-        <h2><span class="step-label step-ok">✓ 完成</span><span class="step-title">文件已生成</span></h2>
+        <h2><span class="step-label step-ok">✓ 完成</span><span class="step-title">调整完成</span></h2>
         <div id="arrangeResultBody"></div>
         <div class="status" id="arrangeStatus2"></div>
       </div>
@@ -735,7 +735,7 @@
       </div>
 
       <div class="card hidden" id="scanListCard">
-        <h2><span class="step-label">第 3 步</span><span class="step-title">扫描结果</span></h2>
+        <h2><span class="step-label">第 3 步</span><span class="step-title">扫描结果与导出</span></h2>
         <div class="scan-result-grid" id="scanResultGrid"></div>
         <div class="field" style="margin-top:12px">
           <label>PDF 页面尺寸</label>
@@ -747,13 +747,13 @@
         </div>
         <div class="btn-row">
           <button class="btn ghost" id="scanClearBtn" type="button">清空全部</button>
-          <button class="btn big" id="scanPdfBtn" type="button" style="flex:1">生成 PDF</button>
+          <button class="btn big" id="scanPdfBtn" type="button" style="flex:1">生成扫描 PDF</button>
         </div>
         <div class="status" id="scanListStatus"></div>
       </div>
 
       <div class="card result-card hidden" id="scanResultCard">
-        <h2><span class="step-label step-ok">✓ 完成</span><span class="step-title">PDF 已生成</span></h2>
+        <h2><span class="step-label step-ok">✓ 完成</span><span class="step-title">扫描 PDF 已生成</span></h2>
         <div id="scanPdfResultBody"></div>
         <div class="status" id="scanPdfStatus2"></div>
       </div>
@@ -788,12 +788,12 @@
         </div>
         <div class="btn-row">
           <button class="btn ghost" id="img2pdfClear" type="button">清空列表</button>
-          <button class="btn big" id="img2pdfBtn" type="button" style="flex:1">生成 PDF</button>
+          <button class="btn big" id="img2pdfBtn" type="button" style="flex:1">转换为 PDF</button>
         </div>
         <div class="status" id="img2pdfStatus"></div>
       </div>
       <div class="card result-card hidden" id="img2pdfResultCard">
-        <h2><span class="step-label step-ok">✓ 完成</span><span class="step-title">文件已生成</span></h2>
+        <h2><span class="step-label step-ok">✓ 完成</span><span class="step-title">转换完成</span></h2>
         <div id="img2pdfResultBody"></div>
         <div class="status" id="img2pdfStatus2"></div>
       </div>
@@ -820,7 +820,7 @@
           <label>JPEG 质量（仅 JPEG 有效）</label>
           <select id="pdf2imgQuality"><option value="0.7">70%</option><option value="0.85" selected>85%</option><option value="0.95">95%</option></select>
         </div>
-        <button class="btn big" id="pdf2imgBtn" type="button">开始导出</button>
+        <button class="btn big" id="pdf2imgBtn" type="button">导出图片</button>
         <div class="status" id="pdf2imgStatus"></div>
       </div>
       <div class="card result-card hidden" id="pdf2imgResultCard">
@@ -847,7 +847,7 @@
           <label>页边距</label>
           <select id="word2pdfMargin"><option value="normal">普通（约 2.5cm）</option><option value="narrow">窄（约 1.5cm）</option><option value="none">无</option></select>
         </div>
-        <button class="btn big" id="word2pdfBtn" type="button">打开并打印为 PDF</button>
+        <button class="btn big" id="word2pdfBtn" type="button">转换并打印为 PDF</button>
         <div class="status" id="word2pdfStatus"></div>
       </div>
     </section>
@@ -860,16 +860,16 @@
         <p class="hint">可一次选择多个 PDF，按列表顺序合并。可调整顺序、删除文件。</p>
       </div>
       <div class="card hidden" id="mergeListCard">
-        <h2><span class="step-label">第 2 步</span><span class="step-title">调整文件顺序</span></h2>
+        <h2><span class="step-label">第 2 步</span><span class="step-title">调整文件顺序并合并</span></h2>
         <div id="mergeList" class="file-list"></div>
         <div class="btn-row" style="margin-top:12px">
           <button class="btn ghost" id="mergeClear" type="button">清空列表</button>
-          <button class="btn big" id="mergeBtn" type="button" style="flex:1">合并 PDF</button>
+          <button class="btn big" id="mergeBtn" type="button" style="flex:1">开始合并</button>
         </div>
         <div class="status" id="mergeStatus"></div>
       </div>
       <div class="card result-card hidden" id="mergeResultCard">
-        <h2><span class="step-label step-ok">✓ 完成</span><span class="step-title">文件已生成</span></h2>
+        <h2><span class="step-label step-ok">✓ 完成</span><span class="step-title">合并完成</span></h2>
         <div id="mergeResultBody"></div>
         <div class="status" id="mergeStatus2"></div>
       </div>
@@ -883,13 +883,13 @@
         <p class="hint">把一个 PDF 拆分成多个小 PDF。可设置每个 PDF 包含几页。</p>
       </div>
       <div class="card hidden" id="extractOptCard">
-        <h2><span class="step-label">第 2 步</span><span class="step-title">设置每份页数</span></h2>
+        <h2><span class="step-label">第 2 步</span><span class="step-title">设置每份页数并拆分</span></h2>
         <div class="field">
           <label>每个 PDF 包含几页</label>
           <input type="number" id="extractPages" value="1" min="1" step="1" inputmode="numeric" />
         </div>
         <p class="hint" id="extractPreviewHint">将拆分为 - 个文件</p>
-        <button class="btn big" id="extractBtn" type="button">开始拆分</button>
+        <button class="btn big" id="extractBtn" type="button">按份数拆分</button>
         <div class="status" id="extractStatus"></div>
       </div>
       <div class="card result-card hidden" id="extractResultCard">
@@ -1036,7 +1036,7 @@
     for (const path of localPaths) {
       updateLoading(label + ' · 本地加载', 0);
       try {
-        await loadScript(path, globalName, 5000);
+        await loadScript(path, globalName, 2000);
         console.log('[加载] ✅ 本地:', path);
         return { url: path, source: 'local' };
       } catch (e) { tried.push(path + '（' + e.message + '）'); }
@@ -1330,7 +1330,6 @@
       async saveAsPdf(bytes, filename, sayFn) {
         const blob = new Blob([bytes], { type: 'application/pdf' });
 
-        // 1) File System Access API（桌面 Chrome / Edge）
         if (hasSavePicker) {
           try {
             const handle = await window.showSaveFilePicker({
@@ -1348,7 +1347,6 @@
           }
         }
 
-        // 2) Blob URL + a.download（手机和电脑通用，比 data: URL 兼容性好）
         let url = null;
         try {
           url = URL.createObjectURL(blob);
@@ -1381,7 +1379,6 @@
           if (url) { try { URL.revokeObjectURL(url); } catch (_) {} }
         }
 
-        // 3) 兜底：弹窗让用户复制 data URL（极少用到）
         try {
           const dataUrl = await bytesToDataUrl(bytes);
           showDataModalDirect(dataUrl);
@@ -1674,7 +1671,7 @@
         $('#splitCard').classList.remove('hidden');
         $('#splitGenCard').classList.remove('hidden');
         await splitRender();
-        say('#splitStatus', '已载入 ' + split.doc.numPages + ' 页，确认拆分模式后点击「生成 PDF」');
+        say('#splitStatus', '已载入 ' + split.doc.numPages + ' 页，确认拆分模式后点击「开始拆分」');
       } catch (err) {
         say('#splitStatus', '载入失败：' + (err && err.message ? err.message : err), true);
       }
@@ -1847,7 +1844,7 @@
     $('#splitBtn').addEventListener('click', async () => {
       if (!split.doc || !split.buf) { say('#splitStatus', '请先选择 PDF 文件', true); return; }
       const btn = $('#splitBtn'); btn.disabled = true;
-      say('#splitStatus', '正在生成…');
+      say('#splitStatus', '正在拆分…');
       try {
         const src = await PDFDocument.load(split.buf.slice(0), { ignoreEncryption: true });
         const out = await PDFDocument.create();
@@ -1882,17 +1879,17 @@
             out.addPage(np);
             outCount++;
           }
-          say('#splitStatus', '正在生成… ' + (i + 1) + '/' + pageCount + ' 页');
+          say('#splitStatus', '正在拆分… ' + (i + 1) + '/' + pageCount + ' 页');
           if (i % 3 === 2) await new Promise((r) => setTimeout(r, 0));
         }
         if (outCount === 0) throw new Error('没有生成任何页面，请检查拆分设置');
         const bytes = await out.save();
         const filename = baseName(split.file.name) + '_拆' + split.parts + '页.pdf';
         await showSplitResult(bytes, filename, pageCount, outCount);
-        say('#splitStatus', '生成完成！请选择一种保存方式', false, true);
+        say('#splitStatus', '拆分完成！请选择一种保存方式', false, true);
         $('#splitResultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       } catch (err) {
-        say('#splitStatus', '生成失败：' + (err && err.message ? err.message : err), true);
+        say('#splitStatus', '拆分失败：' + (err && err.message ? err.message : err), true);
       } finally { btn.disabled = false; }
     });
 
@@ -1969,7 +1966,7 @@
         $('#cropCard').classList.remove('hidden');
         $('#cropOptCard').classList.remove('hidden');
         await cropRender();
-        say('#cropStatus', '已载入 ' + crop.doc.numPages + ' 页，拖动裁剪框后生成');
+        say('#cropStatus', '已载入 ' + crop.doc.numPages + ' 页，拖动裁剪框后点击「开始裁剪」');
       } catch (err) {
         say('#cropStatus', '载入失败：' + (err && err.message ? err.message : err), true);
       }
@@ -2167,7 +2164,7 @@
       if (!crop.doc || !crop.buf) { say('#cropStatus', '请先选择 PDF 文件', true); return; }
       const btn = $('#cropBtn'); btn.disabled = true;
       const unifyMode = $('#cropUnifySize').value;
-      say('#cropStatus', '正在生成…');
+      say('#cropStatus', '正在裁剪…');
       try {
         if (unifyMode === 'none') {
           const src = await PDFDocument.load(crop.buf.slice(0), { ignoreEncryption: true });
@@ -2196,7 +2193,7 @@
             np.setTrimBox(bx, by, bw, bh);
             out.addPage(np);
             outCount++;
-            say('#cropStatus', '正在生成… ' + pageNum + '/' + pageCount + ' 页');
+            say('#cropStatus', '正在裁剪… ' + pageNum + '/' + pageCount + ' 页');
             if (i % 3 === 2) await new Promise(r => setTimeout(r, 0));
           }
           if (outCount === 0) throw new Error('没有生成任何页面，请检查裁剪框');
@@ -2249,7 +2246,7 @@
               y: (targetSize[1] - drawH) / 2,
               width: drawW, height: drawH
             });
-            say('#cropStatus', '正在生成… ' + pageNum + '/' + pageCount + ' 页');
+            say('#cropStatus', '正在裁剪… ' + pageNum + '/' + pageCount + ' 页');
             if (i % 2 === 1) await new Promise(r => setTimeout(r, 0));
           }
           const bytes = await out.save();
@@ -2257,10 +2254,10 @@
             (unifyMode === 'a4' ? 'A4纵向' : unifyMode === 'a4l' ? 'A4横向' : 'Letter') + '.pdf';
           await showCropResult(bytes, filename, pageCount, pageCount);
         }
-        say('#cropStatus', '生成完成！请选择一种保存方式', false, true);
+        say('#cropStatus', '裁剪完成！请选择一种保存方式', false, true);
         $('#cropResultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       } catch (err) {
-        say('#cropStatus', '生成失败：' + (err && err.message ? err.message : err), true);
+        say('#cropStatus', '裁剪失败：' + (err && err.message ? err.message : err), true);
       } finally { btn.disabled = false; }
     });
 
@@ -2352,7 +2349,7 @@
         $('#arrangeCard').classList.remove('hidden');
         $('#arrangeOptCard').classList.remove('hidden');
         renderArrangeGrid();
-        say('#arrangeStatus', '已载入 ' + arrange.doc.numPages + ' 页');
+        say('#arrangeStatus', '已载入 ' + arrange.doc.numPages + ' 页，调整后点击「应用调整」');
       } catch (err) {
         say('#arrangeStatus', '载入失败：' + (err && err.message ? err.message : err), true);
       }
@@ -2647,7 +2644,7 @@
       if (!arrange.doc || !arrange.buf) { say('#arrangeStatus', '请先选择 PDF 文件', true); return; }
       if (arrange.pages.length === 0) { say('#arrangeStatus', '至少保留一页', true); return; }
       const btn = $('#arrangeBtn'); btn.disabled = true;
-      say('#arrangeStatus', '正在生成…');
+      say('#arrangeStatus', '正在应用调整…');
       try {
         const src = await PDFDocument.load(arrange.buf.slice(0), { ignoreEncryption: true });
         const out = await PDFDocument.create();
@@ -2668,16 +2665,16 @@
             }
             out.addPage(copied);
           }
-          say('#arrangeStatus', '正在生成… ' + (i + 1) + '/' + arrange.pages.length + ' 页');
+          say('#arrangeStatus', '正在应用调整… ' + (i + 1) + '/' + arrange.pages.length + ' 页');
           if (i % 3 === 2) await new Promise(r => setTimeout(r, 0));
         }
         const bytes = await out.save();
         const filename = baseName(arrange.file.name) + '_页面调整.pdf';
         await showArrangeResult(bytes, filename, arrange.pages.length);
-        say('#arrangeStatus', '生成完成！请选择一种保存方式', false, true);
+        say('#arrangeStatus', '调整完成！请选择一种保存方式', false, true);
         $('#arrangeResultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       } catch (err) {
-        say('#arrangeStatus', '生成失败：' + (err && err.message ? err.message : err), true);
+        say('#arrangeStatus', '调整失败：' + (err && err.message ? err.message : err), true);
       } finally { btn.disabled = false; }
     });
     async function showArrangeResult(bytes, filename, outPages) {
@@ -2968,7 +2965,7 @@
         $('#scanEditCard').classList.add('hidden');
         scan.currentCanvas = null;
         scan.currentProcessed = null;
-        say('#scanStatus', '已添加 1 页，可继续拍照或生成 PDF。');
+        say('#scanStatus', '已添加 1 页，可继续拍照或生成扫描 PDF。');
         say('#scanEditStatus', '');
         markScanDirty();
         $('#scanListCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -2991,13 +2988,13 @@
       if (scan.items.length === 0) { say('#scanListStatus', '请先拍照并添加到扫描列表', true); return; }
       const btn = $('#scanPdfBtn'); btn.disabled = true;
       const mode = $('#scanPdfSize').value;
-      say('#scanListStatus', '正在生成 PDF…');
+      say('#scanListStatus', '正在生成扫描 PDF…');
       try {
         const doc = await PDFDocument.create();
         const A4 = [595.28, 841.89];
         for (let i = 0; i < scan.items.length; i++) {
           const item = scan.items[i];
-          say('#scanListStatus', '正在生成… ' + (i + 1) + '/' + scan.items.length);
+          say('#scanListStatus', '正在生成扫描 PDF… ' + (i + 1) + '/' + scan.items.length);
           const img = await loadImage(item.dataUrl);
           const cv = document.createElement('canvas');
           cv.width = item.width; cv.height = item.height;
@@ -3027,7 +3024,7 @@
         const bytes = await doc.save();
         const filename = '扫描文档_' + Date.now() + '.pdf';
         await showScanPdfResult(bytes, filename, scan.items.length);
-        say('#scanListStatus', '生成完成！请选择一种保存方式', false, true);
+        say('#scanListStatus', '扫描 PDF 已生成！请选择一种保存方式', false, true);
         $('#scanResultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       } catch (err) {
         console.error(err);
@@ -3147,13 +3144,13 @@
       const btn = $('#img2pdfBtn'); btn.disabled = true;
       const mode = $('#img2pdfSize').value;
       const marginRatio = parseFloat($('#img2pdfMargin').value) || 0;
-      say('#img2pdfStatus', '正在生成…');
+      say('#img2pdfStatus', '正在转换…');
       try {
         const doc = await PDFDocument.create();
         const A4 = [595.28, 841.89];
         for (let i = 0; i < img2pdf.items.length; i++) {
           const item = img2pdf.items[i];
-          say('#img2pdfStatus', '正在生成… ' + (i + 1) + '/' + img2pdf.items.length);
+          say('#img2pdfStatus', '正在转换… ' + (i + 1) + '/' + img2pdf.items.length);
           const maxDim = 2000;
           const scale = Math.min(1, maxDim / Math.max(item.width, item.height));
           const cw = Math.max(1, Math.round(item.width * scale));
@@ -3184,10 +3181,10 @@
         const bytes = await doc.save();
         const filename = '图片转PDF_' + Date.now() + '.pdf';
         await showImg2PdfResult(bytes, filename, img2pdf.items.length);
-        say('#img2pdfStatus', '生成完成！请选择一种保存方式', false, true);
+        say('#img2pdfStatus', '转换完成！请选择一种保存方式', false, true);
         $('#img2pdfResultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       } catch (err) {
-        say('#img2pdfStatus', '生成失败：' + (err && err.message ? err.message : err), true);
+        say('#img2pdfStatus', '转换失败：' + (err && err.message ? err.message : err), true);
       } finally { btn.disabled = false; }
     });
 
@@ -3242,7 +3239,7 @@
       const base = stripExt(pdf2img.file.name);
       try {
         pdf2img.resultFiles = [];
-        say('#pdf2imgStatus', '正在导出…');
+        say('#pdf2imgStatus', '正在导出图片…');
         for (let i = 1; i <= pdf2img.doc.numPages; i++) {
           const page = await pdf2img.doc.getPage(i);
           const vp = page.getViewport({ scale });
@@ -3255,7 +3252,7 @@
           const blob = await new Promise(res => cv.toBlob(res, mime, quality));
           const num = String(i).padStart(String(pdf2img.doc.numPages).length, '0');
           pdf2img.resultFiles.push({ name: base + '_第' + num + '页.' + ext, blob });
-          say('#pdf2imgStatus', '正在导出… ' + i + '/' + pdf2img.doc.numPages);
+          say('#pdf2imgStatus', '正在导出图片… ' + i + '/' + pdf2img.doc.numPages);
           if (i % 2 === 1) await new Promise(r => setTimeout(r, 0));
         }
         say('#pdf2imgStatus', '正在打包 ZIP…');
@@ -3266,7 +3263,7 @@
         pdf2img.resultZipName = base + '_图片.zip';
         pdf2img.hasResult = true;
         renderPdf2ImgResult();
-        say('#pdf2imgStatus', '导出完成！', false, true);
+        say('#pdf2imgStatus', '导出图片完成！', false, true);
         $('#pdf2imgResultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       } catch (err) {
         say('#pdf2imgStatus', '导出失败：' + (err && err.message ? err.message : err), true);
