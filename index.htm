@@ -709,7 +709,7 @@
 
 <header class="app-header">
   <h1>📄 PDF 工具箱</h1>
-  <p class="sub">10 个实用工具 · 全部在浏览器本地处理 · 文件不上传</p>
+  <p class="sub">9 个实用工具 · 全部在浏览器本地处理 · 文件不上传</p>
   <div class="badges">
     <span>🔒 本地安全</span>
     <span>⚡ 无需安装</span>
@@ -1242,31 +1242,6 @@
 <script>
 (function () {
   'use strict';
-
-  /* ========== 调试浮层（正式使用时删掉这一整段即可） ========== */
-  window.__dbgLines = [];
-  window.__dbg = function () {
-    const parts = Array.prototype.slice.call(arguments).map(function (v) {
-      if (typeof v === 'object') { try { return JSON.stringify(v); } catch (e) { return String(v); } }
-      return String(v);
-    });
-    window.__dbgLines.push(parts.join(' '));
-    if (window.__dbgLines.length > 14) window.__dbgLines.shift();
-    let el = document.getElementById('__dbgPanel');
-    if (!el) {
-      el = document.createElement('div');
-      el.id = '__dbgPanel';
-      el.style.cssText = 'position:fixed;left:6px;right:6px;top:6px;z-index:99999;' +
-        'background:rgba(0,0,0,.86);color:#7CFC00;font:11px/1.45 monospace;' +
-        'padding:8px 10px;border-radius:8px;white-space:pre-wrap;word-break:break-all;' +
-        'max-height:42vh;overflow-y:auto;pointer-events:auto;';
-      el.addEventListener('dblclick', function () { el.style.display = 'none'; });
-      document.body.appendChild(el);
-    }
-    el.style.display = 'block';
-    el.textContent = window.__dbgLines.join('\n');
-  };
-  /* ============================================================ */
 
   const LOCAL = {
     pdfLib:    ['./libs/pdf-lib.min.js',         './pdf-lib.min.js'],
@@ -3179,69 +3154,45 @@
       el.classList.toggle('hidden', !show);
     }
 
+    /* ---------- 终极方案：屏幕上直接截图（所见即所得） ---------- */
     function captureVideoWithFrame(videoEl) {
-      const vw = videoEl.videoWidth;
-      const vh = videoEl.videoHeight;
-      if (!vw || !vh) throw new Error('视频尚未就绪');
+      if (!videoEl.videoWidth || !videoEl.videoHeight) throw new Error('视频尚未就绪');
 
       const wrap = $('#scanFsVideoWrap');
       const wrapRect = wrap.getBoundingClientRect();
+      const frameRect = $('#scanFsFrame').getBoundingClientRect();
       const displayW = wrapRect.width;
       const displayH = wrapRect.height;
-      if (displayW <= 0 || displayH <= 0) throw new Error('显示区域异常');
 
-      const frameRect = $('#scanFsFrame').getBoundingClientRect();
+      // 1. 先把整个屏幕显示区域画到一个临时 canvas 上（这步完美复刻屏幕上你看到的画面）
+      const stageCv = document.createElement('canvas');
+      // 放大 2.5 倍绘制，保证输出清晰度
+      const scale = 2.5; 
+      stageCv.width = displayW * scale;
+      stageCv.height = displayH * scale;
+      const sctx = stageCv.getContext('2d');
+      
+      sctx.drawImage(videoEl, 0, 0, stageCv.width, stageCv.height);
 
-      let fx = frameRect.left - wrapRect.left;
-      let fy = frameRect.top - wrapRect.top;
-      let fw = frameRect.width;
-      let fh = frameRect.height;
+      // 2. 计算取景框在这个 canvas 上的像素坐标
+      const fx = frameRect.left - wrapRect.left;
+      const fy = frameRect.top - wrapRect.top;
+      const fw = frameRect.width;
+      const fh = frameRect.height;
 
-      fx = clamp(fx, 0, displayW);
-      fy = clamp(fy, 0, displayH);
-      fw = clamp(fw, 1, displayW - fx);
-      fh = clamp(fh, 1, displayH - fy);
+      // 3. 从临时 canvas 上精确切出取景框的内容
+      const cropX = fx * scale;
+      const cropY = fy * scale;
+      const cropW = fw * scale;
+      const cropH = fh * scale;
 
-      const videoRatio = vw / vh;
-      const displayRatio = displayW / displayH;
-      let drawW, drawH, drawX, drawY;
-      if (videoRatio > displayRatio) {
-        drawH = displayH; drawW = displayH * videoRatio;
-        drawX = (displayW - drawW) / 2; drawY = 0;
-      } else {
-        drawW = displayW; drawH = displayW / videoRatio;
-        drawX = 0; drawY = (displayH - drawH) / 2;
-      }
-
-      const sx = clamp((fx - drawX) / drawW * vw, 0, vw);
-      const sy = clamp((fy - drawY) / drawH * vh, 0, vh);
-      const sw = clamp(fw / drawW * vw, 1, vw - sx);
-      const sh = clamp(fh / drawH * vh, 1, vh - sy);
-
-      const outW = Math.max(1, Math.round(sw));
-      const outH = Math.max(1, Math.round(sh));
       const outCv = document.createElement('canvas');
-      outCv.width = outW;
-      outCv.height = outH;
-      outCv.getContext('2d').drawImage(videoEl, sx, sy, sw, sh, 0, 0, outW, outH);
+      outCv.width = cropW;
+      outCv.height = cropH;
+      const octx = outCv.getContext('2d');
+      
+      octx.drawImage(stageCv, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
 
-      window.__dbg('capture',
-        'video=' + vw + 'x' + vh,
-        'display=' + Math.round(displayW) + 'x' + Math.round(displayH),
-        'frame=' + Math.round(fx) + ',' + Math.round(fy) + ',' + Math.round(fw) + ',' + Math.round(fh),
-        'draw=' + Math.round(drawX) + ',' + Math.round(drawY) + ',' + Math.round(drawW) + ',' + Math.round(drawH),
-        'src=' + Math.round(sx) + ',' + Math.round(sy) + ',' + Math.round(sw) + ',' + Math.round(sh),
-        'out=' + outW + 'x' + outH);
-
-      const maxDim = 2400;
-      if (Math.max(outW, outH) > maxDim) {
-        const k = maxDim / Math.max(outW, outH);
-        const scaled = document.createElement('canvas');
-        scaled.width = Math.max(1, Math.round(outW * k));
-        scaled.height = Math.max(1, Math.round(outH * k));
-        scaled.getContext('2d').drawImage(outCv, 0, 0, scaled.width, scaled.height);
-        return scaled;
-      }
       return outCv;
     }
 
@@ -3255,18 +3206,16 @@
       shutterPulse();
       showProcessing(true);
       try {
+        // 等待两帧，确保画面已刷新
         await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
         const cv = captureVideoWithFrame(v);
-
         scan.currentCanvas = cv;
         scan.currentProcessed = null;
 
         $('#scanEditOverlay').classList.add('show');
-
         await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
         applyScanMode();
-
         showToast('已拍照，请确认或调整处理模式');
       } catch (err) {
         say('#scanStatus', '拍照失败：' + (err && err.message ? err.message : err), true);
@@ -3295,11 +3244,8 @@
     function renderScanEditPreview() {
       const canvas = $('#scanEditPreview');
       const src = scan.currentProcessed || scan.currentCanvas;
-      window.__dbg('preview',
-        'src=' + (src && src.width) + 'x' + (src && src.height),
-        'processed=' + (scan.currentProcessed && scan.currentProcessed.width) + 'x' + (scan.currentProcessed && scan.currentProcessed.height),
-        'currentCanvas=' + (scan.currentCanvas && scan.currentCanvas.width) + 'x' + (scan.currentCanvas && scan.currentCanvas.height));
       if (!canvas || !src || !src.width || !src.height) return;
+      
       canvas.width = src.width;
       canvas.height = src.height;
       const ctx = canvas.getContext('2d');
