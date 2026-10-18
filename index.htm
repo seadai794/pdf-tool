@@ -329,7 +329,7 @@
     object-fit: cover; background: #000;
   }
 
-  /* ===== 身份证取景框（圆角 + 人像/国徽示意） ===== */
+  /* ===== 身份证取景框 ===== */
   .scan-fs-frame {
     position: absolute;
     width: 90%; aspect-ratio: 1.585;
@@ -350,7 +350,7 @@
     letter-spacing: .3px;
   }
   .scan-fs-frame .frame-guide {
-    position: absolute; inset: 8%;
+    position: absolute; inset: 6%;
     display: flex; align-items: center; justify-content: center;
     color: rgba(255,255,255,.18);
     pointer-events: none;
@@ -367,7 +367,6 @@
   .scan-fs-corner.bl { bottom: -2px; left: -2px; border-bottom-width: 4px; border-left-width: 4px; border-bottom-left-radius: 14px; }
   .scan-fs-corner.br { bottom: -2px; right: -2px; border-bottom-width: 4px; border-right-width: 4px; border-bottom-right-radius: 14px; }
 
-  /* 对焦框 */
   .scan-fs-focus {
     position: absolute; width: 80px; height: 80px;
     border: 2px solid #60a5fa; border-radius: 8px;
@@ -494,7 +493,6 @@
   @keyframes spin { to { transform: rotate(360deg); } }
   .scan-fs-processing .txt { font-size: 14px; font-weight: 600; }
 
-  /* ===== 扫描结果列表 ===== */
   .scan-result-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
     gap: 8px; padding: 10px; background: #f8fafc;
     border: 1px solid #e2e8f0; border-radius: 10px;
@@ -533,7 +531,6 @@
     align-self: center; font-weight: 600; padding: 4px 10px;
     background: #fff; border: 1px solid #e2e8f0; border-radius: 7px; }
 
-  /* ===== 扫描图片编辑器 ===== */
   .scan-img-editor {
     position: fixed; inset: 0; z-index: 9200; background: #0f172a;
     display: none; flex-direction: column;
@@ -657,7 +654,7 @@
 
 <header class="app-header">
   <h1>📄 PDF 工具箱 · 本地纯净版</h1>
-  <p class="sub">无需 CDN · 完全离线 · 包含所有功能</p>
+  <p class="sub">无需 CDN · 完全离线1 · 包含所有功能</p>
   <div class="badges">
     <span>🔒 本地安全</span>
     <span>⚡ 无需安装</span>
@@ -1140,22 +1137,25 @@
 
   <div class="scan-fs-video-wrap" id="scanFsVideoWrap">
     <video id="scanFsVideo" playsinline autoplay muted></video>
-    <!-- 身份证专用取景框 -->
     <div class="scan-fs-frame" id="scanFsFrame">
       <div class="frame-hint" id="scanFsFrameHint">请将身份证放入框内</div>
       <div class="frame-guide" id="scanFsFrameGuide">
+        <!-- 人像面示意：人像在右，文字条在左 -->
         <svg viewBox="0 0 158 100" preserveAspectRatio="xMidYMid meet" id="scanFsGuideFront">
-          <ellipse cx="42" cy="38" rx="15" ry="18" fill="currentColor"/>
-          <path d="M20 78 Q20 56 42 56 Q64 56 64 78 Z" fill="currentColor"/>
-          <rect x="82" y="26" width="60" height="5" rx="2.5" fill="currentColor"/>
-          <rect x="82" y="40" width="52" height="5" rx="2.5" fill="currentColor"/>
-          <rect x="82" y="54" width="44" height="5" rx="2.5" fill="currentColor"/>
-          <rect x="82" y="70" width="56" height="5" rx="2.5" fill="currentColor"/>
+          <ellipse cx="118" cy="36" rx="15" ry="18" fill="currentColor"/>
+          <path d="M96 82 Q96 58 118 58 Q140 58 140 82 Z" fill="currentColor"/>
+          <rect x="14" y="22" width="62" height="5" rx="2.5" fill="currentColor"/>
+          <rect x="14" y="36" width="54" height="5" rx="2.5" fill="currentColor"/>
+          <rect x="14" y="50" width="58" height="5" rx="2.5" fill="currentColor"/>
+          <rect x="14" y="64" width="46" height="5" rx="2.5" fill="currentColor"/>
         </svg>
+        <!-- 国徽面示意：国徽在左上角，下方为标题与文字 -->
         <svg viewBox="0 0 158 100" preserveAspectRatio="xMidYMid meet" id="scanFsGuideBack" style="display:none">
-          <circle cx="79" cy="38" r="18" fill="currentColor"/>
-          <rect x="40" y="70" width="78" height="5" rx="2.5" fill="currentColor"/>
-          <rect x="48" y="82" width="62" height="5" rx="2.5" fill="currentColor"/>
+          <circle cx="30" cy="28" r="14" fill="currentColor"/>
+          <rect x="58" y="22" width="60" height="6" rx="3" fill="currentColor"/>
+          <rect x="58" y="34" width="44" height="5" rx="2.5" fill="currentColor"/>
+          <rect x="30" y="66" width="86" height="5" rx="2.5" fill="currentColor"/>
+          <rect x="30" y="78" width="64" height="5" rx="2.5" fill="currentColor"/>
         </svg>
       </div>
       <div class="scan-fs-corner tl"></div>
@@ -3786,7 +3786,9 @@
         const isFront = idcardCurrentMode === 'front';
         $('#scanFsTitle').textContent = isFront ? '拍摄身份证正面' : '拍摄身份证反面';
         const hintEl = $('#scanFsFrameHint');
-        if (hintEl) hintEl.textContent = isFront ? '请将「人像面」放入框内' : '请将「国徽面」放入框内';
+        if (hintEl) hintEl.textContent = isFront
+          ? '请将「人像面」放入框内 · 人像朝右'
+          : '请将「国徽面」放入框内 · 国徽在左上角';
         const guideFront = $('#scanFsGuideFront');
         const guideBack = $('#scanFsGuideBack');
         if (guideFront && guideBack) {
@@ -3966,13 +3968,16 @@
           });
         } catch (e) {}
       }
-      async function downloadModel(onProgress) {
+
+      async function downloadModel(onProgress, onStatus) {
         const urls = LOCAL.rmbg.concat(CDN.rmbg);
-        let lastErr = null;
+        const errors = [];
         for (const url of urls) {
+          const isLocal = url.startsWith('./') || url.startsWith('/');
           try {
+            onStatus && onStatus('尝试：' + (isLocal ? '本地 ' + url : 'CDN ' + url));
             const res = await fetch(url, { cache: 'force-cache' });
-            if (!res.ok) throw new Error('HTTP ' + res.status);
+            if (!res.ok) throw new Error('HTTP ' + res.status + ' ' + res.statusText);
             const total = parseInt(res.headers.get('content-length') || '0', 10);
             const reader = res.body.getReader();
             const chunks = [];
@@ -3988,10 +3993,29 @@
             let off = 0;
             for (const c of chunks) { buf.set(c, off); off += c.length; }
             return buf.buffer;
-          } catch (e) { lastErr = e; }
+          } catch (e) {
+            let reason = e.message || String(e);
+            if (e.name === 'TypeError' && /fetch/i.test(reason)) reason = '网络失败或跨域被拦截';
+            if (e.name === 'AbortError') reason = '请求被中止';
+            errors.push((isLocal ? '本地 ' : 'CDN ') + url + ' → ' + reason);
+          }
         }
-        throw new Error('模型下载失败：' + (lastErr && lastErr.message));
+        const detail = errors.map(x => '· ' + x).join('\n');
+        const err = new Error(
+          'AI 抠图模型下载失败。\n\n' +
+          '已尝试以下地址：\n' + detail + '\n\n' +
+          '解决方案：\n' +
+          '1) 手动下载模型文件 rmbg-1.4.onnx（约 44MB），放到网页目录的 libs/ 文件夹下：\n' +
+          '   https://huggingface.co/briaai/RMBG-1.4/resolve/main/onnx/model.onnx\n' +
+          '   或国内镜像：\n' +
+          '   https://hf-mirror.com/briaai/RMBG-1.4/resolve/main/onnx/model.onnx\n' +
+          '2) 检查网络后点击「生成证件照预览」重试；\n' +
+          '3) 临时改用「🎨 快速抠图」或「➖ 不抠图」模式。'
+        );
+        err.detail = detail;
+        throw err;
       }
+
       async function ensureORT() {
         if (window.ort) return window.ort;
         const all = LOCAL.ort.concat(CDN.ort);
@@ -4006,26 +4030,37 @@
         }
         throw new Error('onnxruntime-web 加载失败');
       }
-      async function init(onProgress) {
+
+      async function init(onProgress, onStatus) {
         if (session) return session;
         if (loadPromise) return loadPromise;
         loadPromise = (async () => {
           try {
             onProgress && onProgress({ stage: 'ort', value: 0 });
+            onStatus && onStatus('正在加载推理引擎 onnxruntime-web…');
             const ort = await ensureORT();
+
             let modelBuf = await idbGet(KEY);
             if (!modelBuf) {
               onProgress && onProgress({ stage: 'download', value: 0 });
-              modelBuf = await downloadModel((p) => {
-                onProgress && onProgress({ stage: 'download', value: p });
-              });
+              onStatus && onStatus('开始下载 AI 模型（约 44MB，仅首次）…');
+              modelBuf = await downloadModel(
+                (p) => { onProgress && onProgress({ stage: 'download', value: p }); },
+                onStatus
+              );
+              onStatus && onStatus('下载完成，正在写入本地缓存…');
               await idbPut(KEY, modelBuf);
+            } else {
+              onStatus && onStatus('已命中本地缓存，跳过下载');
             }
+
             onProgress && onProgress({ stage: 'session', value: 0 });
+            onStatus && onStatus('正在初始化推理会话…');
             session = await ort.InferenceSession.create(modelBuf, {
               executionProviders: ['wasm'],
               graphOptimizationLevel: 'all'
             });
+            onStatus && onStatus('模型就绪');
             return session;
           } catch (e) {
             loadPromise = null;
@@ -4034,6 +4069,7 @@
         })();
         return loadPromise;
       }
+
       function preprocess(srcCanvas) {
         const c = document.createElement('canvas');
         c.width = MODEL_SIZE; c.height = MODEL_SIZE;
@@ -4079,14 +4115,17 @@
         }
         return alpha;
       }
-      async function remove(srcCanvas, onProgress) {
-        const sess = await init(onProgress);
+      async function remove(srcCanvas, onProgress, onStatus) {
+        const sess = await init(onProgress, onStatus);
         const ort = window.ort;
+        onStatus && onStatus('正在预处理图片…');
         const { tensor, dx, dy, dw, dh } = preprocess(srcCanvas);
         const input = new ort.Tensor('float32', tensor, [1, 3, MODEL_SIZE, MODEL_SIZE]);
+        onStatus && onStatus('正在 AI 推理（可能需要 2~5 秒）…');
         const results = await sess.run({ input });
         const outKey = Object.keys(results)[0];
         const maskData = results[outKey].data;
+        onStatus && onStatus('正在合成透明背景…');
         const alpha = postprocess(maskData, srcCanvas.width, srcCanvas.height, dx, dy, dw, dh);
         const out = document.createElement('canvas');
         out.width = srcCanvas.width;
@@ -4120,7 +4159,6 @@
       'small2': { w: 413, h: 531 }
     };
 
-    // 颜色抠图（四边采样背景色 + 软 matting + 3x3 平滑）
     function extractForegroundColor(srcCanvas) {
       const W = srcCanvas.width, H = srcCanvas.height;
       const ctx = srcCanvas.getContext('2d');
@@ -4233,7 +4271,6 @@
         idphotoMatted = { canvas, alpha, mode: 'color' };
         return idphotoMatted;
       }
-      // AI
       $('#idphotoAIStatusWrap').classList.remove('hidden');
       const bar = $('#idphotoAIProgressBar');
       const txt = $('#idphotoAIStatusText');
@@ -4241,21 +4278,25 @@
       try {
         const cached = await RMBG.isCached();
         if (!cached) {
-          txt.textContent = '正在下载 AI 模型（约 44MB，仅首次）…';
-          say('#idphotoStatus', '正在下载 AI 抠图模型，请保持网络…');
+          txt.textContent = '首次使用需下载约 44MB 模型…';
+          say('#idphotoStatus', '正在准备 AI 抠图模型…');
         } else {
-          txt.textContent = '正在加载本地模型…';
-          bar.style.width = '70%';
+          txt.textContent = '已检测到本地模型缓存';
+          bar.style.width = '10%';
         }
-        const { canvas, alpha } = await RMBG.remove(base, ({ stage, value }) => {
-          if (stage === 'download') {
-            bar.style.width = Math.round(value * 60) + '%';
-            txt.textContent = '下载模型 ' + Math.round(value * 100) + '%（首次约 44MB）';
-          } else if (stage === 'session') {
-            bar.style.width = '80%';
-            txt.textContent = '正在初始化推理引擎…';
-          }
-        });
+        const { canvas, alpha } = await RMBG.remove(
+          base,
+          ({ stage, value }) => {
+            if (stage === 'download') {
+              bar.style.width = Math.round(value * 60) + '%';
+              txt.textContent = '下载模型 ' + Math.round(value * 100) + '%（首次约 44MB）';
+            } else if (stage === 'session') {
+              bar.style.width = '80%';
+              txt.textContent = '正在初始化推理引擎…';
+            }
+          },
+          (msg) => { txt.textContent = msg; }
+        );
         bar.style.width = '100%';
         txt.textContent = '✅ AI 抠图完成';
         idphotoMatted = { canvas, alpha, mode: 'ai' };
@@ -4263,7 +4304,10 @@
       } catch (err) {
         console.error('[RMBG]', err);
         bar.style.width = '0%';
-        txt.textContent = '❌ AI 抠图失败：' + err.message + '（已回退到快速抠图）';
+        txt.textContent = '❌ AI 抠图失败';
+        const msg = (err && err.message) ? err.message : String(err);
+        alert(msg);
+        say('#idphotoStatus', '已自动回退到快速抠图（可在上方切换为 AI 重试）', true);
         const { canvas, alpha } = extractForegroundColor(base);
         idphotoMatted = { canvas, alpha, mode: 'color-fallback' };
         return idphotoMatted;
@@ -4404,13 +4448,107 @@
       canvas.addEventListener('pointercancel', endDrag);
     })();
 
-    bind('#idphotoDownloadBtn', 'click', () => {
+    /* ===== 证件照保存（路径提示 + 显式保存） ===== */
+    bind('#idphotoDownloadBtn', 'click', async () => {
       const canvas = $('#idphotoCanvas');
-      canvas.toBlob((blob) => {
-        downloadBlob(blob, '证件照_' + Date.now() + '.jpg');
-        say('#idphotoStatus', '✅ 已保存到本地', false, true);
-      }, 'image/jpeg', 0.95);
+      const btn = $('#idphotoDownloadBtn');
+      if (!canvas || !canvas.width) {
+        say('#idphotoStatus', '请先生成证件照预览', true);
+        return;
+      }
+      btn.disabled = true;
+      try {
+        const blob = await new Promise((res, rej) => {
+          canvas.toBlob((b) => b ? res(b) : rej(new Error('生成图片失败')), 'image/jpeg', 0.95);
+        });
+        const filename = '证件照_' + Date.now() + '.jpg';
+        await saveIdPhotoWithPath(blob, filename);
+      } catch (e) {
+        say('#idphotoStatus', '保存失败：' + (e && e.message ? e.message : e), true);
+      } finally {
+        btn.disabled = false;
+      }
     });
+
+    async function saveIdPhotoWithPath(blob, filename) {
+      if (window.isSecureContext && typeof window.showSaveFilePicker === 'function') {
+        try {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: filename,
+            types: [{ description: 'JPEG 图片', accept: { 'image/jpeg': ['.jpg', '.jpeg'] } }]
+          });
+          const writable = await handle.createWritable();
+          await writable.write(blob);
+          await writable.close();
+          say('#idphotoStatus',
+            '✅ 已保存：' + (handle.name || filename) +
+            '（保存到你刚才选择的文件夹）', false, true);
+          return;
+        } catch (err) {
+          if (err && err.name === 'AbortError') {
+            say('#idphotoStatus', '已取消保存');
+            return;
+          }
+        }
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.rel = 'noopener';
+      a.target = '_self';
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      try { a.click(); }
+      catch (e) {
+        const evt = document.createEvent('MouseEvents');
+        evt.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0,
+          false, false, false, false, 0, null);
+        a.dispatchEvent(evt);
+      }
+      setTimeout(() => {
+        try { document.body.removeChild(a); } catch (_) {}
+        setTimeout(() => { try { URL.revokeObjectURL(url); } catch (_) {} }, 60000);
+      }, 5000);
+      showIdPhotoSaveTip(filename);
+    }
+
+    function showIdPhotoSaveTip(filename) {
+      const ua = navigator.userAgent || '';
+      const isIOS = /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+      const isAndroid = /Android/i.test(ua);
+      const isWin = /Windows/i.test(ua);
+      const isMac = /Macintosh/i.test(ua);
+      let where = '浏览器默认的「下载」目录';
+      if (isIOS) where = '「文件」App →「下载」或「最近」里（也可长按图片保存到相册）';
+      else if (isAndroid) where = '手机「文件管理」App 的「Download / 下载」文件夹，或「相册」的「下载」相册';
+      else if (isWin) where = '用户目录下的「下载」文件夹（C:\\Users\\你的用户名\\Downloads）';
+      else if (isMac) where = '「下载」文件夹（访达 → 左侧「下载」）';
+      const modal = document.createElement('div');
+      modal.style.cssText =
+        'position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,.65);' +
+        'display:flex;align-items:center;justify-content:center;padding:20px;' +
+        'font-family:-apple-system,"PingFang SC",sans-serif';
+      modal.innerHTML =
+        '<div style="max-width:420px;width:100%;background:#fff;border-radius:16px;padding:22px;' +
+        'box-shadow:0 20px 60px rgba(15,23,42,.35);text-align:center">' +
+        '<div style="font-size:44px;margin-bottom:8px">💾</div>' +
+        '<div style="font-size:16px;font-weight:800;color:#0f172a;margin-bottom:6px">图片已保存</div>' +
+        '<div style="font-size:12px;color:#64748b;line-height:1.7;margin-bottom:14px;word-break:break-all">' +
+          '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px;font-family:monospace;margin-bottom:10px">' +
+            escapeHtml(filename) +
+          '</div>' +
+          '存放位置：<b style="color:#334155">' + where + '</b>' +
+        '</div>' +
+        '<button id="idphotoSaveTipOk" type="button" style="width:100%;padding:13px;border:none;' +
+          'background:linear-gradient(135deg,#2563eb,#3b82f6);color:#fff;border-radius:10px;' +
+          'font-size:15px;font-weight:700;cursor:pointer;font-family:inherit">我知道了</button>' +
+        '</div>';
+      document.body.appendChild(modal);
+      const close = () => { try { document.body.removeChild(modal); } catch (_) {} };
+      modal.querySelector('#idphotoSaveTipOk').addEventListener('click', close);
+      modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
+    }
 
     /* ===== 模块 5：图片转 PDF ===== */
     const img2pdf = {
