@@ -338,6 +338,7 @@
     display: flex; align-items: center; justify-content: center;
   }
   .scan-fullscreen video {
+    position: absolute; inset: 0;
     display: block; width: 100%; height: 100%;
     object-fit: cover; background: #000;
   }
@@ -649,11 +650,6 @@
     background: #334155; color: #fff; border: 1px solid #475569;
     box-shadow: none;
   }
- .scan-fullscreen video {
-  position: absolute; inset: 0;
-  display: block; width: 100%; height: 100%;
-  object-fit: cover; background: #000;
-}
   .scan-ie-actions .btn.green {
     background: linear-gradient(135deg, #059669, #10b981);
     box-shadow: 0 2px 8px rgba(5,150,105,.35);
@@ -3189,85 +3185,80 @@
       el.classList.toggle('hidden', !show);
     }
 
-   /* ---------- 关键：按取景框位置从视频帧裁剪（以 wrap 为统一参考系，绝不偏移） ---------- */
-function captureVideoWithFrame(videoEl) {
-  const vw = videoEl.videoWidth;
-  const vh = videoEl.videoHeight;
-  if (!vw || !vh) throw new Error('视频尚未就绪');
+    /* ---------- 关键：按取景框位置从视频帧裁剪（以 wrap 为统一参考系，绝不偏移） ---------- */
+    function captureVideoWithFrame(videoEl) {
+      const vw = videoEl.videoWidth;
+      const vh = videoEl.videoHeight;
+      if (!vw || !vh) throw new Error('视频尚未就绪');
 
-  // 以 video 的父容器（wrap）作为统一参考系
-  const wrap = $('#scanFsVideoWrap');
-  const wrapRect = wrap.getBoundingClientRect();
-  const displayW = wrapRect.width;
-  const displayH = wrapRect.height;
-  if (displayW <= 0 || displayH <= 0) throw new Error('显示区域异常');
+      // 以 video 的父容器（wrap）作为统一参考系
+      const wrap = $('#scanFsVideoWrap');
+      const wrapRect = wrap.getBoundingClientRect();
+      const displayW = wrapRect.width;
+      const displayH = wrapRect.height;
+      if (displayW <= 0 || displayH <= 0) throw new Error('显示区域异常');
 
-  // 取景框在屏幕上的位置
-  const frameRect = $('#scanFsFrame').getBoundingClientRect();
+      // 取景框在屏幕上的位置
+      const frameRect = $('#scanFsFrame').getBoundingClientRect();
 
-  // 取景框相对 wrap 的像素坐标（wrap 就是 video 的显示框，两者同尺寸同位置）
-  let fx = frameRect.left - wrapRect.left;
-  let fy = frameRect.top - wrapRect.top;
-  let fw = frameRect.width;
-  let fh = frameRect.height;
+      // 取景框相对 wrap 的像素坐标（wrap 就是 video 的显示框，两者同尺寸同位置）
+      let fx = frameRect.left - wrapRect.left;
+      let fy = frameRect.top - wrapRect.top;
+      let fw = frameRect.width;
+      let fh = frameRect.height;
 
-  // 限制在显示区域内
-  fx = clamp(fx, 0, displayW);
-  fy = clamp(fy, 0, displayH);
-  fw = clamp(fw, 1, displayW - fx);
-  fh = clamp(fh, 1, displayH - fy);
+      // 限制在显示区域内
+      fx = clamp(fx, 0, displayW);
+      fy = clamp(fy, 0, displayH);
+      fw = clamp(fw, 1, displayW - fx);
+      fh = clamp(fh, 1, displayH - fy);
 
-  // 用一个与 wrap 等大的 canvas，把视频帧按 object-fit: cover 画上去
-  // 这样 canvas 像素坐标 === wrap 屏幕坐标，取景框在哪就从哪裁
-  const stageCv = document.createElement('canvas');
-  stageCv.width = Math.max(1, Math.round(displayW));
-  stageCv.height = Math.max(1, Math.round(displayH));
-  const sctx = stageCv.getContext('2d');
+      // 用一个与 wrap 等大的 canvas，把视频帧按 object-fit: cover 画上去
+      const stageCv = document.createElement('canvas');
+      stageCv.width = Math.max(1, Math.round(displayW));
+      stageCv.height = Math.max(1, Math.round(displayH));
+      const sctx = stageCv.getContext('2d');
 
-  // 复刻 object-fit: cover 的绘制逻辑
-  const videoRatio = vw / vh;
-  const displayRatio = displayW / displayH;
-  let drawW, drawH, drawX, drawY;
-  if (videoRatio > displayRatio) {
-    // 视频更宽 → 高度铺满，左右溢出
-    drawH = displayH;
-    drawW = displayH * videoRatio;
-    drawX = (displayW - drawW) / 2;
-    drawY = 0;
-  } else {
-    // 视频更高 → 宽度铺满，上下溢出
-    drawW = displayW;
-    drawH = displayW / videoRatio;
-    drawX = 0;
-    drawY = (displayH - drawH) / 2;
-  }
-  sctx.drawImage(videoEl, drawX, drawY, drawW, drawH);
+      const videoRatio = vw / vh;
+      const displayRatio = displayW / displayH;
+      let drawW, drawH, drawX, drawY;
+      if (videoRatio > displayRatio) {
+        drawH = displayH;
+        drawW = displayH * videoRatio;
+        drawX = (displayW - drawW) / 2;
+        drawY = 0;
+      } else {
+        drawW = displayW;
+        drawH = displayW / videoRatio;
+        drawX = 0;
+        drawY = (displayH - drawH) / 2;
+      }
+      sctx.drawImage(videoEl, drawX, drawY, drawW, drawH);
 
-  // 按取景框坐标从 stageCv 裁剪
-  const cropX = Math.max(0, Math.round(fx));
-  const cropY = Math.max(0, Math.round(fy));
-  const cropW = Math.max(1, Math.round(fw));
-  const cropH = Math.max(1, Math.round(fh));
+      // 按取景框坐标从 stageCv 裁剪
+      const cropX = Math.max(0, Math.round(fx));
+      const cropY = Math.max(0, Math.round(fy));
+      const cropW = Math.max(1, Math.round(fw));
+      const cropH = Math.max(1, Math.round(fh));
 
-  const outCv = document.createElement('canvas');
-  outCv.width = cropW;
-  outCv.height = cropH;
-  const octx = outCv.getContext('2d');
-  octx.drawImage(stageCv, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+      const outCv = document.createElement('canvas');
+      outCv.width = cropW;
+      outCv.height = cropH;
+      const octx = outCv.getContext('2d');
+      octx.drawImage(stageCv, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
 
-  // 限制输出尺寸
-  const maxDim = 2400;
-  if (Math.max(outCv.width, outCv.height) > maxDim) {
-    const k = maxDim / Math.max(outCv.width, outCv.height);
-    const scaled = document.createElement('canvas');
-    scaled.width = Math.max(1, Math.round(outCv.width * k));
-    scaled.height = Math.max(1, Math.round(outCv.height * k));
-    const sctx2 = scaled.getContext('2d');
-    sctx2.drawImage(outCv, 0, 0, scaled.width, scaled.height);
-    return scaled;
-  }
-  return outCv;
-}
+      const maxDim = 2400;
+      if (Math.max(outCv.width, outCv.height) > maxDim) {
+        const k = maxDim / Math.max(outCv.width, outCv.height);
+        const scaled = document.createElement('canvas');
+        scaled.width = Math.max(1, Math.round(outCv.width * k));
+        scaled.height = Math.max(1, Math.round(outCv.height * k));
+        const sctx2 = scaled.getContext('2d');
+        sctx2.drawImage(outCv, 0, 0, scaled.width, scaled.height);
+        return scaled;
+      }
+      return outCv;
+    }
 
     /* ---------- 拍照 ---------- */
     async function takePhoto() {
@@ -3280,7 +3271,6 @@ function captureVideoWithFrame(videoEl) {
       shutterPulse();
       showProcessing(true);
       try {
-        // 等待两帧，确保视频帧已刷新为当前画面
         await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
         const cv = captureVideoWithFrame(v);
         scan.currentCanvas = cv;
@@ -3323,10 +3313,9 @@ function captureVideoWithFrame(videoEl) {
       const canvas = $('#scanEditPreview');
       const src = scan.currentProcessed || scan.currentCanvas;
       if (!canvas || !src) return;
-      const maxW = Math.min(window.innerWidth - 24, 800);
-      const scale = Math.min(1, maxW / src.width);
-      canvas.width = Math.round(src.width * scale);
-      canvas.height = Math.round(src.height * scale);
+      // 直接把 canvas 固有尺寸设为原图尺寸，CSS 用 width:100%;height:auto 等比缩放
+      canvas.width = src.width;
+      canvas.height = src.height;
       const ctx = canvas.getContext('2d');
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(src, 0, 0, canvas.width, canvas.height);
@@ -3589,11 +3578,8 @@ function captureVideoWithFrame(videoEl) {
 
       try {
         const img = await loadImage(item.dataUrl);
-        // 用原图生成基础 canvas（不再叠加旋转，旋转通过画布重绘实现）
         editor.baseCanvas = drawRotatedCanvas(img, 0);
-        // 先显示编辑器，让布局完成后再绘制
         $('#scanImgEditor').classList.add('show');
-        // 延迟绘制，确保布局尺寸就绪
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             drawEditorCanvas();
@@ -3610,11 +3596,9 @@ function captureVideoWithFrame(videoEl) {
       const overlay = $('#scanIeOverlay');
       if (!editor.baseCanvas) return;
 
-      // 宽高可能为 0（布局未完成），此时跳过，等待下一次触发
       const stageW = stage.clientWidth;
       const stageH = stage.clientHeight;
       if (stageW <= 10 || stageH <= 10) {
-        // 再等一帧
         requestAnimationFrame(() => drawEditorCanvas());
         return;
       }
