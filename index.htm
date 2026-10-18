@@ -939,7 +939,7 @@
       </div>
       <div class="card hidden" id="idcardResultCard">
         <h2><span class="step-label">第 2 步</span><span class="step-title">生成并导出 A4</span></h2>
-        <p class="hint">会将两张图上下居中排版到一张 A4 纸上，非常适合直接打印。</p>
+        <p class="hint">将严格按照身份证原件物理尺寸（85.6mm × 54mm）排版，A4纸上打印出来即与原复印尺寸完全一致。</p>
         <button class="btn big" id="idcardGenBtn" type="button">生成身份证 A4 拼图</button>
         <div class="status" id="idcardStatus"></div>
         <div class="preview-wrap hidden" id="idcardPreviewWrap">
@@ -960,7 +960,7 @@
         <p class="hint">选一张正面清晰的人像照片（纯前端无法完美抠图，如果原图背景较杂乱，结果会有背景保留）。</p>
       </div>
       <div class="card hidden" id="idphotoOptCard">
-        <h2><span class="step-label">第 2 步</span><span class="step-title">尺寸与背景</span></h2>
+        <h2><span class="step-label">第 2 步</span><span class="step-title">尺寸与排版</span></h2>
         <div class="field">
           <label>尺寸规格</label>
           <select id="idphotoSize">
@@ -979,14 +979,22 @@
             <option value="#4b5563">灰色</option>
           </select>
         </div>
-        <button class="btn big" id="idphotoGenBtn" type="button">生成证件照</button>
+        <div class="field">
+          <label>排版模式</label>
+          <select id="idphotoLayout">
+            <option value="single">单张导出</option>
+            <option value="sheet" selected>相馆排版（5寸相纸拼版）</option>
+          </select>
+        </div>
+        <button class="btn big" id="idphotoGenBtn" type="button">生成证件照预览</button>
         <div class="status" id="idphotoStatus"></div>
-        <div class="preview-wrap hidden" id="idphotoPreviewWrap" style="text-align:center;">
-          <p class="hint" style="text-align:left;margin-top:0;">提示：请拖动图片调整位置，使其居中。</p>
-          <canvas id="idphotoCanvas" style="box-shadow: 0 4px 12px rgba(0,0,0,0.15); border-radius: 4px; touch-action:none; cursor:grab;"></canvas>
+        
+        <div class="preview-wrap hidden" id="idphotoPreviewWrap" style="text-align:center; background: #1e293b;">
+          <p class="hint" style="text-align:left;margin-top:0;color:#94a3b8;">提示：单张模式下可拖动照片调整位置。排好版后，请直接截图或点击下方保存。</p>
+          <canvas id="idphotoCanvas" style="box-shadow: 0 4px 12px rgba(0,0,0,0.5); max-width: 100%; touch-action:none; cursor:grab;"></canvas>
         </div>
         <div class="btn-row hidden" id="idphotoDownloadRow" style="margin-top:12px">
-          <button class="btn green" id="idphotoDownloadBtn" type="button">💾 保存证件照</button>
+          <button class="btn green" id="idphotoDownloadBtn" type="button">💾 保存图片</button>
         </div>
       </div>
     </section>
@@ -2191,12 +2199,6 @@
     }
 
     $('#cropUnifySize').addEventListener('change', function () {
-      const hint = $('#cropUnifyHint');
-      if (this.value === 'none') {
-        hint.innerHTML = '选择「<b>保持原裁剪尺寸</b>」时，每一页的裁剪结果尺寸可能不同，内容仍是矢量。<br>适合需要保留原始分辨率或矢量内容的场景。';
-      } else {
-        hint.innerHTML = '选择 A4 / Letter 时，裁剪结果会<b>缩放到统一页面上</b>，适合多页打印或装订。<br>缩放到页面时内容会转为图片，清晰度由渲染分辨率决定。';
-      }
       markCropDirty();
     });
 
@@ -3963,33 +3965,34 @@
       
       try {
         const doc = await PDFDocument.create();
-        const A4 = [595.28, 841.89]; // A4
+        const A4 = [595.28, 841.89]; // A4 pt
         const page = doc.addPage(A4);
         
-        // 计算图片缩放，目标宽度约占 A4 宽度的 70% (约 416pt)
-        const targetW = A4[0] * 0.7;
+        // 身份证真实物理尺寸：85.6mm x 54mm
+        // 1 mm = 2.83465 pt
+        const targetW = 85.6 * 2.83465;
+        const targetH = 54 * 2.83465;
         
-        async function addImgToPage(imgEl, centerYOffset) {
+        async function addImgToPage(imgEl, yOffset) {
           const cv = document.createElement('canvas');
+          // 使用高分辨率绘制以保证清晰
           cv.width = imgEl.width; cv.height = imgEl.height;
           cv.getContext('2d').drawImage(imgEl, 0, 0);
-          const blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.9));
+          const blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.95));
           const jpg = await doc.embedJpg(new Uint8Array(await blob.arrayBuffer()));
           
-          const k = targetW / jpg.width;
-          const targetH = jpg.height * k;
-          
+          // 居中排放，纵向间距 20pt
           page.drawImage(jpg, {
             x: (A4[0] - targetW) / 2,
-            y: (A4[1] / 2) - targetH + centerYOffset,
+            y: (A4[1] / 2) + yOffset,
             width: targetW,
             height: targetH
           });
         }
         
-        // 正面画在中线偏上，反面画在中线偏下，中间留点间距
-        await addImgToPage(idcardFrontImg, -20);
-        await addImgToPage(idcardBackImg, -40 - (idcardFrontImg.height * (targetW / idcardFrontImg.width)));
+        // 正面在中线上方，反面在中线下方
+        await addImgToPage(idcardFrontImg, 10);
+        await addImgToPage(idcardBackImg, -targetH - 10);
         
         const bytes = await doc.save();
         const filename = '身份证复印_A4.pdf';
@@ -4020,7 +4023,7 @@
         $('#idcardPdfResultCard').classList.remove('hidden');
         $('#idcardSaveBtn').addEventListener('click', () => sharedSave.saveAsPdf(bytes, filename, t => say('#idcardStatus', t)));
         
-        say('#idcardStatus', '✅ 生成成功，已生成 A4 排版', false, true);
+        say('#idcardStatus', '✅ 生成成功，已生成真实物理尺寸 A4 排版', false, true);
         $('#idcardPdfResultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       } catch (err) {
         console.error(err);
@@ -4032,8 +4035,9 @@
     let idphotoImg = null;
     let idphotoCtx = null;
     let idphotoState = { scale: 1, x: 0, y: 0, startX: 0, startY: 0, dragging: false };
+    // 使用 300dpi 下的像素尺寸
     const idphotoTargetSizes = {
-      '1inch': { w: 295, h: 413 }, // 25x35mm @300dpi
+      '1inch': { w: 295, h: 413 }, // 25x35mm
       '2inch': { w: 413, h: 579 }, // 35x49mm
       'small1': { w: 260, h: 378 }, // 22x32mm
       'small2': { w: 413, h: 531 }  // 35x45mm
@@ -4045,9 +4049,8 @@
       try {
         idphotoImg = await loadImage(await readDataUrl(f));
         $('#idphotoOptCard').classList.remove('hidden');
-        $('#idphotoPreviewWrap').classList.remove('hidden');
         $('#idphotoDownloadRow').classList.add('hidden');
-        drawIdPhoto();
+        $('#idphotoPreviewWrap').classList.add('hidden');
       } catch (err) {}
     });
 
@@ -4055,48 +4058,113 @@
       if (!idphotoImg) return;
       const sizeKey = $('#idphotoSize').value;
       const bgColor = $('#idphotoBg').value;
+      const layoutMode = $('#idphotoLayout').value;
       const target = idphotoTargetSizes[sizeKey];
       
       const canvas = $('#idphotoCanvas');
-      canvas.width = target.w;
-      canvas.height = target.h;
-      // 为了在手机端显示不至于太大，设置一个合理的 css 宽度
-      canvas.style.width = '150px';
-      canvas.style.height = (150 * target.h / target.w) + 'px';
+      $('#idphotoPreviewWrap').classList.remove('hidden');
       
-      idphotoCtx = canvas.getContext('2d');
-      // 1. 填充背景
-      idphotoCtx.fillStyle = bgColor;
-      idphotoCtx.fillRect(0, 0, target.w, target.h);
-      
-      // 2. 计算居中缩放
-      const scale = Math.max(target.w / idphotoImg.width, target.h / idphotoImg.height);
-      const drawW = idphotoImg.width * scale;
-      const drawH = idphotoImg.height * scale;
-      
-      // 初始位置居中
-      if (idphotoState.x === 0 && idphotoState.y === 0) {
-        idphotoState.x = (target.w - drawW) / 2;
-        idphotoState.y = (target.h - drawH) / 2 - (target.h * 0.1); // 稍微往上一点，脸通常在中间偏上
+      if (layoutMode === 'sheet') {
+        // 5寸相纸：3.5 x 5 英寸 (1050 x 1500 像素 @300dpi)
+        canvas.width = 1050;
+        canvas.height = 1500;
+        canvas.style.width = '100%';
+        canvas.style.height = 'auto';
+        idphotoCtx = canvas.getContext('2d');
+        idphotoCtx.fillStyle = '#ffffff';
+        idphotoCtx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // 这里由于有底色，我们需要生成单张然后贴过去
+        const singleCv = document.createElement('canvas');
+        singleCv.width = target.w; singleCv.height = target.h;
+        const sctx = singleCv.getContext('2d');
+        
+        // 渲染单张
+        sctx.fillStyle = bgColor;
+        sctx.fillRect(0, 0, target.w, target.h);
+        const scale = Math.max(target.w / idphotoImg.width, target.h / idphotoImg.height);
+        const drawW = idphotoImg.width * scale;
+        const drawH = idphotoImg.height * scale;
+        
+        let drawX = (target.w - drawW) / 2;
+        let drawY = (target.h - drawH) / 2 - (target.h * 0.05); // 稍微偏上
+        
+        if (idphotoState.x !== 0 || idphotoState.y !== 0) {
+            drawX = idphotoState.x;
+            drawY = idphotoState.y;
+        }
+        
+        sctx.save();
+        sctx.beginPath();
+        sctx.rect(0, 0, target.w, target.h);
+        sctx.clip();
+        sctx.drawImage(idphotoImg, drawX, drawY, drawW, drawH);
+        sctx.restore();
+        
+        // 计算排版
+        const margin = 40; // 边距
+        const gap = 20; // 间距
+        const cols = Math.floor((canvas.width - margin * 2 + gap) / (target.w + gap));
+        const rows = Math.floor((canvas.height - margin * 2 + gap) / (target.h + gap));
+        
+        const startX = (canvas.width - (cols * target.w + (cols - 1) * gap)) / 2;
+        const startY = (canvas.height - (rows * target.h + (rows - 1) * gap)) / 2;
+        
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const x = startX + c * (target.w + gap);
+            const y = startY + r * (target.h + gap);
+            idphotoCtx.drawImage(singleCv, x, y);
+            // 绘制裁切线
+            idphotoCtx.strokeStyle = '#999';
+            idphotoCtx.lineWidth = 1;
+            idphotoCtx.setLineDash([5, 5]);
+            idphotoCtx.strokeRect(x, y, target.w, target.h);
+          }
+        }
+        
+      } else {
+        // 单张模式
+        canvas.width = target.w;
+        canvas.height = target.h;
+        canvas.style.width = '180px';
+        canvas.style.height = (180 * target.h / target.w) + 'px';
+        
+        idphotoCtx = canvas.getContext('2d');
+        idphotoCtx.fillStyle = bgColor;
+        idphotoCtx.fillRect(0, 0, target.w, target.h);
+        
+        const scale = Math.max(target.w / idphotoImg.width, target.h / idphotoImg.height);
+        const drawW = idphotoImg.width * scale;
+        const drawH = idphotoImg.height * scale;
+        
+        if (idphotoState.x === 0 && idphotoState.y === 0) {
+          idphotoState.x = (target.w - drawW) / 2;
+          idphotoState.y = (target.h - drawH) / 2 - (target.h * 0.05); 
+        }
+        
+        idphotoCtx.save();
+        idphotoCtx.beginPath();
+        idphotoCtx.rect(0, 0, target.w, target.h);
+        idphotoCtx.clip();
+        idphotoCtx.drawImage(idphotoImg, idphotoState.x, idphotoState.y, drawW, drawH);
+        idphotoCtx.restore();
       }
-      
-      // 3. 裁剪绘制（保证不出界）
-      idphotoCtx.save();
-      idphotoCtx.beginPath();
-      idphotoCtx.rect(0, 0, target.w, target.h);
-      idphotoCtx.clip();
-      
-      idphotoCtx.drawImage(idphotoImg, idphotoState.x, idphotoState.y, drawW, drawH);
-      idphotoCtx.restore();
       
       $('#idphotoDownloadRow').classList.remove('hidden');
     }
 
     $('#idphotoSize').addEventListener('change', () => {
-      idphotoState.x = 0; idphotoState.y = 0; // 重置位置
+      idphotoState.x = 0; idphotoState.y = 0;
       drawIdPhoto();
     });
     $('#idphotoBg').addEventListener('change', drawIdPhoto);
+    $('#idphotoLayout').addEventListener('change', () => {
+      idphotoState.x = 0; idphotoState.y = 0;
+      if($('#idphotoPreviewWrap').classList.contains('hidden') === false) {
+          drawIdPhoto();
+      }
+    });
     
     $('#idphotoGenBtn').addEventListener('click', () => {
       if (!idphotoImg) {
@@ -4105,26 +4173,15 @@
       }
       idphotoState.x = 0; idphotoState.y = 0;
       drawIdPhoto();
-      say('#idphotoStatus', '可以手指拖动图片调整位置，调整好后点击下方保存。', false, true);
+      say('#idphotoStatus', '调整好后点击下方保存。', false, true);
     });
 
     // 证件照拖拽调整
     (function bindIdPhotoDrag() {
       const canvas = $('#idphotoCanvas');
       
-      const getPos = (e) => {
-        const rect = canvas.getBoundingClientRect();
-        // 计算缩放比例：canvas内部真实像素 与 屏幕上显示的 css 像素 的比例
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        return {
-          x: (e.clientX - rect.left) * scaleX,
-          y: (e.clientY - rect.top) * scaleY
-        };
-      };
-
       canvas.addEventListener('pointerdown', (e) => {
-        if (!idphotoImg) return;
+        if (!idphotoImg || $('#idphotoLayout').value !== 'single') return;
         idphotoState.dragging = true;
         idphotoState.startX = e.clientX;
         idphotoState.startY = e.clientY;
