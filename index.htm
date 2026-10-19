@@ -609,7 +609,6 @@
   .ai-progress-wrap .ai-progress-track { width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
   .ai-progress-wrap .ai-progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #7c3aed, #a855f7); transition: width .3s; }
 
-  /* ===== 证件照裁剪预览 ===== */
   .idphoto-crop-stage {
     position: relative;
     width: 100%;
@@ -995,7 +994,6 @@
         </p>
       </div>
 
-      <!-- 新增：裁剪步骤 -->
       <div class="card hidden" id="idphotoCropCard">
         <h2><span class="step-label">第 2 步</span><span class="step-title">裁剪取景区域</span></h2>
         <p class="hint">拖动虚线框，只框选「头顶到胸口」的区域。AI 只处理这块，速度更快也更准。</p>
@@ -3959,7 +3957,7 @@
     });
 
     /* ============================================================
-     * RMBG-1.4 本地 AI 抠图引擎
+     * RMBG-1.4 本地 AI 抠图引擎 (已修复手机端 WASM 报错)
      * ============================================================ */
     const RMBG = (function () {
       const DB_NAME = 'pdf-toolbox-models';
@@ -4075,7 +4073,19 @@
           try {
             await loadScriptOnce(url);
             if (window.ort) {
-              window.ort.env.wasm.wasmPaths = url.replace(/ort\.min\.js$/, '');
+              // 【关键修复】强制单线程，避免手机端 SharedArrayBuffer 限制导致崩溃
+              window.ort.env.wasm.numThreads = 1;
+              window.ort.env.wasm.simd = true; 
+              
+              // 【关键修复】直接指向 CDN 根目录，避免手机端自动拼接路径失败
+              if (url.includes('jsdelivr')) {
+                window.ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.3/dist/';
+              } else if (url.includes('unpkg')) {
+                window.ort.env.wasm.wasmPaths = 'https://unpkg.com/onnxruntime-web@1.17.3/dist/';
+              } else {
+                const basePath = url.substring(0, url.lastIndexOf('/') + 1);
+                window.ort.env.wasm.wasmPaths = basePath;
+              }
               return window.ort;
             }
           } catch (e) {}
