@@ -1298,9 +1298,9 @@
       'https://unpkg.com/mammoth@1.6.0/mammoth.browser.min.js'
     ],
     ort: [
-      'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.3/dist/ort.min.js',
-      'https://fastly.jsdelivr.net/npm/onnxruntime-web@1.17.3/dist/ort.min.js',
-      'https://unpkg.com/onnxruntime-web@1.17.3/dist/ort.min.js'
+      'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.15.1/dist/ort.min.js',
+      'https://fastly.jsdelivr.net/npm/onnxruntime-web@1.15.1/dist/ort.min.js',
+      'https://unpkg.com/onnxruntime-web@1.15.1/dist/ort.min.js'
     ],
     rmbg: [
       'https://hf-mirror.com/briaai/RMBG-1.4/resolve/main/onnx/model.onnx',
@@ -4079,9 +4079,9 @@
               
               // 【关键修复】直接指向 CDN 根目录，避免手机端自动拼接路径失败
               if (url.includes('jsdelivr')) {
-                window.ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.3/dist/';
+                window.ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.15.1/dist/';
               } else if (url.includes('unpkg')) {
-                window.ort.env.wasm.wasmPaths = 'https://unpkg.com/onnxruntime-web@1.17.3/dist/';
+                window.ort.env.wasm.wasmPaths = 'https://unpkg.com/onnxruntime-web@1.15.1/dist/';
               } else {
                 const basePath = url.substring(0, url.lastIndexOf('/') + 1);
                 window.ort.env.wasm.wasmPaths = basePath;
