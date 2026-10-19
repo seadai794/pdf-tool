@@ -630,7 +630,7 @@
     border-radius: 10px;
     background: #0f172a;
     overflow: hidden;
-    touch-action: none;
+    touch-action: pan-y; 
     line-height: 0;
     margin-top: 10px;
   }
@@ -638,13 +638,14 @@
     display: block;
     width: 100%;
     height: auto;
-    touch-action: none;
+    touch-action: pan-y;
   }
   .idphoto-crop-stage canvas.overlay {
     position: absolute;
     left: 0;
     top: 0;
     pointer-events: none;
+    touch-action: none;
   }
 
   @media (max-width: 640px) {
@@ -1038,7 +1039,7 @@
         </div>
 
         <div class="btn-row" style="margin-top:10px">
-          <button class="btn gray hidden" id="idphotoBordercutClear" type="button">重新涂抹</button>
+          <button class="btn gray hidden" id="idphotoBordercutClear" type="button">继续涂抹</button>
           <button class="btn green" id="idphotoBordercutApply" type="button" style="flex:1">应用涂抹</button>
         </div>
         <div class="status" id="idphotoBordercutStatus"></div>
@@ -4264,22 +4265,31 @@
       const ctx = canvas.getContext('2d');
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, dispW, dispH);
-      ctx.drawImage(srcCanvas, 0, 0, dispW, dispH);
       
-      // 状态重置
-      bordercutStrokes = [];
+      // 如果有已经应用的历史抠图，我们就显示它作为底图；如果没有，显示原图
+      const baseImg = idphotoMatted && idphotoMatted.mode === 'bordercut' ? idphotoMatted.canvas : srcCanvas;
+      ctx.drawImage(baseImg, 0, 0, dispW, dispH);
+      
+      // 状态重置：不要清空 bordercutStrokes，但要允许重新涂抹
       $('#idphotoBordercutStage').classList.remove('hidden');
       $('#idphotoBordercutPreviewStage').classList.add('hidden');
-      $('#idphotoBordercutClear').classList.add('hidden');
       $('#idphotoBordercutApply').classList.remove('hidden');
       $('#idphotoBordercutConfirm').classList.add('hidden');
-      $('#idphotoBordercutHint').textContent = '用手指在图片上涂抹要去掉的背景区域。涂完点击「应用涂抹」。';
-      say('#idphotoBordercutStatus', '');
+      
+      // 如果之前已经应用过，就不显示“重新涂抹”，而是显示“继续涂抹”或直接保留清除按钮
+      $('#idphotoBordercutClear').classList.remove('hidden');
+      $('#idphotoBordercutHint').textContent = '继续在图片上涂抹剩余要去掉的背景区域，涂完点击「应用涂抹」。';
+      say('#idphotoBordercutStatus', '已加载上次抠图结果，可继续涂抹');
     }
 
     (function bindBordercutDraw() {
       const canvas = $('#idphotoBordercutCanvas');
       if (!canvas) return;
+
+      let startX = 0;
+      let startY = 0;
+      let isDrawing = false;
+      let isScrolling = false;
 
       const getPos = (e) => {
         const rect = canvas.getBoundingClientRect();
@@ -4293,26 +4303,56 @@
 
       canvas.addEventListener('pointerdown', (e) => {
         if (idphotoMatteMode !== 'bordercut' || !bordercutSrcCanvas) return;
-        bordercutDrawing = true;
-        const p = getPos(e);
-        bordercutStrokes.push(p);
-        drawBordercutMark(canvas, p);
-        try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
-        e.preventDefault();
-      }, { passive: false });
+        
+        startX = e.clientX;
+        startY = e.clientY;
+        isDrawing = false; // 初始不认为是涂抹
+        isScrolling = false;
+        
+        // 我们暂不立刻开始涂抹，等手指移动判断方向后再决定
+      });
 
       canvas.addEventListener('pointermove', (e) => {
-        if (!bordercutDrawing) return;
-        const p = getPos(e);
-        bordercutStrokes.push(p);
-        drawBordercutMark(canvas, p);
-        e.preventDefault();
+        if (!bordercutSrcCanvas) return;
+        if (!e.buttons) return; // 如果没有按下按键/屏幕，不处理
+
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+
+        // 在移动最初的 10px 内判断方向
+        if (!isDrawing && !isScrolling) {
+          if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 5) {
+            // 横向移动为主，判定为涂抹
+            isDrawing = true;
+            bordercutDrawing = true;
+            // 记录起点
+            const p = getPos({ clientX: startX, clientY: startY });
+            bordercutStrokes.push(p);
+            drawBordercutMark(canvas, p);
+            try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+          } else if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 5) {
+            // 竖向移动为主，判定为滑动页面
+            isScrolling = true;
+            return;
+          }
+        }
+
+        // 如果判定为涂抹，则持续记录点
+        if (isDrawing) {
+          const p = getPos(e);
+          bordercutStrokes.push(p);
+          drawBordercutMark(canvas, p);
+          e.preventDefault(); // 阻止页面的滚动
+        }
       }, { passive: false });
 
       function endDraw(e) {
+        isDrawing = false;
+        isScrolling = false;
         bordercutDrawing = false;
         try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
       }
+      
       canvas.addEventListener('pointerup', endDraw);
       canvas.addEventListener('pointercancel', endDraw);
     })();
@@ -4333,7 +4373,17 @@
     }
 
     bind('#idphotoBordercutClear', 'click', () => {
+      // 不再清空所有历史数据，而是将当前的抠图结果作为新的基底
       if (!bordercutSrcCanvas) return;
+      
+      // 把当前的 bordercutSrcCanvas 更新为上一次的抠图结果（如果存在）
+      if (idphotoMatted && idphotoMatted.mode === 'bordercut') {
+        bordercutSrcCanvas = idphotoMatted.canvas;
+      }
+      
+      // 清空还未提交的局部笔画
+      bordercutStrokes = [];
+      
       renderBordercutCanvas(bordercutSrcCanvas);
     });
 
@@ -4379,13 +4429,15 @@
 
         // 保存抠图结果
         idphotoMatted = { canvas: out, alpha: null, mode: 'bordercut' };
+        
+        // 注意：不清空 bordercutStrokes，而是清空本次新画的视觉标记（因为已经生效了）
         bordercutStrokes = [];
 
         // 切换到预览状态
         $('#idphotoBordercutStage').classList.add('hidden');
         $('#idphotoBordercutPreviewStage').classList.remove('hidden');
         
-        // 渲染预览图（黑底或格子底）
+        // 渲染预览图
         const prevCanvas = $('#idphotoBordercutPreviewCanvas');
         const stageW = $('#idphotoBordercutPreviewStage').clientWidth || 320;
         const scale = stageW / out.width;
@@ -4400,7 +4452,6 @@
         
         const ctx = prevCanvas.getContext('2d');
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        // 画黑白格子底，方便看透明区域
         for (let i = 0; i < dispW; i += 16) {
           for (let j = 0; j < dispH; j += 16) {
             ctx.fillStyle = ((i / 16 + j / 16) % 2 === 0) ? '#cbd5e1' : '#f1f5f9';
@@ -4413,7 +4464,7 @@
         $('#idphotoBordercutApply').classList.add('hidden');
         $('#idphotoBordercutClear').classList.remove('hidden');
         $('#idphotoBordercutConfirm').classList.remove('hidden');
-        $('#idphotoBordercutHint').textContent = '预览抠图效果，如果边缘不干净，可以点「重新涂抹」调整。';
+        $('#idphotoBordercutHint').textContent = '预览抠图效果，如果边缘不干净，可以点「继续涂抹」调整。';
         say('#idphotoBordercutStatus', '✅ 涂抹抠图完成，满意请点击下方确认', false, true);
 
       } catch (err) {
