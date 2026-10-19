@@ -1023,18 +1023,30 @@
       </div>
 
       <!-- bordercut 涂抹擦除 -->
-      <div class="card hidden" id="idphotoBordercutCard">
-        <h2><span class="step-label">第 3 步</span><span class="step-title">涂抹擦除背景</span></h2>
-        <p class="hint">用手指在图片上涂抹要去掉的背景区域。涂完后点击「应用涂抹」。</p>
-        <div class="idphoto-crop-stage" id="idphotoBordercutStage">
-          <canvas id="idphotoBordercutCanvas"></canvas>
-        </div>
-        <div class="btn-row" style="margin-top:10px">
-          <button class="btn gray" id="idphotoBordercutClear" type="button">清除涂抹</button>
-          <button class="btn green" id="idphotoBordercutApply" type="button" style="flex:1">应用涂抹</button>
-        </div>
-        <div class="status" id="idphotoBordercutStatus"></div>
-      </div>
+     <!-- bordercut 涂抹擦除 -->
+<div class="card hidden" id="idphotoBordercutCard">
+  <h2><span class="step-label">第 3 步</span><span class="step-title">涂抹擦除背景</span></h2>
+  <p class="hint" id="idphotoBordercutHint">用手指在图片上涂抹要去掉的背景区域。涂完点击「应用涂抹」。</p>
+  
+  <!-- 涂抹画布 -->
+  <div class="idphoto-crop-stage" id="idphotoBordercutStage">
+    <canvas id="idphotoBordercutCanvas"></canvas>
+  </div>
+
+  <!-- 抠图后的预览 -->
+  <div class="idphoto-crop-stage hidden" id="idphotoBordercutPreviewStage">
+    <canvas id="idphotoBordercutPreviewCanvas"></canvas>
+  </div>
+
+  <div class="btn-row" style="margin-top:10px">
+    <button class="btn gray hidden" id="idphotoBordercutClear" type="button">重新涂抹</button>
+    <button class="btn green" id="idphotoBordercutApply" type="button" style="flex:1">应用涂抹</button>
+  </div>
+  <div class="status" id="idphotoBordercutStatus"></div>
+  
+  <!-- 预览满意后继续 -->
+  <button class="btn big purple hidden" id="idphotoBordercutConfirm" type="button" style="margin-top:12px">✅ 满意，生成证件照</button>
+</div>
 
       <div class="card hidden" id="idphotoOptCard">
         <h2><span class="step-label">第 4 步</span><span class="step-title">尺寸与排版</span></h2>
@@ -4262,49 +4274,158 @@
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, dispW, dispH);
       ctx.drawImage(srcCanvas, 0, 0, dispW, dispH);
+      
+      // 状态重置
       bordercutStrokes = [];
+      $('#idphotoBordercutStage').classList.remove('hidden');
+      $('#idphotoBordercutPreviewStage').classList.add('hidden');
+      $('#idphotoBordercutClear').classList.add('hidden');
+      $('#idphotoBordercutApply').classList.remove('hidden');
+      $('#idphotoBordercutConfirm').classList.add('hidden');
+      $('#idphotoBordercutHint').textContent = '用手指在图片上涂抹要去掉的背景区域。涂完点击「应用涂抹」。';
+      say('#idphotoBordercutStatus', '');
     }
 
 (function bindBordercutDraw() {
-  const canvas = $('#idphotoBordercutCanvas');
-  if (!canvas) return;
+      const canvas = $('#idphotoBordercutCanvas');
+      if (!canvas) return;
 
-  const getPos = (e) => {
-    const rect = canvas.getBoundingClientRect();
-    // 使用 clamp 限制坐标在 0 ~ 1 之间，防止划出边界报错
-    let x = (e.clientX - rect.left) / rect.width;
-    let y = (e.clientY - rect.top) / rect.height;
-    return {
-      x: Math.max(0, Math.min(1, x)),
-      y: Math.max(0, Math.min(1, y))
-    };
-  };
+      const getPos = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        let x = (e.clientX - rect.left) / rect.width;
+        let y = (e.clientY - rect.top) / rect.height;
+        return {
+          x: Math.max(0, Math.min(1, x)),
+          y: Math.max(0, Math.min(1, y))
+        };
+      };
 
-  canvas.addEventListener('pointerdown', (e) => {
-    if (idphotoMatteMode !== 'bordercut' || !bordercutSrcCanvas) return;
-    bordercutDrawing = true;
-    const p = getPos(e);
-    bordercutStrokes.push(p);
-    drawBordercutMark(canvas, p);
-    try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
-    e.preventDefault();
-  }, { passive: false });
+      canvas.addEventListener('pointerdown', (e) => {
+        if (idphotoMatteMode !== 'bordercut' || !bordercutSrcCanvas) return;
+        bordercutDrawing = true;
+        const p = getPos(e);
+        bordercutStrokes.push(p);
+        drawBordercutMark(canvas, p);
+        try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+        e.preventDefault();
+      }, { passive: false });
 
-  canvas.addEventListener('pointermove', (e) => {
-    if (!bordercutDrawing) return;
-    const p = getPos(e);
-    bordercutStrokes.push(p);
-    drawBordercutMark(canvas, p);
-    e.preventDefault();
-  }, { passive: false });
+      canvas.addEventListener('pointermove', (e) => {
+        if (!bordercutDrawing) return;
+        const p = getPos(e);
+        bordercutStrokes.push(p);
+        drawBordercutMark(canvas, p);
+        e.preventDefault();
+      }, { passive: false });
+
 
   function endDraw(e) {
-    bordercutDrawing = false;
-    try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
-  }
-  canvas.addEventListener('pointerup', endDraw);
-  canvas.addEventListener('pointercancel', endDraw);
-})();
+        bordercutDrawing = false;
+        try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
+      }
+      canvas.addEventListener('pointerup', endDraw);
+      canvas.addEventListener('pointercancel', endDraw);
+    })();
+
+    bind('#idphotoBordercutClear', 'click', () => {
+      if (!bordercutSrcCanvas) return;
+      renderBordercutCanvas(bordercutSrcCanvas);
+    });
+
+    bind('#idphotoBordercutApply', 'click', async () => {
+      if (!bordercutStrokes.length) {
+        say('#idphotoBordercutStatus', '请先在图片上涂抹', true);
+        return;
+      }
+      if (!window.__bordercut) {
+        say('#idphotoBordercutStatus', 'bordercut 库未加载', true);
+        return;
+      }
+
+      const btn = $('#idphotoBordercutApply');
+      btn.disabled = true;
+      say('#idphotoBordercutStatus', '正在处理涂抹区域…');
+
+      try {
+        const srcCanvas = bordercutSrcCanvas;
+        const blob = await new Promise(res => srcCanvas.toBlob(res, 'image/png'));
+
+        const points = bordercutStrokes.map(p => {
+          let px = Math.round(p.x * srcCanvas.width);
+          let py = Math.round(p.y * srcCanvas.height);
+          px = Math.max(0, Math.min(srcCanvas.width - 1, px));
+          py = Math.max(0, Math.min(srcCanvas.height - 1, py));
+          return { x: px, y: py };
+        });
+
+        const { blob: resultBlob } = await window.__bordercut.removeBackgroundFromBlob(
+          blob,
+          { feather: 2 },
+          { 
+            strokes: [{ kind: 'background', radius: 15, points: points }]
+          }
+        );
+
+        const img = await loadImage(URL.createObjectURL(resultBlob));
+        const out = document.createElement('canvas');
+        out.width = img.width;
+        out.height = img.height;
+        out.getContext('2d').drawImage(img, 0, 0);
+
+        // 保存抠图结果
+        idphotoMatted = { canvas: out, alpha: null, mode: 'bordercut' };
+        bordercutStrokes = [];
+
+        // 切换到预览状态
+        $('#idphotoBordercutStage').classList.add('hidden');
+        $('#idphotoBordercutPreviewStage').classList.remove('hidden');
+        
+        // 渲染预览图（黑底或格子底）
+        const prevCanvas = $('#idphotoBordercutPreviewCanvas');
+        const stageW = $('#idphotoBordercutPreviewStage').clientWidth || 320;
+        const scale = stageW / out.width;
+        const dispW = Math.round(out.width * scale);
+        const dispH = Math.round(out.height * scale);
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        
+        prevCanvas.width = Math.round(dispW * dpr);
+        prevCanvas.height = Math.round(dispH * dpr);
+        prevCanvas.style.width = dispW + 'px';
+        prevCanvas.style.height = dispH + 'px';
+        
+        const ctx = prevCanvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        // 画黑白格子底，方便看透明区域
+        for (let i = 0; i < dispW; i += 16) {
+          for (let j = 0; j < dispH; j += 16) {
+            ctx.fillStyle = ((i / 16 + j / 16) % 2 === 0) ? '#cbd5e1' : '#f1f5f9';
+            ctx.fillRect(i, j, 16, 16);
+          }
+        }
+        ctx.drawImage(out, 0, 0, dispW, dispH);
+
+        // 更新按钮状态
+        $('#idphotoBordercutApply').classList.add('hidden');
+        $('#idphotoBordercutClear').classList.remove('hidden');
+        $('#idphotoBordercutConfirm').classList.remove('hidden');
+        $('#idphotoBordercutHint').textContent = '预览抠图效果，如果边缘不干净，可以点「重新涂抹」调整。';
+        say('#idphotoBordercutStatus', '✅ 涂抹抠图完成，满意请点击下方确认', false, true);
+
+      } catch (err) {
+        console.error('[bordercut]', err);
+        say('#idphotoBordercutStatus', '处理失败：' + (err && err.message ? err.message : err), true);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    // 满意后，进入第 4 步
+    bind('#idphotoBordercutConfirm', 'click', async () => {
+      $('#idphotoBordercutCard').classList.add('hidden');
+      $('#idphotoOptCard').classList.remove('hidden');
+      say('#idphotoStatus', '请继续设置尺寸与排版', false, true);
+      await drawIdPhoto();
+    });
 
     function drawBordercutMark(canvas, p) {
       const ctx = canvas.getContext('2d');
