@@ -4265,43 +4265,46 @@
       bordercutStrokes = [];
     }
 
-    (function bindBordercutDraw() {
-      const canvas = $('#idphotoBordercutCanvas');
-      if (!canvas) return;
+(function bindBordercutDraw() {
+  const canvas = $('#idphotoBordercutCanvas');
+  if (!canvas) return;
 
-      const getPos = (e) => {
-        const rect = canvas.getBoundingClientRect();
-        return {
-          x: (e.clientX - rect.left) / rect.width,
-          y: (e.clientY - rect.top) / rect.height
-        };
-      };
+  const getPos = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    // 使用 clamp 限制坐标在 0 ~ 1 之间，防止划出边界报错
+    let x = (e.clientX - rect.left) / rect.width;
+    let y = (e.clientY - rect.top) / rect.height;
+    return {
+      x: Math.max(0, Math.min(1, x)),
+      y: Math.max(0, Math.min(1, y))
+    };
+  };
 
-      canvas.addEventListener('pointerdown', (e) => {
-        if (idphotoMatteMode !== 'bordercut' || !bordercutSrcCanvas) return;
-        bordercutDrawing = true;
-        const p = getPos(e);
-        bordercutStrokes.push(p);
-        drawBordercutMark(canvas, p);
-        try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
-        e.preventDefault();
-      }, { passive: false });
+  canvas.addEventListener('pointerdown', (e) => {
+    if (idphotoMatteMode !== 'bordercut' || !bordercutSrcCanvas) return;
+    bordercutDrawing = true;
+    const p = getPos(e);
+    bordercutStrokes.push(p);
+    drawBordercutMark(canvas, p);
+    try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+    e.preventDefault();
+  }, { passive: false });
 
-      canvas.addEventListener('pointermove', (e) => {
-        if (!bordercutDrawing) return;
-        const p = getPos(e);
-        bordercutStrokes.push(p);
-        drawBordercutMark(canvas, p);
-        e.preventDefault();
-      }, { passive: false });
+  canvas.addEventListener('pointermove', (e) => {
+    if (!bordercutDrawing) return;
+    const p = getPos(e);
+    bordercutStrokes.push(p);
+    drawBordercutMark(canvas, p);
+    e.preventDefault();
+  }, { passive: false });
 
-      function endDraw(e) {
-        bordercutDrawing = false;
-        try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
-      }
-      canvas.addEventListener('pointerup', endDraw);
-      canvas.addEventListener('pointercancel', endDraw);
-    })();
+  function endDraw(e) {
+    bordercutDrawing = false;
+    try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
+  }
+  canvas.addEventListener('pointerup', endDraw);
+  canvas.addEventListener('pointercancel', endDraw);
+})();
 
     function drawBordercutMark(canvas, p) {
       const ctx = canvas.getContext('2d');
@@ -4324,7 +4327,7 @@
       say('#idphotoBordercutStatus', '已清除涂抹');
     });
 
-  bind('#idphotoBordercutApply', 'click', async () => {
+ bind('#idphotoBordercutApply', 'click', async () => {
   if (!bordercutStrokes.length) {
     say('#idphotoBordercutStatus', '请先在图片上涂抹', true);
     return;
@@ -4340,29 +4343,30 @@
 
   try {
     const srcCanvas = bordercutSrcCanvas;
-    // 1. 把 Canvas 转成 Blob（bordercut 的浏览器接口需要 Blob）
     const blob = await new Promise(res => srcCanvas.toBlob(res, 'image/png'));
 
-    // 2. 把归一化坐标转成图片像素坐标
-    const points = bordercutStrokes.map(p => ({
-      x: Math.round(p.x * srcCanvas.width),
-      y: Math.round(p.y * srcCanvas.height)
-    }));
+    // 将归一化坐标转为严格限制在图片内的像素坐标
+    const points = bordercutStrokes.map(p => {
+      let px = Math.round(p.x * srcCanvas.width);
+      let py = Math.round(p.y * srcCanvas.height);
+      // 强制限制在 [0, width - 1] 和 [0, height - 1] 范围内
+      px = Math.max(0, Math.min(srcCanvas.width - 1, px));
+      py = Math.max(0, Math.min(srcCanvas.height - 1, py));
+      return { x: px, y: py };
+    });
 
-    // 3. 调用 removeBackgroundFromBlob，strokes 放在第三个参数（guidance）里
     const { blob: resultBlob } = await window.__bordercut.removeBackgroundFromBlob(
       blob,
-      { feather: 2 },  // 第二个参数：可选的图像处理选项
-      {                // 第三个参数：guidance，接收 strokes
+      { feather: 2 },
+      { 
         strokes: [{
           kind: 'background',
-          radius: 15,
+          radius: 15, // 笔刷半径（像素）
           points: points
         }]
       }
     );
 
-    // 4. 将处理后的透明 PNG 转成 Canvas
     const img = await loadImage(URL.createObjectURL(resultBlob));
     const out = document.createElement('canvas');
     out.width = img.width;
