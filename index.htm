@@ -1023,30 +1023,29 @@
       </div>
 
       <!-- bordercut 涂抹擦除 -->
-     <!-- bordercut 涂抹擦除 -->
-<div class="card hidden" id="idphotoBordercutCard">
-  <h2><span class="step-label">第 3 步</span><span class="step-title">涂抹擦除背景</span></h2>
-  <p class="hint" id="idphotoBordercutHint">用手指在图片上涂抹要去掉的背景区域。涂完点击「应用涂抹」。</p>
-  
-  <!-- 涂抹画布 -->
-  <div class="idphoto-crop-stage" id="idphotoBordercutStage">
-    <canvas id="idphotoBordercutCanvas"></canvas>
-  </div>
+      <div class="card hidden" id="idphotoBordercutCard">
+        <h2><span class="step-label">第 3 步</span><span class="step-title">涂抹擦除背景</span></h2>
+        <p class="hint" id="idphotoBordercutHint">用手指在图片上涂抹要去掉的背景区域。涂完点击「应用涂抹」。</p>
+        
+        <!-- 涂抹画布 -->
+        <div class="idphoto-crop-stage" id="idphotoBordercutStage">
+          <canvas id="idphotoBordercutCanvas"></canvas>
+        </div>
 
-  <!-- 抠图后的预览 -->
-  <div class="idphoto-crop-stage hidden" id="idphotoBordercutPreviewStage">
-    <canvas id="idphotoBordercutPreviewCanvas"></canvas>
-  </div>
+        <!-- 抠图后的预览 -->
+        <div class="idphoto-crop-stage hidden" id="idphotoBordercutPreviewStage">
+          <canvas id="idphotoBordercutPreviewCanvas"></canvas>
+        </div>
 
-  <div class="btn-row" style="margin-top:10px">
-    <button class="btn gray hidden" id="idphotoBordercutClear" type="button">重新涂抹</button>
-    <button class="btn green" id="idphotoBordercutApply" type="button" style="flex:1">应用涂抹</button>
-  </div>
-  <div class="status" id="idphotoBordercutStatus"></div>
-  
-  <!-- 预览满意后继续 -->
-  <button class="btn big purple hidden" id="idphotoBordercutConfirm" type="button" style="margin-top:12px">✅ 满意，生成证件照</button>
-</div>
+        <div class="btn-row" style="margin-top:10px">
+          <button class="btn gray hidden" id="idphotoBordercutClear" type="button">重新涂抹</button>
+          <button class="btn green" id="idphotoBordercutApply" type="button" style="flex:1">应用涂抹</button>
+        </div>
+        <div class="status" id="idphotoBordercutStatus"></div>
+        
+        <!-- 预览满意后继续 -->
+        <button class="btn big purple hidden" id="idphotoBordercutConfirm" type="button" style="margin-top:12px">✅ 满意，生成证件照</button>
+      </div>
 
       <div class="card hidden" id="idphotoOptCard">
         <h2><span class="step-label">第 4 步</span><span class="step-title">尺寸与排版</span></h2>
@@ -1068,13 +1067,6 @@
             <option value="#4b5563">灰色</option>
           </select>
         </div>
-        <div class="field hidden">
-          <label>抠图引擎</label>
-          <select id="idphotoMatteMode">
-            <option value="bordercut" selected>✍️ 手动涂抹抠图（bordercut）</option>
-            <option value="none">➖ 不抠图（直接铺底）</option>
-          </select>
-        </div>
         <div class="field">
           <label>排版模式</label>
           <select id="idphotoLayout">
@@ -1082,15 +1074,14 @@
             <option value="sheet" selected>相馆排版（5寸相纸拼版）</option>
           </select>
         </div>
-        <button class="btn big" id="idphotoGenBtn" type="button">生成证件照预览</button>
-        <div class="status" id="idphotoStatus"></div>
         
-        <div class="preview-wrap hidden" id="idphotoPreviewWrap" style="text-align:center; background: #1e293b;">
+        <div class="preview-wrap hidden" id="idphotoPreviewWrap" style="text-align:center; background: #1e293b; margin-bottom: 12px;">
           <p class="hint" style="text-align:left;margin-top:0;color:#94a3b8;">提示：单张模式下可拖动照片调整位置。排好版后，请直接截图或点击下方保存。</p>
           <canvas id="idphotoCanvas" style="box-shadow: 0 4px 12px rgba(0,0,0,0.5); max-width: 100%; touch-action:none; cursor:grab;"></canvas>
         </div>
-        <div class="btn-row hidden" id="idphotoDownloadRow" style="margin-top:12px">
-          <button class="btn green" id="idphotoDownloadBtn" type="button">💾 保存图片</button>
+        
+        <div class="btn-row hidden" id="idphotoDownloadRow">
+          <button class="btn green big" id="idphotoDownloadBtn" type="button">💾 保存图片</button>
         </div>
       </div>
     </section>
@@ -4286,7 +4277,7 @@
       say('#idphotoBordercutStatus', '');
     }
 
-(function bindBordercutDraw() {
+    (function bindBordercutDraw() {
       const canvas = $('#idphotoBordercutCanvas');
       if (!canvas) return;
 
@@ -4318,14 +4309,28 @@
         e.preventDefault();
       }, { passive: false });
 
-
-  function endDraw(e) {
+      function endDraw(e) {
         bordercutDrawing = false;
         try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
       }
       canvas.addEventListener('pointerup', endDraw);
       canvas.addEventListener('pointercancel', endDraw);
     })();
+
+    function drawBordercutMark(canvas, p) {
+      const ctx = canvas.getContext('2d');
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const rect = canvas.getBoundingClientRect();
+      const x = p.x * rect.width;
+      const y = p.y * rect.height;
+      ctx.save();
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.beginPath();
+      ctx.arc(x, y, 8, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(239, 68, 68, 0.5)';
+      ctx.fill();
+      ctx.restore();
+    }
 
     bind('#idphotoBordercutClear', 'click', () => {
       if (!bordercutSrcCanvas) return;
@@ -4426,89 +4431,6 @@
       say('#idphotoStatus', '请继续设置尺寸与排版', false, true);
       await drawIdPhoto();
     });
-
-    function drawBordercutMark(canvas, p) {
-      const ctx = canvas.getContext('2d');
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const rect = canvas.getBoundingClientRect();
-      const x = p.x * rect.width;
-      const y = p.y * rect.height;
-      ctx.save();
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.beginPath();
-      ctx.arc(x, y, 8, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(239, 68, 68, 0.5)';
-      ctx.fill();
-      ctx.restore();
-    }
-
-    bind('#idphotoBordercutClear', 'click', () => {
-      if (!bordercutSrcCanvas) return;
-      renderBordercutCanvas(bordercutSrcCanvas);
-      say('#idphotoBordercutStatus', '已清除涂抹');
-    });
-
- bind('#idphotoBordercutApply', 'click', async () => {
-  if (!bordercutStrokes.length) {
-    say('#idphotoBordercutStatus', '请先在图片上涂抹', true);
-    return;
-  }
-  if (!window.__bordercut) {
-    say('#idphotoBordercutStatus', 'bordercut 库未加载，请检查网络或 libs/bordercut.min.js', true);
-    return;
-  }
-
-  const btn = $('#idphotoBordercutApply');
-  btn.disabled = true;
-  say('#idphotoBordercutStatus', '正在处理涂抹区域…');
-
-  try {
-    const srcCanvas = bordercutSrcCanvas;
-    const blob = await new Promise(res => srcCanvas.toBlob(res, 'image/png'));
-
-    // 将归一化坐标转为严格限制在图片内的像素坐标
-    const points = bordercutStrokes.map(p => {
-      let px = Math.round(p.x * srcCanvas.width);
-      let py = Math.round(p.y * srcCanvas.height);
-      // 强制限制在 [0, width - 1] 和 [0, height - 1] 范围内
-      px = Math.max(0, Math.min(srcCanvas.width - 1, px));
-      py = Math.max(0, Math.min(srcCanvas.height - 1, py));
-      return { x: px, y: py };
-    });
-
-    const { blob: resultBlob } = await window.__bordercut.removeBackgroundFromBlob(
-      blob,
-      { feather: 2 },
-      { 
-        strokes: [{
-          kind: 'background',
-          radius: 15, // 笔刷半径（像素）
-          points: points
-        }]
-      }
-    );
-
-    const img = await loadImage(URL.createObjectURL(resultBlob));
-    const out = document.createElement('canvas');
-    out.width = img.width;
-    out.height = img.height;
-    out.getContext('2d').drawImage(img, 0, 0);
-
-    idphotoMatted = { canvas: out, alpha: null, mode: 'bordercut' };
-    bordercutStrokes = [];
-
-    $('#idphotoBordercutCard').classList.add('hidden');
-    $('#idphotoOptCard').classList.remove('hidden');
-    say('#idphotoStatus', '✅ 涂抹抠图完成，请继续设置尺寸与排版', false, true);
-
-    await drawIdPhoto();
-  } catch (err) {
-    console.error('[bordercut]', err);
-    say('#idphotoBordercutStatus', '处理失败：' + (err && err.message ? err.message : err), true);
-  } finally {
-    btn.disabled = false;
-  }
-});
 
     async function ensureIdPhotoMatte() {
       if (idphotoMatted) return idphotoMatted;
