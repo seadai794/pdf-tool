@@ -4324,56 +4324,68 @@
       say('#idphotoBordercutStatus', '已清除涂抹');
     });
 
-    bind('#idphotoBordercutApply', 'click', async () => {
-      if (!bordercutStrokes.length) {
-        say('#idphotoBordercutStatus', '请先在图片上涂抹', true);
-        return;
+  bind('#idphotoBordercutApply', 'click', async () => {
+  if (!bordercutStrokes.length) {
+    say('#idphotoBordercutStatus', '请先在图片上涂抹', true);
+    return;
+  }
+  if (!window.__bordercut) {
+    say('#idphotoBordercutStatus', 'bordercut 库未加载，请检查网络或 libs/bordercut.min.js', true);
+    return;
+  }
+
+  const btn = $('#idphotoBordercutApply');
+  btn.disabled = true;
+  say('#idphotoBordercutStatus', '正在处理涂抹区域…');
+
+  try {
+    const srcCanvas = bordercutSrcCanvas;
+    const ctx = srcCanvas.getContext('2d');
+    const imgData = ctx.getImageData(0, 0, srcCanvas.width, srcCanvas.height);
+
+    // 将归一化坐标转为像素坐标
+    const points = bordercutStrokes.map(p => ({
+      x: Math.round(p.x * srcCanvas.width),
+      y: Math.round(p.y * srcCanvas.height)
+    }));
+
+    // 调用核心函数，传入 RGBA 数据、选项和引导笔画
+    const result = window.__bordercut.removeBackground(
+      { width: srcCanvas.width, height: srcCanvas.height, data: imgData.data },
+      { feather: 2 }, // 可选：调整边缘平滑度
+      {
+        strokes: [{
+          kind: 'background', // 表示涂抹区域是要移除的背景
+          radius: 15,         // 笔刷半径（像素）
+          points: points
+        }]
       }
-      if (!window.__bordercut) {
-        say('#idphotoBordercutStatus', 'bordercut 库未加载，请检查网络或 libs/bordercut.min.js', true);
-        return;
-      }
+    );
 
-      const btn = $('#idphotoBordercutApply');
-      btn.disabled = true;
-      say('#idphotoBordercutStatus', '正在处理涂抹区域…');
+    // 用处理后的透明 RGBA 数据重建 Canvas
+    const out = document.createElement('canvas');
+    out.width = result.image.width;
+    out.height = result.image.height;
+    const outCtx = out.getContext('2d');
+    const outImgData = outCtx.createImageData(out.width, out.height);
+    outImgData.data.set(result.image.data);
+    outCtx.putImageData(outImgData, 0, 0);
 
-      try {
-        const srcCanvas = bordercutSrcCanvas;
-        const blob = await new Promise(res => srcCanvas.toBlob(res, 'image/png'));
+    idphotoMatted = { canvas: out, alpha: null, mode: 'bordercut' };
+    bordercutStrokes = [];
 
-        // 将归一化坐标转为像素坐标
-        const points = bordercutStrokes.map(p => ({
-          x: Math.round(p.x * srcCanvas.width),
-          y: Math.round(p.y * srcCanvas.height)
-        }));
+    $('#idphotoBordercutCard').classList.add('hidden');
+    $('#idphotoOptCard').classList.remove('hidden');
+    say('#idphotoStatus', '✅ 涂抹抠图完成，请继续设置尺寸与排版', false, true);
 
-        const { blob: resultBlob } = await window.__bordercut.removeBackgroundFromBlob(blob, {
-          strokes: [{ kind: 'background', radius: 15, points }]
-        });
-
-        const img = await loadImage(URL.createObjectURL(resultBlob));
-        const out = document.createElement('canvas');
-        out.width = img.width;
-        out.height = img.height;
-        out.getContext('2d').drawImage(img, 0, 0);
-
-        idphotoMatted = { canvas: out, alpha: null, mode: 'bordercut' };
-        bordercutStrokes = [];
-
-        $('#idphotoBordercutCard').classList.add('hidden');
-        $('#idphotoOptCard').classList.remove('hidden');
-        say('#idphotoStatus', '✅ 涂抹抠图完成，请继续设置尺寸与排版', false, true);
-        
-        // 自动生成一次预览
-        await drawIdPhoto();
-      } catch (err) {
-        console.error('[bordercut]', err);
-        say('#idphotoBordercutStatus', '处理失败：' + (err && err.message ? err.message : err), true);
-      } finally {
-        btn.disabled = false;
-      }
-    });
+    await drawIdPhoto();
+  } catch (err) {
+    console.error('[bordercut]', err);
+    say('#idphotoBordercutStatus', '处理失败：' + (err && err.message ? err.message : err), true);
+  } finally {
+    btn.disabled = false;
+  }
+});
 
     async function ensureIdPhotoMatte() {
       if (idphotoMatted) return idphotoMatted;
