@@ -1,3 +1,19 @@
+# PDF 静态工具合集
+本仓库收集整理各类单文件前端工具，全部为静态网页，无需后端，浏览器直接打开使用。
+
+| 文件路径 | 简介 | 访问链接 |
+| ---- | ---- | ---- |
+| index.html | 自用常用PDF工具箱：A3试卷拆分、PDF页面调整、身份证复印、证件照制作 | https://seadai794.github.io/pdf-tool/ |
+| ai.html | 收集的第三方证件照制作页面 | https://seadai794.github.io/pdf-tool/ai.html |
+| hx/index.html | 房屋户型、装修设计单文件工具合集 | https://seadai794.github.io/pdf-tool/hx |
+| A3-A4.html | 单独的A3试卷拆分为A4工具（收集别人制作） | https://seadai794.github.io/pdf-tool/A3-A4.html |
+| xcpdf.html | 新创PDF工具集，PDF功能更多更全 | https://seadai794.github.io/pdf-tool/xcpdf.html |
+
+> 说明：大部分工具来源于网络收集整理，为单HTML静态页面，本地保存也可离线打开。
+
+
+
+
 # pdf工具
 这是一款完全免费、开源且无需安装的网页端效率工具箱。它最大的特点是 100% 纯本地运行 —— 你上传的所有文件、照片都不会被上传到任何服务器。没有网络限制，没有文件大小限制，彻底保护你的隐私安全。
 
