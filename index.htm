@@ -4152,7 +4152,7 @@
     }
 
     /* ---- AI 抠图核心 ---- */
-    async function ensureAiSegmentation() {
+        async function ensureAiSegmentation() {
       if (idphotoAiSegmentation) return idphotoAiSegmentation;
 
       // 尝试本地加载 selfie_segmentation.js
@@ -4186,7 +4186,14 @@
       const seg = new window.SelfieSegmentation({
         locateFile: (f) => idphotoAiBasePath + f
       });
-      seg.setOptions({ modelSelection: 1, selfieMode: false });
+      
+      // 【核心修复】：强制指定底层使用纯 CPU 模式，解决 Abort 崩溃
+      seg.setOptions({ 
+        modelSelection: 1, 
+        selfieMode: false,
+        delegate: 'CPU'
+      });
+      
       seg.onResults(onAiSegmentationResults);
       idphotoAiSegmentation = seg;
       return seg;
