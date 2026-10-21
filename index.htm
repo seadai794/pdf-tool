@@ -4266,21 +4266,28 @@
         const errMsg = String(e.message || e);
         idphotoAiBusy = false; // 确保错误后能重试
 
-        // 【修复点】：严格区分电脑端和手机端
-        const isDeviceMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent);
-        
-        if (isDeviceMobile && (errMsg.includes('abort') || errMsg.includes('Aborted') || errMsg.includes('native code'))) {
-          // 仅在移动端因 GPU/内存受限崩溃时，才引导涂抹
-          st.innerHTML = '❌ <b>您的手机浏览器内存或 GPU 受限，无法运行 AI 模型。</b><br><br>请点击下方按钮改用「<b>涂抹擦除背景</b>」，或使用电脑浏览器打开。';
+        // 【修复点】：严格区分微信环境、普通手机和电脑
+        const isWeChat = /MicroMessenger/i.test(ua);
+        const isQQ = /QQ/i.test(ua) && /Mobile/i.test(ua);
+        const isDeviceMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(ua);
+
+        if (isWeChat || isQQ) {
+          st.innerHTML = '❌ <b>微信/QQ内置浏览器无法运行 AI 模型。</b><br><br>请点击下方按钮改用「<b>涂抹擦除背景</b>」，或点击右上角「<b>在浏览器中打开</b>」。';
           st.className = 'status err';
-          
           setTimeout(() => {
             $('#idphotoAiArea').classList.add('hidden');
             $('#idphotoUseBordercutBtn').click();
-          }, 1200);
+          }, 1500);
+        } else if (isDeviceMobile && (errMsg.includes('abort') || errMsg.includes('Aborted') || errMsg.includes('native code'))) {
+          st.innerHTML = '❌ <b>您的手机浏览器内存或 GPU 受限，无法运行 AI 模型。</b><br><br>请点击下方按钮改用「<b>涂抹擦除背景</b>」，或使用电脑浏览器打开。';
+          st.className = 'status err';
+          setTimeout(() => {
+            $('#idphotoAiArea').classList.add('hidden');
+            $('#idphotoUseBordercutBtn').click();
+          }, 1500);
         } else {
-          // 电脑端或非 GPU 错误：保留 AI 区域，显示错误，让用户重试
-          st.textContent = '❌ AI 抠图失败：' + errMsg + '（请点击「重新识别」重试，或改用涂抹模式）';
+          // 电脑端：不自动隐藏，让用户重试或者手动切换
+          st.innerHTML = '❌ AI 抠图引擎异常（可能是显卡加速限制）。<br><br>请重试，或点击上方「<b>涂抹擦除背景</b>」。';
           st.className = 'status err';
         }
       }
