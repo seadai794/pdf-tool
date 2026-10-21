@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <title>PDF 工具箱 · 本地纯净版</title>
+<!-- 引入 bordercut（纯本地涂抹抠图库） -->
 <script type="module">
   let loaded = false;
   try {
@@ -23,19 +24,25 @@
     }
   }
 </script>
+
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
     background: #eef1f6; color: #0f172a; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; min-height: 100vh; }
+
   .app-header { background: linear-gradient(135deg, #2563eb 0%, #7c3aed 60%, #a855f7 100%);
     color: #fff; padding: 22px 20px 18px; text-align: center;
     box-shadow: 0 6px 20px rgba(37,99,235,.25); position: relative; overflow: hidden; }
+  .app-header::before { content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 20% 20%, rgba(255,255,255,.2), transparent 45%),
+                radial-gradient(circle at 80% 80%, rgba(255,255,255,.12), transparent 45%); pointer-events: none; }
   .app-header h1 { margin: 0; font-size: 22px; letter-spacing: .8px; font-weight: 800; position: relative; }
   .app-header .sub { margin: 6px 0 0; font-size: 12px; opacity: .92; position: relative; }
   .app-header .badges { margin-top: 10px; display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; position: relative; }
   .app-header .badges span { font-size: 10px; padding: 3px 9px; background: rgba(255,255,255,.18);
     border: 1px solid rgba(255,255,255,.25); border-radius: 999px; }
+
   .feature-catalog { max-width: 900px; margin: 0 auto; padding: 16px 16px 0; }
   .catalog-group { margin-bottom: 14px; }
   .catalog-title { display: flex; align-items: center; gap: 8px; padding: 0 2px 8px;
@@ -45,30 +52,37 @@
     background: linear-gradient(135deg, #f1f5f9, #e2e8f0); flex: 0 0 auto; }
   .catalog-title .catalog-line { flex: 1; height: 1px;
     background: linear-gradient(90deg, #cbd5e1, transparent); margin-left: 4px; }
+
   .catalog-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 6px; }
   .feature-card { display: flex; flex-direction: row; align-items: center; gap: 10px;
     background: #fff; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 10px 12px;
     cursor: pointer; transition: all .15s ease; text-align: left; font-family: inherit;
-    box-shadow: 0 1px 2px rgba(15,23,42,.04); min-height: 54px; }
+    box-shadow: 0 1px 2px rgba(15,23,42,.04); min-height: 54px;
+    -webkit-appearance: none; appearance: none; touch-action: manipulation; }
   .feature-card:hover { border-color: #cbd5e1; box-shadow: 0 3px 8px rgba(15,23,42,.07); transform: translateY(-1px); }
   .feature-card:active { transform: scale(.97); }
   .feature-icon { flex: 0 0 auto; font-size: 20px; width: 34px; height: 34px;
     display: flex; align-items: center; justify-content: center;
-    background: #f8fafc; border-radius: 8px; }
+    background: #f8fafc; border-radius: 8px; transition: all .15s; }
   .feature-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; flex: 1; }
   .feature-name { font-size: 13px; font-weight: 700; color: #0f172a; line-height: 1.25;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .feature-desc { font-size: 10px; color: #94a3b8; line-height: 1.2;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
   .catalog-group[data-category="edit"] .feature-card.active { border-color: #2563eb;
     background: linear-gradient(135deg, #eff6ff, #fff);
     box-shadow: 0 0 0 3px rgba(37,99,235,.1), 0 3px 10px rgba(37,99,235,.1); }
+  .catalog-group[data-category="edit"] .feature-card.active .feature-icon { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
   .catalog-group[data-category="convert"] .feature-card.active { border-color: #7c3aed;
     background: linear-gradient(135deg, #f5f3ff, #fff);
     box-shadow: 0 0 0 3px rgba(124,58,237,.1), 0 3px 10px rgba(124,58,237,.1); }
+  .catalog-group[data-category="convert"] .feature-card.active .feature-icon { background: linear-gradient(135deg, #ede9fe, #ddd6fe); }
   .catalog-group[data-category="organize"] .feature-card.active { border-color: #059669;
     background: linear-gradient(135deg, #ecfdf5, #fff);
     box-shadow: 0 0 0 3px rgba(5,150,105,.1), 0 3px 10px rgba(5,150,105,.1); }
+  .catalog-group[data-category="organize"] .feature-card.active .feature-icon { background: linear-gradient(135deg, #d1fae5, #a7f3d0); }
+
   #workspace { max-width: 900px; margin: 0 auto; padding: 4px 16px 80px; scroll-margin-top: 16px; }
   .workspace-header { display: flex; align-items: center; gap: 10px; padding: 6px 4px 12px; }
   .workspace-title { font-size: 15px; font-weight: 700; color: #0f172a;
@@ -76,16 +90,22 @@
   .workspace-title .ws-icon { font-size: 18px; width: 30px; height: 30px;
     display: flex; align-items: center; justify-content: center; border-radius: 8px;
     background: linear-gradient(135deg, #e0e7ff, #c7d2fe); flex: 0 0 auto; }
+
   main { padding: 0; }
   .panel { display: none; }
   .panel.active { display: block; animation: fadeIn .22s ease; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
   #envBanner { display: none; margin: 0 0 12px; border-radius: 10px; padding: 12px 14px;
     font-size: 12px; line-height: 1.65; border: 1px solid; }
   #envBanner.show { display: block; }
   #envBanner.warn { background: #fffbeb; border-color: #fde68a; color: #78350f; }
   #envBanner.err  { background: #fef2f2; border-color: #fecaca; color: #7f1d1d; }
   #envBanner.ok   { background: #f0fdf4; border-color: #bbf7d0; color: #14532d; }
+  #envBanner b { font-weight: 700; }
+  #envBanner code { background: rgba(0,0,0,.07); padding: 1px 5px; border-radius: 4px;
+    font-family: ui-monospace, Menlo, monospace; font-size: 11px; }
+
   .card { background: #fff; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px;
     box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 4px 14px rgba(15,23,42,.05);
     border: 1px solid #f1f5f9; position: relative; overflow: hidden; }
@@ -93,64 +113,87 @@
     background: linear-gradient(90deg, #2563eb, #7c3aed, #059669); opacity: .8; }
   .card h2 { margin: 0 0 12px; font-size: 14px; font-weight: 700;
     color: #0f172a; display: flex; align-items: center; gap: 10px; }
+
   .step-label { display: inline-flex; align-items: center; justify-content: center;
     padding: 4px 10px; background: linear-gradient(135deg, #2563eb, #7c3aed); color: #fff;
     border-radius: 7px; font-size: 11px; font-weight: 700; letter-spacing: .3px;
     white-space: nowrap; flex: 0 0 auto; box-shadow: 0 1px 3px rgba(37,99,235,.3); }
-  .step-label.step-ok { background: linear-gradient(135deg, #059669, #10b981); }
+  .step-label.step-ok { background: linear-gradient(135deg, #059669, #10b981);
+    box-shadow: 0 1px 3px rgba(5,150,105,.3); }
   .step-title { font-size: 14px; font-weight: 700; color: #0f172a; }
+
   .field { margin-bottom: 12px; }
   .field label { display: block; font-size: 12px; color: #475569; margin-bottom: 5px; font-weight: 500; }
   input[type=file] { width: 100%; font-size: 16px; padding: 12px 10px;
     border: 1.5px dashed #cbd5e1; border-radius: 10px; background: #f8fafc;
-    cursor: pointer; color: #334155; min-height: 48px; }
+    cursor: pointer; color: #334155; transition: all .15s;
+    -webkit-appearance: none; appearance: none; line-height: 1.4;
+    min-height: 48px; touch-action: manipulation; }
+  input[type=file]:active { background: #eff6ff; border-color: #93c5fd; }
   input[type=file]::-webkit-file-upload-button { border: none;
     background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff;
     padding: 8px 14px; border-radius: 7px; margin-right: 10px; cursor: pointer;
-    font-size: 13px; font-weight: 600; font-family: inherit; }
+    font-size: 13px; font-weight: 600; font-family: inherit; -webkit-appearance: none; }
   input[type=file]::file-selector-button { border: none;
     background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff;
     padding: 8px 14px; border-radius: 7px; margin-right: 10px; cursor: pointer;
     font-size: 13px; font-weight: 600; font-family: inherit; }
+
   select, input[type=number], input[type=text] { width: 100%; padding: 12px;
     border: 1.5px solid #e2e8f0; border-radius: 9px; background: #fff;
-    color: #0f172a; font-size: 16px; font-family: inherit; min-height: 48px; }
+    color: #0f172a; font-size: 16px; transition: all .15s;
+    font-family: inherit; -webkit-appearance: none; appearance: none; min-height: 48px; }
+  select:focus, input[type=number]:focus, input[type=text]:focus { outline: none; border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
   select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+
   .btn { display: inline-flex; align-items: center; justify-content: center;
     padding: 11px 16px; border: none; border-radius: 9px;
     background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff;
     font-size: 14px; font-weight: 600; cursor: pointer; transition: all .15s ease;
-    white-space: nowrap; font-family: inherit; box-shadow: 0 2px 5px rgba(37,99,235,.22);
-    min-height: 44px; }
+    white-space: nowrap; -webkit-user-select: none; user-select: none;
+    font-family: inherit; text-decoration: none; box-shadow: 0 2px 5px rgba(37,99,235,.22);
+    -webkit-appearance: none; appearance: none; touch-action: manipulation; min-height: 44px; }
   .btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,.35); }
   .btn:active:not(:disabled) { transform: scale(.97); }
   .btn:disabled { opacity: .5; cursor: not-allowed; box-shadow: none; }
   .btn.ghost { background: #eff6ff; color: #2563eb; box-shadow: none; border: 1px solid #dbeafe; }
   .btn.gray { background: #f1f5f9; color: #334155; box-shadow: none; border: 1px solid #e2e8f0; }
-  .btn.green { background: linear-gradient(135deg, #059669, #10b981); }
-  .btn.amber { background: linear-gradient(135deg, #d97706, #f59e0b); }
-  .btn.purple { background: linear-gradient(135deg, #7c3aed, #a855f7); }
-  .btn.red { background: linear-gradient(135deg, #dc2626, #ef4444); }
+  .btn.green { background: linear-gradient(135deg, #059669, #10b981); box-shadow: 0 2px 5px rgba(5,150,105,.22); }
+  .btn.amber { background: linear-gradient(135deg, #d97706, #f59e0b); box-shadow: 0 2px 5px rgba(217,119,6,.22); }
+  .btn.purple { background: linear-gradient(135deg, #7c3aed, #a855f7); box-shadow: 0 2px 5px rgba(124,58,237,.22); }
+  .btn.red { background: linear-gradient(135deg, #dc2626, #ef4444); box-shadow: 0 2px 5px rgba(220,38,38,.22); }
+  .btn.blue { background: linear-gradient(135deg, #2563eb, #3b82f6); box-shadow: 0 2px 5px rgba(37,99,235,.22); }
   .btn.big { width: 100%; padding: 13px 16px; font-size: 15px; }
+  .btn.small { padding: 7px 12px; font-size: 12px; border-radius: 7px; min-height: 36px; }
+
   .hint { font-size: 11px; color: #64748b; line-height: 1.55; margin: 8px 0 0; }
+  .hint b { color: #334155; }
   .status { font-size: 12px; color: #2563eb; margin-top: 10px; min-height: 16px;
     line-height: 1.45; padding: 7px 10px; border-radius: 7px; }
   .status:not(:empty) { background: #eff6ff; }
   .status.err { color: #dc2626; background: #fef2f2; }
   .status.ok { color: #059669; background: #f0fdf4; }
+  .status.warn { color: #d97706; background: #fffbeb; border: 1px solid #fde68a; }
   .hidden { display: none !important; }
+
   .pager { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
   .pager .info { font-size: 13px; color: #475569; min-width: 70px; text-align: center;
     font-weight: 600; background: #f8fafc; padding: 5px 10px; border-radius: 7px;
     border: 1px solid #e2e8f0; }
+
   .stage { position: relative; width: 100%; overflow: hidden; border-radius: 10px;
-    background: #f1f5f9; line-height: 0; border: 1px solid #e2e8f0; touch-action: pan-y; }
+    background: #f1f5f9; -webkit-user-select: none; user-select: none;
+    line-height: 0; border: 1px solid #e2e8f0; touch-action: pan-y; }
   .stage canvas { display: block; width: 100%; touch-action: none; }
   .stage canvas.overlay { position: absolute; left: 0; top: 0; pointer-events: none; }
+
   .btn-row { display: flex; flex-wrap: wrap; gap: 6px; }
+
   .result-card { border: 1px solid #bbf7d0;
-    background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 60%); }
+    background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 60%);
+    box-shadow: 0 5px 20px rgba(5,150,105,.08); }
   .result-card::before { background: linear-gradient(90deg, #059669, #10b981); }
   .result-file { display: flex; align-items: center; gap: 12px;
     background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
@@ -160,42 +203,61 @@
     font-size: 11px; font-weight: 800; display: flex; align-items: center;
     justify-content: center; letter-spacing: .5px; }
   .result-meta { min-width: 0; flex: 1; }
-  .result-name { font-size: 13px; font-weight: 700; color: #0f172a; word-break: break-all; }
+  .result-name { font-size: 13px; font-weight: 700; color: #0f172a;
+    word-break: break-all; line-height: 1.35; }
   .result-sub { font-size: 11px; color: #64748b; margin-top: 3px; }
   .dirty-tip { font-size: 11px; color: #b45309; background: #fffbeb;
     border: 1px solid #fde68a; border-radius: 7px; padding: 7px 10px;
     margin-bottom: 10px; font-weight: 500; }
+
   .preview-wrap { margin-top: 12px; border: 1px solid #e2e8f0;
     border-radius: 10px; background: #f8fafc; padding: 10px;
     max-height: 640px; overflow-y: auto; }
   .preview-page { margin: 0 auto 12px; box-shadow: 0 3px 12px rgba(15,23,42,.1);
-    border-radius: 5px; overflow: hidden; background: #fff; max-width: 100%; }
+    border-radius: 5px; overflow: hidden; background: #fff;
+    max-width: 100%; border: 1px solid #f1f5f9; }
   .preview-page canvas { display: block; width: 100%; height: auto; }
   .preview-toolbar { display: flex; justify-content: space-between; align-items: center;
     font-size: 11px; color: #64748b; padding: 4px 2px 8px; flex-wrap: wrap; gap: 6px; }
+  .preview-toolbar .label { font-weight: 700; color: #334155; font-size: 12px; }
   .preview-loading { text-align: center; padding: 24px 10px; font-size: 12px; color: #64748b; }
+
   .modal { position: fixed; inset: 0; z-index: 1000; background: rgba(15,23,42,.6);
     display: flex; align-items: center; justify-content: center; padding: 16px; }
   .modal-content { background: #fff; border-radius: 14px; padding: 18px;
     max-width: 720px; width: 100%; max-height: 90vh; display: flex;
     flex-direction: column; box-shadow: 0 20px 60px rgba(15,23,42,.3); }
+  .modal-content h3 { margin: 0 0 10px; font-size: 16px; color: #0f172a; }
+  .modal-content p { margin: 0 0 12px; font-size: 12px; color: #475569; line-height: 1.6; }
   #dataTextarea { flex: 1; min-height: 220px; font-family: ui-monospace, monospace;
     font-size: 11px; padding: 10px; border: 1px solid #e2e8f0;
-    border-radius: 8px; resize: vertical; word-break: break-all; background: #f8fafc; }
+    border-radius: 8px; resize: vertical; word-break: break-all;
+    background: #f8fafc; color: #334155; -webkit-user-select: text; user-select: text; }
+
+  .crop-tips { font-size: 11px; color: #334155; line-height: 1.65;
+    background: linear-gradient(135deg, #eff6ff, #f8fafc);
+    border: 1px solid #dbeafe; border-radius: 9px;
+    padding: 10px 12px; margin-top: 10px; }
+  .crop-tips b { color: #1e40af; }
+
   .arrange-toolbar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;
     padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; }
   .arrange-toolbar .btn { padding: 7px 11px; font-size: 12px; border-radius: 7px; min-height: 34px; }
   .arrange-info { font-size: 12px; color: #475569; margin-left: auto;
     align-self: center; font-weight: 600; padding: 4px 10px;
     background: #fff; border: 1px solid #e2e8f0; border-radius: 7px; }
+
   .arrange-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 10px; max-height: 600px; overflow-y: auto; padding: 12px;
     background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;
-    touch-action: pan-y; }
+    touch-action: pan-y; -webkit-overflow-scrolling: touch; }
   .page-card { position: relative; background: #fff; border: 2px solid #e2e8f0;
     border-radius: 9px; padding: 7px; display: flex; flex-direction: column;
-    align-items: center; gap: 5px; cursor: grab; user-select: none; }
-  .page-card.selected { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.13); }
+    align-items: center; gap: 5px; cursor: grab;
+    -webkit-user-select: none; user-select: none;
+    box-shadow: 0 1px 2px rgba(15,23,42,.04); touch-action: manipulation; }
+  .page-card.selected { border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,.13); }
   .page-card.dragging { opacity: .35; }
   .page-card.drop-target { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,.2); }
   .page-card .thumb-wrap { position: relative; display: flex; align-items: center;
@@ -214,12 +276,17 @@
   .page-actions { display: flex; gap: 3px; width: 100%; justify-content: center; }
   .page-actions button { flex: 1; min-width: 0; padding: 5px 0; border: none;
     border-radius: 5px; background: #f1f5f9; color: #334155; font-size: 12px;
-    cursor: pointer; font-family: inherit; font-weight: 600; min-height: 30px; }
+    cursor: pointer; font-family: inherit; display: flex; align-items: center;
+    justify-content: center; font-weight: 600;
+    min-height: 30px; -webkit-appearance: none; appearance: none;
+    touch-action: manipulation; }
   .page-actions button.danger { background: #fee2e2; color: #b91c1c; }
   .page-actions button.primary { background: #eff6ff; color: #2563eb; }
+
   .img-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     gap: 8px; padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0;
-    border-radius: 10px; max-height: 440px; overflow-y: auto; }
+    border-radius: 10px; max-height: 440px; overflow-y: auto;
+    -webkit-overflow-scrolling: touch; }
   .img-item { position: relative; background: #fff; border: 1.5px solid #e2e8f0;
     border-radius: 9px; padding: 7px; display: flex; flex-direction: column; gap: 4px; }
   .img-item .thumb { width: 100%; height: 90px; object-fit: contain;
@@ -232,174 +299,396 @@
   .img-item .actions { display: flex; gap: 2px; }
   .img-item .actions button { flex: 1; padding: 5px 0; font-size: 12px;
     border: none; border-radius: 4px; background: #f1f5f9; color: #334155;
-    cursor: pointer; font-family: inherit; font-weight: 600; min-height: 28px; }
+    cursor: pointer; font-family: inherit; font-weight: 600; min-height: 28px;
+    touch-action: manipulation; -webkit-appearance: none; appearance: none; }
   .img-item .actions button.danger { background: #fee2e2; color: #b91c1c; }
+
   .file-list { display: flex; flex-direction: column; gap: 6px;
     max-height: 440px; overflow-y: auto; padding: 10px; background: #f8fafc;
-    border: 1px solid #e2e8f0; border-radius: 10px; }
+    border: 1px solid #e2e8f0; border-radius: 10px;
+    -webkit-overflow-scrolling: touch; }
   .file-item { display: flex; align-items: center; gap: 10px; background: #fff;
     border: 1px solid #e2e8f0; border-radius: 9px; padding: 10px; }
   .file-item .file-icon { flex: 0 0 auto; width: 34px; height: 34px;
     border-radius: 7px; background: linear-gradient(135deg, #fee2e2, #fecaca);
     color: #dc2626; display: flex; align-items: center; justify-content: center;
-    font-size: 9px; font-weight: 800; }
+    font-size: 9px; font-weight: 800; letter-spacing: .3px; }
+  .file-item .file-icon.zip { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; }
   .file-item .file-info { flex: 1; min-width: 0; }
-  .file-item .file-name { font-size: 12px; font-weight: 600; word-break: break-all; color: #0f172a; }
+  .file-item .file-name { font-size: 12px; font-weight: 600;
+    word-break: break-all; line-height: 1.25; color: #0f172a; }
   .file-item .file-meta { font-size: 11px; color: #64748b; margin-top: 2px; }
   .file-item .file-actions { display: flex; gap: 4px; flex-wrap: wrap; }
   .file-item .file-actions button { padding: 5px 10px; font-size: 11px;
     border: none; border-radius: 5px; background: #f1f5f9; color: #334155;
-    cursor: pointer; font-family: inherit; font-weight: 600; min-height: 28px; }
+    cursor: pointer; font-family: inherit; font-weight: 600; min-height: 28px;
+    touch-action: manipulation; -webkit-appearance: none; appearance: none; }
   .file-item .file-actions button.danger { background: #fee2e2; color: #b91c1c; }
   .file-item .file-actions button.primary { background: linear-gradient(135deg, #2563eb, #3b82f6);
-    color: #fff; }
+    color: #fff; box-shadow: 0 1px 4px rgba(37,99,235,.22); }
+
   .zip-result { text-align: center; padding: 20px 10px; }
   .zip-result .big-icon { font-size: 48px; margin-bottom: 10px; }
   .zip-result .zip-title { font-size: 14px; font-weight: 700; margin-bottom: 5px; color: #065f46; }
   .zip-result .zip-sub { font-size: 11px; color: #64748b; margin-bottom: 16px; }
-  .scan-fullscreen { position: fixed; inset: 0; z-index: 9000; background: #000;
-    display: none; flex-direction: column; touch-action: none; }
+
+  /* ===== 全屏相机 ===== */
+  .scan-fullscreen {
+    position: fixed; inset: 0; z-index: 9000; background: #000;
+    display: none; flex-direction: column;
+    -webkit-user-select: none; user-select: none;
+    touch-action: none;
+  }
   .scan-fullscreen.show { display: flex; }
-  .scan-fs-video-wrap { flex: 1; position: relative; overflow: hidden;
-    display: flex; align-items: center; justify-content: center; }
-  .scan-fullscreen video { position: absolute; inset: 0; display: block;
-    width: 100%; height: 100%; object-fit: cover; background: #000; }
-  .scan-fs-frame { position: absolute; width: 90%; aspect-ratio: 1.585;
-    pointer-events: none; border: 1.5px solid rgba(255,255,255,.5);
-    border-radius: 14px; box-shadow: 0 0 0 4000px rgba(0,0,0,0.55);
-    display: none; overflow: hidden; }
-  .scan-fs-frame.show { display: block; }
-  .scan-fs-frame .frame-hint { position: absolute; left: 50%; top: -30px;
-    transform: translateX(-50%); background: rgba(37,99,235,.92); color: #fff;
-    font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 999px;
-    white-space: nowrap; }
-  .scan-fs-frame .frame-guide { position: absolute; inset: 6%;
+
+  .scan-fs-video-wrap {
+    flex: 1; position: relative; overflow: hidden;
     display: flex; align-items: center; justify-content: center;
-    color: rgba(255,255,255,.18); pointer-events: none; }
+  }
+  .scan-fullscreen video {
+    position: absolute; inset: 0;
+    display: block; width: 100%; height: 100%;
+    object-fit: cover; background: #000;
+  }
+
+  .scan-fs-frame {
+    position: absolute;
+    width: 90%; aspect-ratio: 1.585;
+    pointer-events: none;
+    border: 1.5px solid rgba(255,255,255,.5);
+    border-radius: 14px;
+    box-shadow: 0 0 0 4000px rgba(0,0,0,0.55), inset 0 0 40px rgba(96,165,250,.08);
+    display: none;
+    overflow: hidden;
+  }
+  .scan-fs-frame.show { display: block; }
+  .scan-fs-frame .frame-hint {
+    position: absolute;
+    left: 50%; top: -30px; transform: translateX(-50%);
+    background: rgba(37,99,235,.92); color: #fff;
+    font-size: 12px; font-weight: 600; padding: 5px 12px;
+    border-radius: 999px; white-space: nowrap;
+    letter-spacing: .3px;
+  }
+  .scan-fs-frame .frame-guide {
+    position: absolute; inset: 6%;
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,.18);
+    pointer-events: none;
+  }
   .scan-fs-frame .frame-guide svg { width: 100%; height: 100%; }
-  .scan-fs-corner { position: absolute; width: 40px; height: 40px;
-    border-color: #60a5fa; border-style: solid; border-width: 0; z-index: 2; }
+  .scan-fs-corner {
+    position: absolute; width: 40px; height: 40px;
+    border-color: #60a5fa; border-style: solid; border-width: 0;
+    filter: drop-shadow(0 0 6px rgba(0,0,0,.5));
+    z-index: 2;
+  }
   .scan-fs-corner.tl { top: -2px; left: -2px; border-top-width: 4px; border-left-width: 4px; border-top-left-radius: 14px; }
   .scan-fs-corner.tr { top: -2px; right: -2px; border-top-width: 4px; border-right-width: 4px; border-top-right-radius: 14px; }
   .scan-fs-corner.bl { bottom: -2px; left: -2px; border-bottom-width: 4px; border-left-width: 4px; border-bottom-left-radius: 14px; }
   .scan-fs-corner.br { bottom: -2px; right: -2px; border-bottom-width: 4px; border-right-width: 4px; border-bottom-right-radius: 14px; }
-  .scan-fs-topbar { position: absolute; top: 0; left: 0; right: 0;
+
+  .scan-fs-focus {
+    position: absolute; width: 80px; height: 80px;
+    border: 2px solid #60a5fa; border-radius: 8px;
+    display: none; pointer-events: none;
+    animation: focusAnim 0.5s ease-out;
+  }
+  @keyframes focusAnim {
+    0% { transform: scale(1.2); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .scan-fs-topbar {
+    position: absolute; top: 0; left: 0; right: 0;
     padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;
     background: linear-gradient(180deg, rgba(0,0,0,.55), transparent);
-    color: #fff; z-index: 10; }
+    color: #fff; z-index: 10;
+  }
   .scan-fs-topbar .title { font-size: 14px; font-weight: 700; }
-  .scan-fs-topbar .page-count { font-size: 12px; background: rgba(255,255,255,.22);
-    padding: 4px 10px; border-radius: 999px; font-weight: 600; }
-  .scan-fs-close { width: 40px; height: 40px; border-radius: 50%;
+  .scan-fs-topbar .page-count {
+    font-size: 12px; background: rgba(255,255,255,.22);
+    padding: 4px 10px; border-radius: 999px; font-weight: 600;
+  }
+  .scan-fs-close {
+    width: 40px; height: 40px; border-radius: 50%;
     background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.25);
-    color: #fff; font-size: 20px; line-height: 1; display: flex;
-    align-items: center; justify-content: center; cursor: pointer; }
-  .scan-fs-bottombar { position: absolute; left: 0; right: 0; bottom: 0;
+    color: #fff; font-size: 20px; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; -webkit-appearance: none; appearance: none;
+    touch-action: manipulation;
+  }
+
+  .scan-fs-bottombar {
+    position: absolute; left: 0; right: 0; bottom: 0;
     padding: 16px 20px calc(24px + env(safe-area-inset-bottom));
     display: flex; align-items: center; justify-content: space-between;
-    background: linear-gradient(0deg, rgba(0,0,0,.7), transparent); z-index: 10; }
-  .scan-fs-thumb { width: 54px; height: 54px; border-radius: 8px;
+    background: linear-gradient(0deg, rgba(0,0,0,.7), transparent);
+    z-index: 10;
+  }
+  .scan-fs-thumb {
+    width: 54px; height: 54px; border-radius: 8px;
     background: rgba(255,255,255,.1); border: 2px solid rgba(255,255,255,.35);
     overflow: hidden; display: flex; align-items: center; justify-content: center;
-    cursor: pointer; padding: 0; }
+    cursor: pointer; -webkit-appearance: none; appearance: none;
+    touch-action: manipulation; padding: 0;
+  }
   .scan-fs-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .scan-fs-thumb .placeholder { color: rgba(255,255,255,.6); font-size: 20px; }
-  .scan-fs-shutter { width: 78px; height: 78px; border-radius: 50%;
+
+  .scan-fs-shutter {
+    width: 78px; height: 78px; border-radius: 50%;
     border: 5px solid #fff; background: rgba(255,255,255,.2);
     display: flex; align-items: center; justify-content: center;
-    cursor: pointer; padding: 0; transition: all .12s;
-    box-shadow: 0 6px 20px rgba(0,0,0,.4); position: relative; }
-  .scan-fs-shutter .inner { width: 58px; height: 58px; border-radius: 50%;
-    background: #fff; transition: all .12s; }
-  .scan-fs-shutter:active { transform: scale(.92); }
-  .scan-fs-action { width: 54px; height: 54px; border-radius: 50%;
+    cursor: pointer; -webkit-appearance: none; appearance: none;
+    touch-action: manipulation; padding: 0;
+    transition: all .12s;
+    box-shadow: 0 6px 20px rgba(0,0,0,.4);
+    position: relative;
+  }
+  .scan-fs-shutter .inner {
+    width: 58px; height: 58px; border-radius: 50%;
+    background: #fff;
+    transition: all .12s;
+  }
+  .scan-fs-shutter:active { transform: scale(.92); background: rgba(255,255,255,.5); }
+  .scan-fs-shutter:active .inner { background: #e5e7eb; }
+  .scan-fs-shutter.flash::after {
+    content: ''; position: absolute; inset: -8px;
+    border-radius: 50%; border: 3px solid #60a5fa;
+    animation: shutterFlash .5s ease-out;
+  }
+  @keyframes shutterFlash {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(1.8); opacity: 0; }
+  }
+
+  .scan-fs-action {
+    width: 54px; height: 54px; border-radius: 50%;
     background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3);
-    color: #fff; font-size: 22px; display: flex; align-items: center;
-    justify-content: center; cursor: pointer; }
-  .scan-toast { position: fixed; left: 50%; bottom: 130px; z-index: 9600;
-    transform: translateX(-50%); background: rgba(15,23,42,.92); color: #fff;
-    padding: 10px 18px; border-radius: 999px; font-size: 13px; font-weight: 600;
-    box-shadow: 0 6px 24px rgba(0,0,0,.4); opacity: 0; pointer-events: none;
-    transition: opacity .25s ease, transform .25s ease; white-space: nowrap; }
-  .scan-toast.show { opacity: 1; transform: translateX(-50%) translateY(-8px); }
-  .scan-fs-processing { position: absolute; inset: 0; z-index: 20;
-    background: rgba(0,0,0,.6); display: flex; flex-direction: column;
-    align-items: center; justify-content: center; color: #fff; gap: 14px; }
-  .scan-fs-processing .spinner { width: 44px; height: 44px; border-radius: 50%;
-    border: 4px solid rgba(255,255,255,.25); border-top-color: #fff;
-    animation: spin 0.8s linear infinite; }
+    color: #fff; font-size: 22px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; -webkit-appearance: none; appearance: none;
+    touch-action: manipulation;
+  }
+
+  .scan-flash-screen {
+    position: fixed; inset: 0; z-index: 9500; background: #fff;
+    opacity: 0; pointer-events: none;
+  }
+  .scan-flash-screen.animate { animation: flashWhite .35s ease-out; }
+  @keyframes flashWhite {
+    0% { opacity: 0; }
+    20% { opacity: .85; }
+    100% { opacity: 0; }
+  }
+
+  .scan-toast {
+    position: fixed; left: 50%; bottom: 130px; z-index: 9600;
+    transform: translateX(-50%);
+    background: rgba(15,23,42,.92); color: #fff;
+    padding: 10px 18px; border-radius: 999px;
+    font-size: 13px; font-weight: 600;
+    box-shadow: 0 6px 24px rgba(0,0,0,.4);
+    opacity: 0; pointer-events: none;
+    transition: opacity .25s ease, transform .25s ease;
+    white-space: nowrap;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .scan-toast.show {
+    opacity: 1; transform: translateX(-50%) translateY(-8px);
+  }
+
+  .scan-fs-processing {
+    position: absolute; inset: 0; z-index: 20;
+    background: rgba(0,0,0,.6);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: #fff; gap: 14px;
+  }
+  .scan-fs-processing .spinner {
+    width: 44px; height: 44px; border-radius: 50%;
+    border: 4px solid rgba(255,255,255,.25);
+    border-top-color: #fff;
+    animation: spin 0.8s linear infinite;
+  }
   @keyframes spin { to { transform: rotate(360deg); } }
+  .scan-fs-processing .txt { font-size: 14px; font-weight: 600; }
+
   .scan-result-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-    gap: 8px; padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0;
-    border-radius: 10px; max-height: 500px; overflow-y: auto; }
+    gap: 8px; padding: 10px; background: #f8fafc;
+    border: 1px solid #e2e8f0; border-radius: 10px;
+    max-height: 500px; overflow-y: auto;
+    -webkit-overflow-scrolling: touch; }
   .scan-result-item { position: relative; background: #fff; border: 1.5px solid #e2e8f0;
-    border-radius: 9px; padding: 6px; display: flex; flex-direction: column; gap: 4px; }
+    border-radius: 9px; padding: 6px; display: flex;
+    flex-direction: column; gap: 4px;
+    transition: all .15s; }
   .scan-result-item .thumb { width: 100%; height: 100px; object-fit: contain;
-    background: #fff; border-radius: 5px; display: block; cursor: pointer; }
+    background: #fff; border-radius: 5px; display: block; border: 1px solid #f1f5f9;
+    cursor: pointer; }
+  .scan-result-item .thumb:active { opacity: .7; }
   .scan-result-item .num { position: absolute; top: 8px; left: 8px;
-    background: rgba(15,23,42,.85); color: #fff; font-size: 10px;
-    font-weight: 700; padding: 2px 7px; border-radius: 999px; pointer-events: none; }
+    background: rgba(15,23,42,.85); color: #fff;
+    font-size: 10px; font-weight: 700; padding: 2px 7px;
+    border-radius: 999px; pointer-events: none; }
   .scan-result-item .actions { display: flex; gap: 2px; }
   .scan-result-item .actions button { flex: 1; padding: 5px 0; font-size: 13px;
-    border: none; border-radius: 4px; background: #f1f5f9; color: #334155;
-    cursor: pointer; font-family: inherit; font-weight: 600; min-height: 28px; }
+    border: none; border-radius: 4px;
+    background: #f1f5f9; color: #334155;
+    cursor: pointer; font-family: inherit;
+    font-weight: 600; min-height: 28px;
+    touch-action: manipulation;
+    -webkit-appearance: none; appearance: none; }
   .scan-result-item .actions button.danger { background: #fee2e2; color: #b91c1c; }
-  .scan-toolbar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;
-    padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; }
+  .scan-result-item .actions button.primary { background: #eff6ff; color: #2563eb; }
+  .scan-result-item .actions button:active { background: #e2e8f0; }
+
+  .scan-toolbar {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;
+    padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;
+  }
   .scan-toolbar .btn { padding: 7px 11px; font-size: 12px; border-radius: 7px; min-height: 34px; }
   .scan-toolbar .info { font-size: 12px; color: #475569; margin-left: auto;
     align-self: center; font-weight: 600; padding: 4px 10px;
     background: #fff; border: 1px solid #e2e8f0; border-radius: 7px; }
-  .scan-img-editor { position: fixed; inset: 0; z-index: 9200; background: #0f172a;
-    display: none; flex-direction: column; }
+
+  .scan-img-editor {
+    position: fixed; inset: 0; z-index: 9200; background: #0f172a;
+    display: none; flex-direction: column;
+  }
   .scan-img-editor.show { display: flex; }
-  .scan-ie-header { padding: 14px 16px; display: flex; align-items: center;
-    justify-content: space-between; background: #0f172a; color: #fff; flex: 0 0 auto;
-    border-bottom: 1px solid #1e293b; }
+
+  .scan-ie-header {
+    padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;
+    background: #0f172a; color: #fff; flex: 0 0 auto;
+    border-bottom: 1px solid #1e293b;
+  }
   .scan-ie-header .title { font-size: 14px; font-weight: 700; }
-  .scan-ie-header .close-btn { width: 36px; height: 36px; border-radius: 50%;
+  .scan-ie-header .close-btn {
+    width: 36px; height: 36px; border-radius: 50%;
     background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
-    color: #fff; font-size: 18px; display: flex; align-items: center;
-    justify-content: center; cursor: pointer; }
-  .scan-ie-stage { flex: 1; overflow: hidden; position: relative;
+    color: #fff; font-size: 18px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; -webkit-appearance: none; appearance: none;
+  }
+
+  .scan-ie-stage {
+    flex: 1; overflow: hidden; position: relative;
     display: flex; align-items: center; justify-content: center;
-    touch-action: none; background: #0f172a; min-height: 200px; }
-  .scan-ie-stage canvas { display: block; touch-action: none;
-    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
-  .scan-ie-toolbar { display: flex; align-items: center; justify-content: space-around;
-    padding: 10px 12px; background: #0f172a; flex: 0 0 auto; gap: 4px;
-    flex-wrap: wrap; border-top: 1px solid #1e293b; }
-  .scan-ie-toolbar button { flex: 1; min-width: 0; padding: 10px 6px;
-    border: none; border-radius: 8px; background: #1e293b; color: #cbd5e1;
-    font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
-    display: flex; flex-direction: column; align-items: center;
-    justify-content: center; gap: 3px; min-height: 58px; }
+    touch-action: none; -webkit-user-select: none; user-select: none;
+    background: #0f172a;
+    min-height: 200px;
+  }
+  .scan-ie-stage canvas {
+    display: block;
+    touch-action: none;
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .scan-ie-toolbar {
+    display: flex; align-items: center; justify-content: space-around;
+    padding: 10px 12px; background: #0f172a; flex: 0 0 auto;
+    gap: 4px; flex-wrap: wrap;
+    border-top: 1px solid #1e293b;
+  }
+  .scan-ie-toolbar button {
+    flex: 1; min-width: 0; padding: 10px 6px;
+    border: none; border-radius: 8px;
+    background: #1e293b; color: #cbd5e1;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    font-family: inherit; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 3px;
+    min-height: 58px;
+    -webkit-appearance: none; appearance: none;
+    touch-action: manipulation;
+  }
   .scan-ie-toolbar button .icon { font-size: 20px; line-height: 1; }
+  .scan-ie-toolbar button:active { background: #334155; }
   .scan-ie-toolbar button.active { background: #2563eb; color: #fff; }
-  .scan-ie-actions { display: flex; gap: 8px; flex: 0 0 auto;
+
+  .scan-ie-actions {
+    display: flex; gap: 8px; flex: 0 0 auto;
     padding: 12px 16px calc(20px + env(safe-area-inset-bottom));
-    background: #0f172a; border-top: 1px solid #1e293b; }
+    background: #0f172a; border-top: 1px solid #1e293b;
+  }
   .scan-ie-actions .btn { flex: 1; min-height: 50px; border-radius: 10px; font-size: 15px; }
-  .idphoto-crop-stage { position: relative; width: 100%; border-radius: 10px;
-    background: #0f172a; overflow: hidden; touch-action: pan-y;
-    line-height: 0; margin-top: 10px; }
-  .idphoto-crop-stage canvas { display: block; width: 100%; height: auto; touch-action: pan-y; }
-  .idphoto-crop-stage canvas.overlay { position: absolute; left: 0; top: 0;
-    pointer-events: none; touch-action: none; }
+  .scan-ie-actions .btn.gray { background: #334155; color: #fff; border: 1px solid #475569; box-shadow: none; }
+  .scan-ie-actions .btn.green { background: linear-gradient(135deg, #059669, #10b981); box-shadow: 0 2px 8px rgba(5,150,105,.35); }
+
+  .panel[data-theme="edit"] .card::before { background: linear-gradient(90deg, #2563eb, #3b82f6); }
+  .panel[data-theme="edit"] .step-label:not(.step-ok) { background: linear-gradient(135deg, #2563eb, #3b82f6); }
+  .panel[data-theme="convert"] .card::before { background: linear-gradient(90deg, #7c3aed, #a855f7); }
+  .panel[data-theme="convert"] .step-label:not(.step-ok) { background: linear-gradient(135deg, #7c3aed, #a855f7); }
+  .panel[data-theme="convert"] input[type=file]::file-selector-button { background: linear-gradient(135deg, #7c3aed, #a855f7); }
+  .panel[data-theme="convert"] input[type=file]::-webkit-file-upload-button { background: linear-gradient(135deg, #7c3aed, #a855f7); }
+  .panel[data-theme="organize"] .card::before { background: linear-gradient(90deg, #059669, #10b981); }
+  .panel[data-theme="organize"] .step-label:not(.step-ok) { background: linear-gradient(135deg, #059669, #10b981); }
+  .panel[data-theme="organize"] input[type=file]::file-selector-button { background: linear-gradient(135deg, #059669, #10b981); }
+  .panel[data-theme="organize"] input[type=file]::-webkit-file-upload-button { background: linear-gradient(135deg, #059669, #10b981); }
+
+  .idphoto-crop-stage {
+    position: relative;
+    width: 100%;
+    border-radius: 10px;
+    background: #0f172a;
+    overflow: hidden;
+    touch-action: pan-y;
+    line-height: 0;
+    margin-top: 10px;
+  }
+  .idphoto-crop-stage canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    touch-action: pan-y;
+  }
+  .idphoto-crop-stage canvas.overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    pointer-events: none;
+    touch-action: none;
+  }
+
+  #idphotoAiPreviewCanvas { display: block; margin: 0 auto; border-radius: 6px; }
+  #idphotoAiStage { margin-top: 10px; }
+
   @media (max-width: 640px) {
     .app-header { padding: 18px 16px 16px; }
     .app-header h1 { font-size: 20px; }
+    .app-header .sub { font-size: 11px; }
+    .app-header .badges { margin-top: 8px; }
+    .feature-catalog { padding: 12px 12px 0; }
     .catalog-items { grid-template-columns: 1fr 1fr; gap: 5px; }
-    .feature-card { padding: 9px 10px; gap: 8px; min-height: 50px; }
+    .catalog-group { margin-bottom: 12px; }
+    .catalog-title { font-size: 12px; padding-bottom: 6px; }
+    .catalog-title .catalog-icon { width: 24px; height: 24px; font-size: 12px; }
+    .feature-card { padding: 9px 10px; gap: 8px; min-height: 50px; border-radius: 9px; }
+    .feature-icon { font-size: 18px; width: 30px; height: 30px; border-radius: 7px; }
+    .feature-name { font-size: 12px; }
+    .feature-desc { font-size: 9px; }
     #workspace { padding: 4px 12px 80px; }
+    .workspace-header { padding: 4px 2px 10px; }
+    .workspace-title { font-size: 14px; }
+    .workspace-title .ws-icon { width: 28px; height: 28px; font-size: 16px; }
     .card { padding: 12px 13px; border-radius: 11px; margin-bottom: 8px; }
     .card h2 { font-size: 13px; gap: 8px; margin-bottom: 10px; }
+    .step-label { font-size: 10px; padding: 3px 8px; border-radius: 6px; }
+    .step-title { font-size: 13px; }
+    .pager { gap: 5px; }
+    .pager .btn { padding: 8px 10px; font-size: 12px; }
+    .pager .info { font-size: 12px; min-width: 60px; padding: 4px 8px; }
     .btn.big { padding: 12px 14px; font-size: 14px; }
-    .arrange-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
-    .img-list { grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); gap: 6px; }
+    .preview-wrap { max-height: 480px; }
+    .arrange-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; padding: 8px; }
+    .page-actions button { font-size: 11px; padding: 4px 0; }
+    .img-list { grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); gap: 6px; padding: 8px; }
     .img-item .thumb { height: 70px; }
-    .scan-result-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 6px; }
+    .scan-result-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 6px; padding: 8px; }
     .scan-result-item .thumb { height: 80px; }
+  }
+  @supports (padding: env(safe-area-inset-bottom)) {
+    #workspace { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
   }
 </style>
 </head>
@@ -455,11 +744,12 @@
         <span class="feature-icon">👤</span>
         <span class="feature-text">
           <span class="feature-name">证件照制作</span>
-          <span class="feature-desc">AI 涂抹抠图 / 跳过直接生成</span>
+          <span class="feature-desc">AI / 涂抹 / 跳过</span>
         </span>
       </button>
     </div>
   </div>
+
   <div class="catalog-group" data-category="convert">
     <div class="catalog-title">
       <span class="catalog-icon">🔄</span>
@@ -490,6 +780,7 @@
       </button>
     </div>
   </div>
+
   <div class="catalog-group" data-category="organize">
     <div class="catalog-title">
       <span class="catalog-icon">📁</span>
@@ -522,7 +813,9 @@
       <span id="workspaceName">试卷拆分</span>
     </div>
   </div>
+
   <div id="envBanner"></div>
+
   <main>
     <!-- 模块 1：试卷拆分 -->
     <section class="panel active" id="panel-split" data-theme="edit">
@@ -601,7 +894,7 @@
       </div>
     </section>
 
-    <!-- 模块 3：页面调整 -->
+    <!-- 模块 3：页面调整（原 arrange，暂时隐藏入口，保留代码） -->
     <section class="panel" id="panel-arrange" data-theme="edit">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择 PDF</span></h2>
@@ -643,6 +936,7 @@
         <p class="hint">拍照后在下方列表中直接显示，点击图片可编辑。左右滑动切换上一张/下一张。</p>
         <div class="status" id="scanStatus"></div>
       </div>
+
       <div class="card hidden" id="scanListCard">
         <h2><span class="step-label">第 2 步</span><span class="step-title">扫描结果管理</span></h2>
         <div class="scan-toolbar">
@@ -661,6 +955,7 @@
         <button class="btn big" id="scanPdfBtn" type="button">生成扫描 PDF</button>
         <div class="status" id="scanListStatus"></div>
       </div>
+
       <div class="card result-card hidden" id="scanResultCard">
         <h2><span class="step-label step-ok">✓ 完成</span><span class="step-title">扫描 PDF 已生成</span></h2>
         <div id="scanPdfResultBody"></div>
@@ -709,7 +1004,7 @@
       </div>
     </section>
 
-    <!-- 模块 6：证件照制作（完整 AI 抠图版） -->
+    <!-- 模块 6：证件照制作（AI / 涂抹 / 跳过） -->
     <section class="panel" id="panel-idphoto" data-theme="convert">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">上传人像照片</span></h2>
@@ -733,21 +1028,47 @@
         <div class="status" id="idphotoCropStatus"></div>
       </div>
 
+      <!-- 第 3 步：背景处理 -->
       <div class="card hidden" id="idphotoBgCard">
         <h2><span class="step-label">第 3 步</span><span class="step-title">背景处理</span></h2>
         <p class="hint" style="margin-bottom:14px">
-          若照片背景已是纯色或已去除背景，<b>可直接点击「直接生成证件照」跳过涂抹</b>。<br>
-          若需去除复杂背景，请点击「AI 涂抹擦除背景」。
+          若照片背景已是纯色或已去除背景，<b>可直接点击「直接生成证件照」跳过抠图</b>。<br>
+          若背景复杂，推荐用 <b>AI 智能抠图</b> 自动识别人像；也可用 <b>涂抹擦除</b> 手动处理。
         </p>
         <div class="btn-row" style="margin-bottom:12px">
           <button class="btn amber" id="idphotoSkipBgBtn" type="button" style="flex:1">
-            ⚡ 直接生成证件照（跳过涂抹）
+            ⚡ 直接生成（跳过抠图）
           </button>
+        </div>
+        <div class="btn-row" style="margin-bottom:12px">
           <button class="btn purple" id="idphotoUseBordercutBtn" type="button" style="flex:1">
-            ✏️ AI 涂抹擦除背景
+            ✏️ 涂抹擦除背景
+          </button>
+          <button class="btn blue" id="idphotoUseAiBtn" type="button" style="flex:1">
+            🤖 AI 智能抠图
           </button>
         </div>
 
+        <!-- AI 抠图预览区 -->
+        <div id="idphotoAiArea" class="hidden">
+          <div class="idphoto-crop-stage" id="idphotoAiStage">
+            <canvas id="idphotoAiPreviewCanvas"></canvas>
+          </div>
+          <div class="btn-row" style="margin-top:10px; align-items:center">
+            <span style="font-size:12px; color:#475569; margin-right:6px">背景色：</span>
+            <button class="btn small" data-aibg="#ffffff" style="background:#fff; color:#0f172a; border:1px solid #e2e8f0">白</button>
+            <button class="btn small" data-aibg="#d92b2b" style="background:#d92b2b">红</button>
+            <button class="btn small" data-aibg="#1d4ed8" style="background:#1d4ed8">蓝</button>
+            <button class="btn small" data-aibg="#4b5563" style="background:#4b5563">灰</button>
+          </div>
+          <div class="btn-row" style="margin-top:10px">
+            <button class="btn gray" id="idphotoAiRetry" type="button">🔄 重新识别</button>
+            <button class="btn green" id="idphotoAiConfirm" type="button" style="flex:1">✅ 满意，继续</button>
+          </div>
+          <div class="status" id="idphotoAiStatus"></div>
+        </div>
+
+        <!-- 涂抹区（保留原有） -->
         <div id="idphotoBordercutArea" class="hidden">
           <div class="idphoto-crop-stage" id="idphotoBordercutStage">
             <canvas id="idphotoBordercutCanvas"></canvas>
@@ -764,9 +1085,11 @@
           <button class="btn big purple hidden" id="idphotoBordercutConfirm" type="button" style="margin-top:12px">✅ 满意，继续</button>
           <div class="status" id="idphotoBordercutStatus"></div>
         </div>
+
         <div class="status" id="idphotoBgStatus"></div>
       </div>
 
+      <!-- 第 4 步：尺寸与排版 -->
       <div class="card hidden" id="idphotoOptCard">
         <h2><span class="step-label">第 4 步</span><span class="step-title">尺寸与排版</span></h2>
         <div class="field">
@@ -912,6 +1235,7 @@
     <div class="title" id="scanFsTitle">扫描文档</div>
     <div class="page-count" id="scanFsCount">已拍 0 页</div>
   </div>
+
   <div class="scan-fs-video-wrap" id="scanFsVideoWrap">
     <video id="scanFsVideo" playsinline autoplay muted></video>
     <div class="scan-fs-frame" id="scanFsFrame">
@@ -938,11 +1262,14 @@
       <div class="scan-fs-corner bl"></div>
       <div class="scan-fs-corner br"></div>
     </div>
+    <div class="scan-fs-focus" id="scanFsFocus"></div>
+
     <div id="scanFsProcessing" class="scan-fs-processing hidden">
       <div class="spinner"></div>
       <div class="txt">正在处理…</div>
     </div>
   </div>
+
   <div class="scan-fs-bottombar">
     <button class="scan-fs-thumb" id="scanFsThumb" type="button">
       <span class="placeholder">🖼️</span>
@@ -954,6 +1281,7 @@
   </div>
 </div>
 
+<div class="scan-flash-screen" id="scanFlash"></div>
 <div class="scan-toast" id="scanToast">
   <span>✓</span><span id="scanToastText">已添加</span>
 </div>
@@ -970,10 +1298,18 @@
     <canvas id="scanIeOverlay" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none;"></canvas>
   </div>
   <div class="scan-ie-toolbar">
-    <button id="scanIeRotateLeft" type="button"><span class="icon">↺</span><span>左转</span></button>
-    <button id="scanIeRotateRight" type="button"><span class="icon">↻</span><span>右转</span></button>
-    <button id="scanIeCrop" type="button"><span class="icon">✂️</span><span>裁剪</span></button>
-    <button id="scanIeReset" type="button"><span class="icon">↺</span><span>重置</span></button>
+    <button id="scanIeRotateLeft" type="button">
+      <span class="icon">↺</span><span>左转</span>
+    </button>
+    <button id="scanIeRotateRight" type="button">
+      <span class="icon">↻</span><span>右转</span>
+    </button>
+    <button id="scanIeCrop" type="button">
+      <span class="icon">✂️</span><span>裁剪</span>
+    </button>
+    <button id="scanIeReset" type="button">
+      <span class="icon">↺</span><span>重置</span>
+    </button>
   </div>
   <div class="scan-ie-actions">
     <button class="btn gray" id="scanIeCancel" type="button">取消</button>
@@ -1002,8 +1338,11 @@
     pdfJs:     ['./libs/pdf.min.js',             './pdf.min.js'],
     pdfWorker: ['./libs/pdf.worker.min.js',      './pdf.worker.min.js'],
     jszip:     ['./libs/jszip.min.js',           './jszip.min.js'],
-    mammoth:   ['./libs/mammoth.browser.min.js', './mammoth.browser.min.js']
+    mammoth:   ['./libs/mammoth.browser.min.js', './mammoth.browser.min.js'],
+    mediapipeJs:   ['./libs/selfie_segmentation.js', './selfie_segmentation.js'],
+    mediapipeBase: './libs/'
   };
+
   const CDN = {
     pdfLib: [
       'https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js',
@@ -1022,10 +1361,15 @@
     mammoth: [
       'https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js',
       'https://unpkg.com/mammoth@1.6.0/mammoth.browser.min.js'
-    ]
+    ],
+    mediapipeJs: [
+      'https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation@0.1.1675465747/selfie_segmentation.js'
+    ],
+    mediapipeBase: 'https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation@0.1.1675465747/'
   };
 
   let loadingEl = null, progressValue = 0;
+
   function updateLoading(text, inc) {
     if (!loadingEl) {
       loadingEl = document.createElement('div');
@@ -1051,6 +1395,7 @@
       if (bar) bar.style.width = progressValue + '%';
     }
   }
+
   function finishLoading() {
     progressValue = 100;
     const bar = document.getElementById('pdfLoadingBar');
@@ -1066,12 +1411,14 @@
       }
     }, 200);
   }
+
   function hideLoadingNow() {
     if (loadingEl && loadingEl.parentNode) {
       loadingEl.parentNode.removeChild(loadingEl);
       loadingEl = null;
     }
   }
+
   function loadScript(url, globalName, timeout) {
     return new Promise((resolve, reject) => {
       const script = document.createElement('script');
@@ -1101,6 +1448,7 @@
       document.head.appendChild(script);
     });
   }
+
   async function loadFirstAvailable(localPaths, cdnPaths, globalName, label, timeout) {
     const tried = [];
     for (const path of localPaths) {
@@ -1122,6 +1470,7 @@
     }
     throw new Error(tried.join('\n'));
   }
+
   async function probeWorkerPath(localPaths, mainLibUrl) {
     for (const p of localPaths) {
       try {
@@ -1133,16 +1482,45 @@
     console.log('[pdf.js] ⚠️ 使用 CDN worker:', workerUrl);
     return workerUrl;
   }
+
   function showLoadError(title, detail) {
     hideLoadingNow();
+    const ua = navigator.userAgent || '';
+    const isWeChat = /MicroMessenger/i.test(ua);
+    const isQQ = /QQ/i.test(ua) && /Mobile/i.test(ua);
+    let wechatTip = '';
+    if (isWeChat || isQQ) {
+      wechatTip = '<div style="background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:12px 16px;margin:14px 0;color:#92400e;font-size:13px;line-height:1.7;text-align:left">'
+        + '<b>📱 检测到微信 / QQ 内置浏览器</b><br>'
+        + '内置浏览器对外部资源加载有限制。<br>'
+        + '请点右上角 <b>···</b> 菜单 → 选 <b>在浏览器打开</b>，再试。'
+        + '</div>';
+    }
     document.body.innerHTML =
       '<div style="min-height:100vh;padding:40px 20px;background:linear-gradient(135deg,#f8fafc,#eef1f6);font-family:-apple-system,\'PingFang SC\',sans-serif">'
       + '<div style="max-width:520px;margin:0 auto;background:#fff;border-radius:20px;padding:32px 24px;box-shadow:0 10px 40px rgba(15,23,42,.1)">'
       +   '<div style="font-size:56px;text-align:center;margin-bottom:14px">⚠️</div>'
       +   '<h2 style="margin:0 0 12px;color:#0f172a;font-size:19px;text-align:center">' + title + '</h2>'
       +   '<p style="margin:0 0 8px;color:#475569;font-size:14px;line-height:1.7;text-align:center">无法加载所需的 PDF 处理库。</p>'
+      +   wechatTip
+      +   '<div style="margin:20px 0;color:#475569;font-size:13px;line-height:1.9;text-align:left">'
+      +   '<b style="color:#0f172a;font-size:14px">解决办法：</b><br><br>'
+      +   '<b>1. 下载库文件到本地（推荐）</b><br>'
+      +   '在网页目录新建 <code style="background:#eef2ff;color:#3730a3;padding:1px 6px;border-radius:4px">libs</code> 文件夹，下载以下文件，然后刷新页面：<br>'
+      +   '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;margin:8px 0;font-family:monospace;font-size:11px;line-height:1.9;word-break:break-all">'
+      +   'pdf-lib.min.js ← https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js<br>'
+      +   'pdf.min.js ← https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js<br>'
+      +   'pdf.worker.min.js ← https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js<br>'
+      +   'jszip.min.js ← https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js<br>'
+      +   'mammoth.browser.min.js ← https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js<br>'
+      +   'selfie_segmentation.js ← https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation@0.1.1675465747/selfie_segmentation.js<br>'
+      +   '（以及同目录下的 _wasm_bin.js / .wasm 文件）'
+      +   '</div>'
+      +   '<b>2. 网络问题</b><br>如果是网络限制导致 CDN 加载失败，请切换网络后重试。<br><br>'
+      +   '<b>3. 浏览器兼容</b><br>建议用最新版 Chrome / Safari / Edge 打开。'
+      +   '</div>'
       +   '<div style="font-size:11px;color:#94a3b8;background:#f8fafc;border-radius:8px;padding:10px 12px;margin:16px 0;font-family:monospace;white-space:pre-wrap;word-break:break-all">' + detail + '</div>'
-      +   '<button onclick="location.reload()" style="display:block;width:100%;padding:16px;border:none;background:linear-gradient(135deg,#2563eb,#3b82f6);color:#fff;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit">🔄 重新加载</button>'
+      +   '<button onclick="location.reload()" style="display:block;width:100%;padding:16px;border:none;background:linear-gradient(135deg,#2563eb,#3b82f6);color:#fff;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(37,99,235,.35);font-family:inherit">🔄 重新加载</button>'
       + '</div></div>';
   }
 
@@ -1179,6 +1557,7 @@
     const $ = (s) => document.querySelector(s);
     const $$ = (s) => Array.prototype.slice.call(document.querySelectorAll(s));
     const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
     const bind = (sel, event, fn) => {
       const el = typeof sel === 'string' ? $(sel) : sel;
       if (el) el.addEventListener(event, fn);
@@ -1191,105 +1570,36 @@
       isHttps: location.protocol === 'https:',
       isSecure: window.isSecureContext === true
     };
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent || '')
-      || (/Macintosh/.test(navigator.userAgent || '') && navigator.maxTouchPoints > 1);
+    const isMobile = (function () {
+      const ua = navigator.userAgent || '';
+      if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(ua)) return true;
+      if (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) return true;
+      return false;
+    })();
     const hasSavePicker = env.isSecure && typeof window.showSaveFilePicker === 'function';
 
-    // ============ 微信 / QQ 内置浏览器检测 ============
-    const ua = navigator.userAgent || '';
-    const isWeChat = /MicroMessenger/i.test(ua);
-    const isQQ = /QQ/i.test(ua) && /Mobile/i.test(ua);
-    const isWeCom = /wxwork/i.test(ua);
-    const inAppBrowser = isWeChat || isQQ || isWeCom;
-
-    function showInAppSaveGuide(sayFn, filename) {
-      if (document.getElementById('inappSaveGuide')) return;
-      const tip = document.createElement('div');
-      tip.id = 'inappSaveGuide';
-      tip.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,.75);'
-        + 'display:flex;align-items:center;justify-content:center;padding:20px;'
-        + 'font-family:-apple-system,"PingFang SC",sans-serif';
-      const pageUrl = location.href.split('#')[0];
-      tip.innerHTML =
-        '<div style="max-width:420px;width:100%;background:#fff;border-radius:16px;padding:22px;'
-        + 'box-shadow:0 20px 60px rgba(15,23,42,.35);text-align:left">'
-        + '<div style="font-size:36px;text-align:center;margin-bottom:10px">📱</div>'
-        + '<div style="font-size:16px;font-weight:800;color:#0f172a;text-align:center;margin-bottom:10px">'
-        + '微信内无法直接保存文件</div>'
-        + '<div style="font-size:13px;color:#475569;line-height:1.8;margin-bottom:14px">'
-        + '请按以下任一方式操作：<br><br>'
-        + '<b style="color:#0f172a">① 在浏览器中打开（推荐）</b><br>'
-        + '点右上角 <b>···</b> → 选 <b>在浏览器打开</b>，再回来重新点击保存。<br><br>'
-        + '<b style="color:#0f172a">② 复制页面链接</b><br>'
-        + '复制后粘贴到 Chrome / Safari 地址栏打开。'
-        + '</div>'
-        + '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;'
-        + 'padding:10px 12px;font-family:monospace;font-size:11px;word-break:break-all;'
-        + 'color:#334155;margin-bottom:12px;max-height:80px;overflow:auto">'
-        + escapeHtml(pageUrl) + '</div>'
-        + '<div style="display:flex;gap:8px;margin-bottom:10px">'
-        + '<button id="inappCopyUrl" style="flex:1;padding:12px;border:none;border-radius:10px;'
-        + 'background:linear-gradient(135deg,#2563eb,#3b82f6);color:#fff;font-size:14px;'
-        + 'font-weight:700;cursor:pointer;font-family:inherit">📋 复制页面链接</button>'
-        + '</div>'
-        + '<button id="inappClose" style="width:100%;padding:12px;border:none;border-radius:10px;'
-        + 'background:#f1f5f9;color:#334155;font-size:14px;font-weight:600;cursor:pointer;'
-        + 'font-family:inherit">我知道了</button>'
-        + (filename ? '<div style="font-size:11px;color:#94a3b8;margin-top:10px;text-align:center;'
-          + 'word-break:break-all">待保存文件：' + escapeHtml(filename) + '</div>' : '')
-        + '</div>';
-      document.body.appendChild(tip);
-      const close = () => { try { document.body.removeChild(tip); } catch (_) {} };
-      tip.querySelector('#inappClose').addEventListener('click', close);
-      tip.addEventListener('click', (e) => { if (e.target === tip) close(); });
-      tip.querySelector('#inappCopyUrl').addEventListener('click', async () => {
-        try {
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            await navigator.clipboard.writeText(pageUrl);
-          } else {
-            const ta = document.createElement('textarea');
-            ta.value = pageUrl;
-            ta.style.position = 'fixed'; ta.style.opacity = '0';
-            document.body.appendChild(ta); ta.select();
-            document.execCommand('copy');
-            document.body.removeChild(ta);
-          }
-          if (sayFn) sayFn('✅ 页面链接已复制，请粘贴到浏览器打开', false, true);
-          close();
-        } catch (e) {
-          if (sayFn) sayFn('复制失败，请手动长按选择链接复制', true);
-        }
-      });
-    }
-
-    if (inAppBrowser) {
+    function renderEnvBanner() {
       const el = $('#envBanner');
-      if (el) {
+      if (!el) return;
+      if (env.isFile) {
+        el.className = 'envBanner show err';
+        el.innerHTML = '⚠️ <b>当前以本地文件方式打开（file://），Chrome 会屏蔽普通下载。</b><br>'
+          + '请用下面任一方式保存文件：<br>'
+          + '<b>① 打印 / 存为 PDF</b><br>'
+          + '<b>② 复制数据</b><br>'
+          + '<b>③ 本地服务器</b>——执行 <code>python -m http.server 8000</code>，访问 <code>http://localhost:8000</code>。';
+        el.classList.add('show'); return;
+      }
+      if (!env.isSecure && !env.isHttps && !env.isLocalhost) {
         el.className = 'envBanner show warn';
-        el.innerHTML = '📱 <b>检测到微信 / QQ 内置浏览器</b><br>'
-          + '内置浏览器会拦截文件保存。请点右上角 <b>···</b> → 选 <b>在浏览器打开</b>，再使用保存功能。';
-        el.classList.add('show');
+        el.innerHTML = '⚠️ <b>当前页面不是安全上下文（非 HTTPS 且非 localhost）。</b><br>推荐使用「打印 / 存为 PDF」或「复制数据」保存。';
+        el.classList.add('show'); return;
       }
-    } else {
-      const el = $('#envBanner');
-      if (el) {
-        if (env.isFile) {
-          el.className = 'envBanner show err';
-          el.innerHTML = '⚠️ <b>当前以本地文件方式打开（file://），Chrome 会屏蔽普通下载。</b><br>'
-            + '请用下面任一方式保存文件：<br><b>① 打印 / 存为 PDF</b><br><b>② 复制数据</b><br>'
-            + '<b>③ 本地服务器</b>——执行 <code>python -m http.server 8000</code>，访问 <code>http://localhost:8000</code>。';
-          el.classList.add('show');
-        } else if (!env.isSecure && !env.isHttps && !env.isLocalhost) {
-          el.className = 'envBanner show warn';
-          el.innerHTML = '⚠️ <b>当前页面不是安全上下文（非 HTTPS 且非 localhost）。</b><br>推荐使用「打印 / 存为 PDF」或「复制数据」保存。';
-          el.classList.add('show');
-        } else {
-          el.className = 'envBanner show ok';
-          el.innerHTML = '✅ 当前环境正常，所有保存方式均可用。';
-          setTimeout(() => { el.classList.remove('show'); }, 4000);
-        }
-      }
+      el.className = 'envBanner show ok';
+      el.innerHTML = '✅ 当前环境正常，所有保存方式均可用。';
+      setTimeout(() => { el.classList.remove('show'); }, 4000);
     }
+    renderEnvBanner();
 
     const toolNames = {
       split: '试卷拆分', crop: 'PDF 裁剪', arrange: '页面调整', scan: '扫描文档',
@@ -1303,32 +1613,36 @@
       img2pdf: '🖼️', pdf2img: '📷', word2pdf: '📘',
       merge: '🔗', extract: '📑'
     };
+
     function showTool(tabName, scrollToWorkspace) {
-      $$('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + tabName));
-      $$('.feature-card').forEach(c => c.classList.toggle('active', c.dataset.tab === tabName));
-      const nameEl = $('#workspaceName');
-      if (nameEl) nameEl.textContent = toolNames[tabName] || '';
-      const iconEl = $('.ws-icon');
-      if (iconEl) iconEl.textContent = toolIcons[tabName] || '📄';
-      setTimeout(() => {
-        try {
-          if (tabName === 'split' && split.doc) splitRender();
-          if (tabName === 'crop' && crop.doc) cropRender();
-        } catch (e) {}
-      }, 30);
-      if (scrollToWorkspace) {
+      try {
+        $$('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + tabName));
+        $$('.feature-card').forEach(c => c.classList.toggle('active', c.dataset.tab === tabName));
+        const nameEl = $('#workspaceName');
+        if (nameEl) nameEl.textContent = toolNames[tabName] || '';
+        const iconEl = $('.ws-icon');
+        if (iconEl) iconEl.textContent = toolIcons[tabName] || '📄';
         setTimeout(() => {
           try {
-            const el = $('#workspace');
-            if (!el) return;
-            const rect = el.getBoundingClientRect();
-            if (rect.top > window.innerHeight * 0.4 || rect.top < 0) {
-              window.scrollTo({ top: el.offsetTop - 10, behavior: 'smooth' });
-            }
+            if (tabName === 'split' && split.doc) splitRender();
+            if (tabName === 'crop' && crop.doc) cropRender();
           } catch (e) {}
-        }, 80);
-      }
+        }, 30);
+        if (scrollToWorkspace) {
+          setTimeout(() => {
+            try {
+              const el = $('#workspace');
+              if (!el) return;
+              const rect = el.getBoundingClientRect();
+              if (rect.top > window.innerHeight * 0.4 || rect.top < 0) {
+                window.scrollTo({ top: el.offsetTop - 10, behavior: 'smooth' });
+              }
+            } catch (e) {}
+          }, 80);
+        }
+      } catch (e) { console.error('[showTool]', e); }
     }
+
     $$('.feature-card').forEach(btn => {
       btn.addEventListener('click', function (e) {
         e.preventDefault();
@@ -1343,6 +1657,7 @@
       node.textContent = text || '';
       node.classList.toggle('err', !!isErr);
       node.classList.toggle('ok', !!isOk);
+      node.classList.toggle('warn', !isErr && !isOk && text && text.includes('⚠️'));
     }
     function fmtSize(n) {
       if (n < 1024) return n + ' B';
@@ -1402,7 +1717,7 @@
           if (window.JSZip) { console.log('[JSZip] ✅', url); return window.JSZip; }
         } catch (e) {}
       }
-      throw new Error('JSZip 加载失败');
+      throw new Error('JSZip 加载失败，请检查网络或下载 jszip.min.js 到 libs/ 目录');
     }
     async function ensureMammoth() {
       if (window.mammoth) return window.mammoth;
@@ -1413,16 +1728,23 @@
           if (window.mammoth) { console.log('[mammoth] ✅', url); return window.mammoth; }
         } catch (e) {}
       }
-      throw new Error('Word 解析库加载失败');
+      throw new Error('Word 解析库加载失败，请检查网络或下载 mammoth.browser.min.js 到 libs/ 目录');
     }
     function downloadBlob(blob, filename) {
-      if (inAppBrowser) { showInAppSaveGuide(null, filename); return; }
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url; a.download = filename; a.rel = 'noopener';
-      a.target = '_self'; a.style.display = 'none';
+      a.target = '_self';
+      a.style.display = 'none';
       document.body.appendChild(a);
-      try { a.click(); } catch (_) {}
+      if (typeof a.click === 'function') {
+        a.click();
+      } else {
+        const evt = document.createEvent('MouseEvents');
+        evt.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0,
+          false, false, false, false, 0, null);
+        a.dispatchEvent(evt);
+      }
       setTimeout(() => {
         try { document.body.removeChild(a); } catch (_) {}
         setTimeout(() => { try { URL.revokeObjectURL(url); } catch (_) {} }, 60000);
@@ -1431,11 +1753,6 @@
 
     const sharedSave = {
       async saveAsPdf(bytes, filename, sayFn) {
-        if (inAppBrowser) {
-          showInAppSaveGuide(sayFn, filename);
-          sayFn('微信内请按提示在浏览器中打开后再保存', true);
-          return;
-        }
         const blob = new Blob([bytes], { type: 'application/pdf' });
         if (hasSavePicker) {
           try {
@@ -1456,10 +1773,20 @@
         try {
           url = URL.createObjectURL(blob);
           const a = document.createElement('a');
-          a.href = url; a.download = filename; a.rel = 'noopener';
-          a.target = '_self'; a.style.display = 'none';
+          a.href = url;
+          a.download = filename;
+          a.rel = 'noopener';
+          a.target = '_self';
+          a.style.display = 'none';
           document.body.appendChild(a);
-          try { a.click(); } catch (_) {}
+          if (typeof a.click === 'function') {
+            a.click();
+          } else {
+            const evt = document.createEvent('MouseEvents');
+            evt.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0,
+              false, false, false, false, 0, null);
+            a.dispatchEvent(evt);
+          }
           setTimeout(() => {
             try { document.body.removeChild(a); } catch (_) {}
             setTimeout(() => { try { URL.revokeObjectURL(url); } catch (_) {} }, 60000);
@@ -1478,11 +1805,6 @@
         }
       },
       async printAsPdf(previewDoc, filename, sayFn) {
-        if (inAppBrowser) {
-          showInAppSaveGuide(sayFn, filename);
-          sayFn('微信内请按提示在浏览器中打开后再打印', true);
-          return;
-        }
         sayFn('正在准备打印，请稍候…');
         const images = [];
         const total = previewDoc.numPages;
@@ -1529,11 +1851,6 @@
         sayFn('已打开打印窗口，请选择「另存为 PDF」', false, true);
       },
       async copyData(bytes, sayFn) {
-        if (inAppBrowser) {
-          showInAppSaveGuide(sayFn, '');
-          sayFn('微信内请按提示在浏览器中打开后再复制', true);
-          return;
-        }
         const dataUrl = await bytesToDataUrl(bytes);
         try {
           if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -1552,19 +1869,22 @@
       modal.classList.remove('hidden');
       setTimeout(() => { try { ta.focus(); ta.select(); } catch (_) {} }, 80);
     }
+    async function showDataModalFor(bytes, sayFn) {
+      try {
+        const url = await bytesToDataUrl(bytes);
+        showDataModalDirect(url);
+        if (sayFn) sayFn('请手动复制下方文本');
+      } catch (e) {
+        if (sayFn) sayFn('数据准备失败：' + (e && e.message ? e.message : e), true);
+      }
+    }
     const dataSelectAllBtn = $('#dataSelectAll');
     if (dataSelectAllBtn) {
-      dataSelectAllBtn.addEventListener('click', async function () {
+      dataSelectAllBtn.addEventListener('click', function () {
         const ta = $('#dataTextarea');
         if (!ta) return;
         ta.focus(); ta.select();
-        try {
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            await navigator.clipboard.writeText(ta.value);
-          } else {
-            document.execCommand('copy');
-          }
-        } catch (e) {}
+        try { if (document.execCommand && document.execCommand('copy')) {} } catch (e) {}
       });
     }
     const dataCloseBtn = $('#dataClose');
@@ -1636,6 +1956,7 @@
         try { await sharedSave.saveAsPdf(state.resultBytes, state.resultFilename, sayFn); }
         finally { this.disabled = false; }
       });
+
       printBtn.addEventListener('click', async function () {
         if (!state.previewDoc) { sayFn('请先生成 PDF', true); return; }
         if (state.dirty && confirmDirty && !confirm('设置已修改，当前是旧版本。\n仍要打印吗？')) return;
@@ -1644,12 +1965,14 @@
         catch (err) { sayFn('打印准备失败：' + (err && err.message ? err.message : err), true); }
         finally { this.disabled = false; }
       });
+
       copyBtn.addEventListener('click', async function () {
         if (!state.resultBytes) { sayFn('请先生成 PDF', true); return; }
         if (state.dirty && confirmDirty && !confirm('设置已修改，当前是旧版本。\n仍要复制吗？')) return;
         try { await sharedSave.copyData(state.resultBytes, sayFn); }
         catch (err) { sayFn('复制失败：' + (err && err.message ? err.message : err), true); }
       });
+
       previewToggle.addEventListener('click', async function () {
         if (state.previewOpen) {
           previewWrap.classList.add('hidden'); state.previewOpen = false;
@@ -1691,12 +2014,22 @@
             + (err && err.message ? err.message : err) + '</div>';
         }
       });
+
       openBtn.addEventListener('click', function () {
         if (!state.resultUrl) { sayFn('请先生成 PDF', true); return; }
         let w = null;
         try { w = window.open(state.resultUrl, '_blank'); } catch (e) { w = null; }
         if (w && !w.closed) { sayFn('↗ 已在新窗口打开', false, true); return; }
-        sayFn('无法打开新窗口，请使用「🖨 打印 / 存为 PDF」。', true);
+        try {
+          const a = document.createElement('a');
+          a.href = state.resultUrl; a.target = '_blank'; a.rel = 'noopener';
+          a.style.display = 'none';
+          document.body.appendChild(a); a.click();
+          setTimeout(() => { try { document.body.removeChild(a); } catch (_) {} }, 2000);
+          sayFn('已尝试打开。如未自动打开，请用「🖨 打印 / 存为 PDF」。', false, true);
+        } catch (err) {
+          sayFn('无法打开新窗口，请使用「🖨 打印 / 存为 PDF」。', true);
+        }
       });
     }
 
@@ -2011,6 +2344,7 @@
       crop.dirty = true;
       if (crop._refresh) crop._refresh();
     }
+
     bind('#cropUnifySize', 'change', function () { markCropDirty(); });
 
     bind('#cropFile', 'change', async (e) => {
@@ -2079,6 +2413,15 @@
       ctx.fillRect(cx + cw, cy, W - cx - cw, ch);
       ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 2; ctx.setLineDash([]);
       ctx.strokeRect(cx + 1, cy + 1, Math.max(0, cw - 2), Math.max(0, ch - 2));
+      ctx.save();
+      ctx.strokeStyle = 'rgba(37,99,235,0.35)'; ctx.lineWidth = 1;
+      ctx.setLineDash([5, 4]);
+      ctx.beginPath();
+      for (let i = 1; i <= 2; i++) {
+        ctx.moveTo(cx + (cw * i / 3), cy); ctx.lineTo(cx + (cw * i / 3), cy + ch);
+        ctx.moveTo(cx, cy + (ch * i / 3)); ctx.lineTo(cx + cw, cy + (ch * i / 3));
+      }
+      ctx.stroke(); ctx.restore();
       const HIT = isMobile ? 20 : 14;
       const positions = [
         [cx, cy], [cx + cw / 2, cy], [cx + cw, cy],
@@ -2091,6 +2434,18 @@
         ctx.fillStyle = '#ffffff'; ctx.fill();
         ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 2; ctx.stroke();
       });
+      const pctW = Math.round(c.w * 100), pctH = Math.round(c.h * 100);
+      const label = pctW + '% × ' + pctH + '%';
+      ctx.font = '600 ' + (isMobile ? 13 : 12) + 'px -apple-system,"PingFang SC",sans-serif';
+      ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+      const tw = ctx.measureText(label).width + 14;
+      const tx = cx + 6, ty = cy + 6;
+      if (cw > tw + 12 && ch > 26) {
+        ctx.fillStyle = 'rgba(37,99,235,0.92)';
+        ctx.fillRect(tx, ty, tw, 20);
+        ctx.fillStyle = '#fff';
+        ctx.fillText(label, tx + 7, ty + 3);
+      }
     }
 
     function hitTestCrop(px, py) {
@@ -2218,8 +2573,10 @@
             np.setTrimBox(bx, by, bw, bh);
             out.addPage(np);
             outCount++;
+            say('#cropStatus', '正在裁剪… ' + pageNum + '/' + pageCount + ' 页');
+            if (i % 3 === 2) await new Promise(r => setTimeout(r, 0));
           }
-          if (outCount === 0) throw new Error('没有生成任何页面');
+          if (outCount === 0) throw new Error('没有生成任何页面，请检查裁剪框');
           const bytes = await out.save();
           const filename = baseName(crop.file.name) + '_裁剪.pdf';
           await showCropResult(bytes, filename, pageCount, outCount);
@@ -2254,7 +2611,8 @@
             const cropCanvas = document.createElement('canvas');
             cropCanvas.width = cropW;
             cropCanvas.height = cropH;
-            cropCanvas.getContext('2d').drawImage(fullCanvas, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+            const cropCtx = cropCanvas.getContext('2d');
+            cropCtx.drawImage(fullCanvas, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
             const blob = await new Promise(res => cropCanvas.toBlob(res, 'image/jpeg', 0.92));
             const imgBytes = new Uint8Array(await blob.arrayBuffer());
             const img = await out.embedJpg(imgBytes);
@@ -2299,7 +2657,7 @@
       say('#cropStatus2', '');
     }
 
-    /* ===== 模块 3：页面调整 ===== */
+    /* ===== 模块 3：页面调整（保留功能，入口暂未在目录显示） ===== */
     const arrange = {
       file: null, buf: null, doc: null,
       pages: [], idCounter: 0,
@@ -2314,7 +2672,12 @@
     bindResultCard('arrangeRes', arrange, (t, e, o) => say('#arrangeStatus2', t, e, o), true);
 
     function newItem(type, originalIndex, rotation, blankSize) {
-      return { id: 'p' + (++arrange.idCounter), type, originalIndex, rotation: rotation || 0, blankSize: blankSize || null };
+      return {
+        id: 'p' + (++arrange.idCounter),
+        type, originalIndex,
+        rotation: rotation || 0,
+        blankSize: blankSize || null
+      };
     }
     function revokeArrangeResult() {
       if (arrange.resultUrl) { try { URL.revokeObjectURL(arrange.resultUrl); } catch (_) {} arrange.resultUrl = null; }
@@ -2325,6 +2688,7 @@
       arrange.dirty = true;
       if (arrange._refresh) arrange._refresh();
     }
+
     const originalSizeCache = {};
     async function getOriginalSizeAsync(idx) {
       if (originalSizeCache[idx]) return originalSizeCache[idx];
@@ -2337,6 +2701,7 @@
       }
       return originalSizeCache[idx];
     }
+
     bind('#arrangeFile', 'change', async (e) => {
       const f = e.target.files[0]; if (!f) return;
       say('#arrangeStatus', '');
@@ -2368,13 +2733,16 @@
         say('#arrangeStatus', '载入失败：' + (err && err.message ? err.message : err), true);
       }
     });
+
     function updateArrangeInfo() {
       $('#arrangeInfo').textContent = '共 ' + arrange.pages.length + ' 页';
     }
     function renderArrangeGrid() {
       const grid = $('#arrangeGrid');
       grid.innerHTML = '';
-      arrange.pages.forEach((item, idx) => grid.appendChild(buildCard(item, idx)));
+      arrange.pages.forEach((item, idx) => {
+        grid.appendChild(buildCard(item, idx));
+      });
       updateArrangeInfo();
       renderArrangeThumbs();
     }
@@ -2394,7 +2762,9 @@
         }
       }
       const canvas = card.querySelector('canvas');
-      if (canvas) { try { await renderThumbInto(canvas, item); } catch (e) {} }
+      if (canvas) {
+        try { await renderThumbInto(canvas, item); } catch (e) {}
+      }
     }
     let renderArrangeToken = 0;
     async function renderArrangeThumbs() {
@@ -2442,21 +2812,30 @@
       const actions = document.createElement('div');
       actions.className = 'page-actions';
       const btnLeft = document.createElement('button');
-      btnLeft.textContent = '↺'; btnLeft.type = 'button';
+      btnLeft.title = '左转 90°';
+      btnLeft.textContent = '↺';
+      btnLeft.type = 'button';
       bind(btnLeft, 'click', async (e) => {
         e.stopPropagation();
         item.rotation = ((item.rotation - 90) % 360 + 360) % 360;
-        markArrangeDirty(); await updateArrangeCard(item);
+        markArrangeDirty();
+        await updateArrangeCard(item);
       });
       const btnRight = document.createElement('button');
-      btnRight.textContent = '↻'; btnRight.type = 'button';
+      btnRight.title = '右转 90°';
+      btnRight.textContent = '↻';
+      btnRight.type = 'button';
       bind(btnRight, 'click', async (e) => {
         e.stopPropagation();
         item.rotation = (item.rotation + 90) % 360;
-        markArrangeDirty(); await updateArrangeCard(item);
+        markArrangeDirty();
+        await updateArrangeCard(item);
       });
       const btnInsert = document.createElement('button');
-      btnInsert.className = 'primary'; btnInsert.textContent = '＋'; btnInsert.type = 'button';
+      btnInsert.className = 'primary';
+      btnInsert.title = '在此页后插入空白页';
+      btnInsert.textContent = '＋';
+      btnInsert.type = 'button';
       bind(btnInsert, 'click', async (e) => {
         e.stopPropagation();
         const realIdx = arrange.pages.findIndex(p => p.id === item.id);
@@ -2465,10 +2844,14 @@
         if (item.type === 'blank') size = item.blankSize || arrange.defaultSize.slice();
         else size = (await getOriginalSizeAsync(item.originalIndex)).slice();
         arrange.pages.splice(realIdx + 1, 0, newItem('blank', -1, 0, size));
-        markArrangeDirty(); renderArrangeGrid();
+        markArrangeDirty();
+        renderArrangeGrid();
       });
       const btnDelete = document.createElement('button');
-      btnDelete.className = 'danger'; btnDelete.textContent = '✕'; btnDelete.type = 'button';
+      btnDelete.className = 'danger';
+      btnDelete.title = '删除此页';
+      btnDelete.textContent = '✕';
+      btnDelete.type = 'button';
       bind(btnDelete, 'click', (e) => {
         e.stopPropagation();
         const realIdx = arrange.pages.findIndex(p => p.id === item.id);
@@ -2476,7 +2859,8 @@
         if (arrange.pages.length <= 1) { say('#arrangeStatus', '至少需要保留一页', true); return; }
         arrange.pages.splice(realIdx, 1);
         if (arrange.selectedId === item.id) arrange.selectedId = null;
-        markArrangeDirty(); renderArrangeGrid();
+        markArrangeDirty();
+        renderArrangeGrid();
       });
       actions.appendChild(btnLeft);
       actions.appendChild(btnRight);
@@ -2490,7 +2874,10 @@
         document.querySelectorAll('#arrangeGrid .page-card').forEach(c => {
           c.classList.toggle('selected', c.dataset.id === item.id);
         });
-        arrange.dragging = { id: item.id, el: card, pointerId: e.pointerId, startX: e.clientX, startY: e.clientY, started: false };
+        arrange.dragging = {
+          id: item.id, el: card, pointerId: e.pointerId,
+          startX: e.clientX, startY: e.clientY, started: false
+        };
         card.classList.add('dragging');
       });
       return card;
@@ -2531,8 +2918,10 @@
       ctx.translate(-srcW * drawScale / 2, -srcH * drawScale / 2);
       ctx.scale(drawScale, drawScale);
       if (item.type === 'blank') {
-        ctx.fillStyle = '#fefefe'; ctx.fillRect(0, 0, srcW, srcH);
-        ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 2 / drawScale;
+        ctx.fillStyle = '#fefefe';
+        ctx.fillRect(0, 0, srcW, srcH);
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 2 / drawScale;
         ctx.setLineDash([6 / drawScale, 6 / drawScale]);
         ctx.strokeRect(1 / drawScale, 1 / drawScale, srcW - 2 / drawScale, srcH - 2 / drawScale);
         ctx.setLineDash([]);
@@ -2586,6 +2975,7 @@
       document.addEventListener('pointercancel', endDrag);
       grid.addEventListener('contextmenu', (e) => e.preventDefault());
     })();
+
     bind('#arrangeAddBlank', 'click', async () => {
       if (!arrange.doc) return;
       let size;
@@ -2593,7 +2983,8 @@
         size = (await getOriginalSizeAsync(arrange.pages[0].originalIndex)).slice();
       } else size = arrange.defaultSize.slice();
       arrange.pages.push(newItem('blank', -1, 0, size));
-      markArrangeDirty(); renderArrangeGrid();
+      markArrangeDirty();
+      renderArrangeGrid();
       say('#arrangeStatus', '已在末尾添加一页空白页');
     });
     bind('#arrangeRotateAllLeft', 'click', async () => {
@@ -2618,7 +3009,8 @@
         arrange.pages.push(newItem('original', i, 0));
       }
       arrange.selectedId = null;
-      markArrangeDirty(); renderArrangeGrid();
+      markArrangeDirty();
+      renderArrangeGrid();
       say('#arrangeStatus', '已恢复原始顺序');
     });
     bind('#arrangeBtn', 'click', async () => {
@@ -2677,7 +3069,12 @@
 
     /* ===== 模块 4：扫描文档 ===== */
     const scan = {
-      stream: null, facingMode: 'environment', items: [], idCounter: 0,
+      stream: null,
+      facingMode: 'environment',
+      currentCanvas: null,
+      currentProcessed: null,
+      items: [],
+      idCounter: 0,
       resultBytes: null, resultUrl: null,
       resultFilename: '', resultSize: 0, resultOutPages: 0,
       hasResult: false, dirty: false,
@@ -2696,6 +3093,7 @@
       scan.dirty = true;
       if (scan._refresh) scan._refresh();
     }
+
     async function openScanCamera() {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         say('#scanStatus', '当前浏览器不支持摄像头调用，请使用最新版 Chrome / Safari，并确保是 HTTPS 环境。', true);
@@ -2721,6 +3119,7 @@
         updateScanCountBadge();
         say('#scanStatus', '全屏相机已就绪，点击底部白色圆形按钮拍照。');
       } catch (err) {
+        console.error('[camera]', err);
         let msg = '无法打开摄像头：' + (err && err.message ? err.message : err);
         if (err && (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError')) {
           msg = '摄像头权限被拒绝。请在浏览器地址栏的权限设置中允许本站使用摄像头，然后重试。';
@@ -2732,6 +3131,7 @@
         say('#scanStatus', msg, true);
       }
     }
+
     function closeScanCamera() {
       if (scan.stream) {
         scan.stream.getTracks().forEach(t => t.stop());
@@ -2743,15 +3143,23 @@
       $('#scanStartRow').classList.remove('hidden');
       $('#scanStopRow').classList.add('hidden');
     }
+
     function updateScanCountBadge() {
       const el = $('#scanFsCount');
       if (el) el.textContent = '已拍 ' + scan.items.length + ' 页';
       const infoEl = $('#scanResultInfo');
       if (infoEl) infoEl.textContent = '共 ' + scan.items.length + ' 页';
     }
+
     bind('#scanStartBtn', 'click', openScanCamera);
-    bind('#scanStopBtn', 'click', () => { closeScanCamera(); say('#scanStatus', '摄像头已关闭'); });
-    bind('#scanFsClose', 'click', () => { closeScanCamera(); say('#scanStatus', '摄像头已关闭'); });
+    bind('#scanStopBtn', 'click', () => {
+      closeScanCamera();
+      say('#scanStatus', '摄像头已关闭');
+    });
+    bind('#scanFsClose', 'click', () => {
+      closeScanCamera();
+      say('#scanStatus', '摄像头已关闭');
+    });
     bind('#scanSwitchBtn', 'click', async () => {
       scan.facingMode = scan.facingMode === 'environment' ? 'user' : 'environment';
       await openScanCamera();
@@ -2761,6 +3169,21 @@
       await openScanCamera();
     });
     bind('#scanAddMoreBtn', 'click', () => { openScanCamera(); });
+
+    function flashScreen() {
+      const el = $('#scanFlash');
+      if (!el) return;
+      el.classList.remove('animate');
+      void el.offsetWidth;
+      el.classList.add('animate');
+    }
+    function shutterPulse() {
+      const btn = $('#scanFsShutter');
+      if (!btn) return;
+      btn.classList.remove('flash');
+      void btn.offsetWidth;
+      btn.classList.add('flash');
+    }
     function showToast(text) {
       const el = $('#scanToast');
       const txt = $('#scanToastText');
@@ -2775,7 +3198,115 @@
       if (!el) return;
       el.classList.toggle('hidden', !show);
     }
+
+    function captureVideoWithFrame(videoEl) {
+      const vw = videoEl.videoWidth;
+      const vh = videoEl.videoHeight;
+      if (!vw || !vh) throw new Error('视频尚未就绪');
+      const wrap = $('#scanFsVideoWrap');
+      const wrapRect = wrap.getBoundingClientRect();
+      const displayW = wrapRect.width;
+      const displayH = wrapRect.height;
+      if (displayW <= 0 || displayH <= 0) throw new Error('显示区域异常');
+      const frameRect = $('#scanFsFrame').getBoundingClientRect();
+      let fx = frameRect.left - wrapRect.left;
+      let fy = frameRect.top - wrapRect.top;
+      let fw = frameRect.width;
+      let fh = frameRect.height;
+      fx = clamp(fx, 0, displayW);
+      fy = clamp(fy, 0, displayH);
+      fw = clamp(fw, 1, displayW - fx);
+      fh = clamp(fh, 1, displayH - fy);
+      const videoRatio = vw / vh;
+      const displayRatio = displayW / displayH;
+      let drawW, drawH, drawX, drawY;
+      if (videoRatio > displayRatio) {
+        drawH = displayH; drawW = displayH * videoRatio;
+        drawX = (displayW - drawW) / 2; drawY = 0;
+      } else {
+        drawW = displayW; drawH = displayW / videoRatio;
+        drawX = 0; drawY = (displayH - drawH) / 2;
+      }
+      const sx = clamp((fx - drawX) / drawW * vw, 0, vw);
+      const sy = clamp((fy - drawY) / drawH * vh, 0, vh);
+      const sw = clamp(fw / drawW * vw, 1, vw - sx);
+      const sh = clamp(fh / drawH * vh, 1, vh - sy);
+      const outW = Math.max(1, Math.round(sw));
+      const outH = Math.max(1, Math.round(sh));
+      const outCv = document.createElement('canvas');
+      outCv.width = outW;
+      outCv.height = outH;
+      outCv.getContext('2d').drawImage(videoEl, sx, sy, sw, sh, 0, 0, outW, outH);
+      const maxDim = 2400;
+      if (Math.max(outW, outH) > maxDim) {
+        const k = maxDim / Math.max(outW, outH);
+        const scaled = document.createElement('canvas');
+        scaled.width = Math.max(1, Math.round(outW * k));
+        scaled.height = Math.max(1, Math.round(outH * k));
+        scaled.getContext('2d').drawImage(outCv, 0, 0, scaled.width, scaled.height);
+        return scaled;
+      }
+      return outCv;
+    }
+
+    async function takePhoto() {
+      const v = $('#scanFsVideo');
+      if (!v || !v.videoWidth) {
+        say('#scanStatus', '摄像头尚未准备好', true);
+        return;
+      }
+      flashScreen();
+      shutterPulse();
+      showProcessing(true);
+      try {
+        await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+        const cv = captureVideoWithFrame(v);
+        const mode = 'enhance';
+        const processed = processImageForScan(cv, mode);
+        const dataUrl = processed.toDataURL('image/jpeg', 0.92);
+        scan.items.push({
+          id: 's' + (++scan.idCounter),
+          dataUrl,
+          width: processed.width,
+          height: processed.height
+        });
+        updateScanCountBadge();
+        updateScanThumbnail();
+        $('#scanListCard').classList.remove('hidden');
+        renderScanResultGrid();
+        markScanDirty();
+        showToast('✓ 已添加第 ' + scan.items.length + ' 页');
+      } catch (err) {
+        say('#scanStatus', '拍照失败：' + (err && err.message ? err.message : err), true);
+      } finally {
+        showProcessing(false);
+      }
+    }
+
+    bind('#scanFsShutter', 'click', async () => {
+      if (idcardCurrentMode) {
+        await idcardShutter();
+      } else {
+        await takePhoto();
+      }
+    });
+
+    bind('#scanFsThumb', 'click', () => {
+      closeScanCamera();
+      const card = $('#scanListCard');
+      if (card) {
+        card.classList.remove('hidden');
+        card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+
     function processImageForScan(srcCanvas, mode) {
+      if (mode === 'original') {
+        const cv = document.createElement('canvas');
+        cv.width = srcCanvas.width; cv.height = srcCanvas.height;
+        cv.getContext('2d').drawImage(srcCanvas, 0, 0);
+        return cv;
+      }
       const cv = document.createElement('canvas');
       cv.width = srcCanvas.width; cv.height = srcCanvas.height;
       const ctx = cv.getContext('2d');
@@ -2798,22 +3329,51 @@
       const range = hi - lo;
       const LUT = new Uint8ClampedArray(256);
       for (let i = 0; i < 256; i++) LUT[i] = clamp((i - lo) * 255 / range, 0, 255);
+      let threshold = -1;
+      if (mode === 'bw') {
+        const hist2 = new Uint32Array(256);
+        for (let j = 0; j < n; j++) hist2[LUT[gray[j]]]++;
+        let sum = 0;
+        for (let i = 0; i < 256; i++) sum += i * hist2[i];
+        let sumB = 0, wB = 0, maxVar = -1;
+        for (let t = 0; t < 256; t++) {
+          wB += hist2[t];
+          if (wB === 0) continue;
+          const wF = n - wB;
+          if (wF === 0) break;
+          sumB += t * hist2[t];
+          const mB = sumB / wB;
+          const mF = (sum - sumB) / wF;
+          const v = wB * wF * (mB - mF) * (mB - mF);
+          if (v > maxVar) { maxVar = v; threshold = t; }
+        }
+        if (threshold < 0) threshold = 128;
+      }
       for (let i = 0, j = 0; i < d.length; i += 4, j++) {
         let v = LUT[gray[j]];
-        if (v < 100) v = v * 0.85;
-        else if (v > 155) v = Math.min(255, 155 + (v - 155) * 1.2);
+        if (mode === 'bw') v = v > threshold ? 255 : 0;
+        if (mode === 'enhance') {
+          if (v < 100) v = v * 0.85;
+          else if (v > 155) v = Math.min(255, 155 + (v - 155) * 1.2);
+        }
         d[i] = d[i + 1] = d[i + 2] = v;
         d[i + 3] = 255;
       }
       ctx.putImageData(imgData, 0, 0);
       return cv;
     }
+
     function updateScanThumbnail() {
       const btn = $('#scanFsThumb');
       if (!btn) return;
       const latest = scan.items[scan.items.length - 1];
-      btn.innerHTML = latest ? '<img src="' + latest.dataUrl + '" alt="" />' : '<span class="placeholder">🖼️</span>';
+      if (latest) {
+        btn.innerHTML = '<img src="' + latest.dataUrl + '" alt="" />';
+      } else {
+        btn.innerHTML = '<span class="placeholder">🖼️</span>';
+      }
     }
+
     function renderScanResultGrid() {
       const grid = $('#scanResultGrid');
       if (!grid) return;
@@ -2831,7 +3391,10 @@
           +   '<button data-act="down" type="button" title="下移">↓</button>'
           +   '<button class="danger" data-act="del" type="button" title="删除">✕</button>'
           + '</div>';
-        bind(div.querySelector('.thumb'), 'click', (e) => { e.stopPropagation(); openScanImageEditor(idx); });
+        bind(div.querySelector('.thumb'), 'click', (e) => {
+          e.stopPropagation();
+          openScanImageEditor(idx);
+        });
         bind(div.querySelector('[data-act="up"]'), 'click', (e) => {
           e.stopPropagation();
           if (idx === 0) return;
@@ -2848,8 +3411,14 @@
           renderScanResultGrid(); markScanDirty();
           updateScanThumbnail();
         });
-        bind(div.querySelector('[data-act="rotL"]'), 'click', async (e) => { e.stopPropagation(); await rotateScanItem(idx, -90); });
-        bind(div.querySelector('[data-act="rotR"]'), 'click', async (e) => { e.stopPropagation(); await rotateScanItem(idx, 90); });
+        bind(div.querySelector('[data-act="rotL"]'), 'click', async (e) => {
+          e.stopPropagation();
+          await rotateScanItem(idx, -90);
+        });
+        bind(div.querySelector('[data-act="rotR"]'), 'click', async (e) => {
+          e.stopPropagation();
+          await rotateScanItem(idx, 90);
+        });
         bind(div.querySelector('[data-act="del"]'), 'click', (e) => {
           e.stopPropagation();
           scan.items.splice(idx, 1);
@@ -2859,6 +3428,7 @@
         grid.appendChild(div);
       });
     }
+
     async function rotateScanItem(idx, delta) {
       const item = scan.items[idx];
       if (!item) return;
@@ -2870,8 +3440,12 @@
         renderScanResultGrid(); markScanDirty();
         updateScanThumbnail();
         showToast('已旋转');
-      } catch (err) { say('#scanListStatus', '旋转失败：' + (err && err.message ? err.message : err), true); }
+      } catch (err) {
+        console.error('[rotate]', err);
+        say('#scanListStatus', '旋转失败：' + (err && err.message ? err.message : err), true);
+      }
     }
+
     function drawRotatedCanvas(img, rotation) {
       const rot = ((rotation % 360) + 360) % 360;
       const w = img.naturalWidth || img.width;
@@ -2889,21 +3463,33 @@
       ctx.drawImage(img, -w / 2, -h / 2);
       return cv;
     }
-    const editor = { baseCanvas: null, crop: null, cropMode: false, drag: null, swipeStartX: 0, swipeStartY: 0, swipeMoved: false };
+
+    const editor = {
+      baseCanvas: null, crop: null, cropMode: false, drag: null,
+      cssW: 0, cssH: 0, swipeStartX: 0, swipeStartY: 0, swipeMoved: false
+    };
+
     async function openScanImageEditor(idx) {
       const item = scan.items[idx];
       if (!item) return;
       scan.editIndex = idx;
-      editor.crop = null; editor.cropMode = false; editor.drag = null;
+      editor.crop = null;
+      editor.cropMode = false;
+      editor.drag = null;
       $('#scanIeTitle').textContent = '编辑扫描图 #' + (idx + 1) + ' / 共 ' + scan.items.length + ' 张';
       $('#scanIeCrop').classList.remove('active');
       try {
         const img = await loadImage(item.dataUrl);
         editor.baseCanvas = drawRotatedCanvas(img, 0);
         $('#scanImgEditor').classList.add('show');
-        requestAnimationFrame(() => requestAnimationFrame(() => drawEditorCanvas()));
-      } catch (err) { say('#scanListStatus', '打开编辑失败：' + err.message, true); }
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => { drawEditorCanvas(); });
+        });
+      } catch (err) {
+        say('#scanListStatus', '打开编辑失败：' + (err && err.message ? err.message : err), true);
+      }
     }
+
     function drawEditorCanvas() {
       const stage = $('#scanIeStage');
       const canvas = $('#scanIeCanvas');
@@ -2911,13 +3497,18 @@
       if (!editor.baseCanvas) return;
       const stageW = stage.clientWidth;
       const stageH = stage.clientHeight;
-      if (stageW <= 10 || stageH <= 10) { requestAnimationFrame(() => drawEditorCanvas()); return; }
+      if (stageW <= 10 || stageH <= 10) {
+        requestAnimationFrame(() => drawEditorCanvas());
+        return;
+      }
       const maxW = stageW - 16;
       const maxH = stageH - 16;
       const scale = Math.min(maxW / editor.baseCanvas.width, maxH / editor.baseCanvas.height);
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const cssW = Math.round(editor.baseCanvas.width * scale);
       const cssH = Math.round(editor.baseCanvas.height * scale);
+      editor.cssW = cssW;
+      editor.cssH = cssH;
       [canvas, overlay].forEach((cv) => {
         cv.width = Math.round(cssW * dpr);
         cv.height = Math.round(cssH * dpr);
@@ -2934,6 +3525,7 @@
       ctx.drawImage(editor.baseCanvas, 0, 0, cssW, cssH);
       drawEditorCropOverlay(cssW, cssH);
     }
+
     function drawEditorCropOverlay(cssW, cssH) {
       const overlay = $('#scanIeOverlay');
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -2961,7 +3553,20 @@
       ctx.strokeStyle = '#60a5fa'; ctx.lineWidth = 2;
       ctx.setLineDash([8, 6]); ctx.strokeRect(cx, cy, cw, ch);
       ctx.setLineDash([]);
+      const HIT = isMobile ? 20 : 16;
+      const positions = [
+        [cx, cy], [cx + cw / 2, cy], [cx + cw, cy],
+        [cx, cy + ch / 2], [cx + cw, cy + ch / 2],
+        [cx, cy + ch], [cx + cw / 2, cy + ch], [cx + cw, cy + ch]
+      ];
+      positions.forEach(([x, y]) => {
+        ctx.beginPath();
+        ctx.rect(x - HIT / 2, y - HIT / 2, HIT, HIT);
+        ctx.fillStyle = '#fff'; ctx.fill();
+        ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 2; ctx.stroke();
+      });
     }
+
     async function rotateEditor(delta) {
       if (!editor.baseCanvas) return;
       const old = editor.baseCanvas;
@@ -2975,6 +3580,7 @@
       }
       drawEditorCanvas();
     }
+
     bind('#scanIeRotateLeft', 'click', () => rotateEditor(-90));
     bind('#scanIeRotateRight', 'click', () => rotateEditor(90));
     bind('#scanIeCrop', 'click', () => {
@@ -2995,6 +3601,7 @@
         showToast('已重置');
       } catch (err) {}
     });
+
     (function bindEditorCropDrag() {
       const stage = $('#scanIeStage');
       if (!stage) return;
@@ -3027,7 +3634,9 @@
         return null;
       }
       stage.addEventListener('pointerdown', (e) => {
-        editor.swipeStartX = e.clientX; editor.swipeStartY = e.clientY; editor.swipeMoved = false;
+        editor.swipeStartX = e.clientX;
+        editor.swipeStartY = e.clientY;
+        editor.swipeMoved = false;
         if (!editor.cropMode || !editor.crop) return;
         const p = getStagePos(e);
         if (!p.inside) return;
@@ -3052,7 +3661,10 @@
             const y = Math.min(d.startY, p.y);
             const w = Math.abs(p.x - d.startX);
             const h = Math.abs(p.y - d.startY);
-            editor.crop = { x: clamp(x, 0, 1), y: clamp(y, 0, 1), w: clamp(w, 0, 1 - x), h: clamp(h, 0, 1 - y) };
+            editor.crop = {
+              x: clamp(x, 0, 1), y: clamp(y, 0, 1),
+              w: clamp(w, 0, 1 - x), h: clamp(h, 0, 1 - y)
+            };
           } else {
             const dx = p.x - d.startX;
             const dy = p.y - d.startY;
@@ -3099,19 +3711,26 @@
           const dy = e.clientY - editor.swipeStartY;
           if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
             if (dx > 0) {
-              if (scan.editIndex > 0) { openScanImageEditor(scan.editIndex - 1); showToast('← 上一张'); }
-              else { showToast('已经是第一张了'); }
+              if (scan.editIndex > 0) {
+                openScanImageEditor(scan.editIndex - 1);
+                showToast('← 上一张');
+              } else { showToast('已经是第一张了'); }
             } else {
-              if (scan.editIndex < scan.items.length - 1) { openScanImageEditor(scan.editIndex + 1); showToast('下一张 →'); }
-              else { showToast('已经是最后一张了'); }
+              if (scan.editIndex < scan.items.length - 1) {
+                openScanImageEditor(scan.editIndex + 1);
+                showToast('下一张 →');
+              } else { showToast('已经是最后一张了'); }
             }
           }
         }
-        editor.swipeStartX = null; editor.swipeStartY = null; editor.swipeMoved = false;
+        editor.swipeStartX = null;
+        editor.swipeStartY = null;
+        editor.swipeMoved = false;
       }
       stage.addEventListener('pointerup', endDrag);
       stage.addEventListener('pointercancel', endDrag);
     })();
+
     bind('#scanIeSave', 'click', async () => {
       const idx = scan.editIndex;
       const item = scan.items[idx];
@@ -3139,12 +3758,20 @@
         updateScanCountBadge();
         markScanDirty();
         showToast('✓ 第 ' + (idx + 1) + ' 张修改已保存');
-        if (idx < scan.items.length - 1) openScanImageEditor(idx + 1);
-        else $('#scanImgEditor').classList.remove('show');
-      } catch (err) { showToast('保存失败：' + (err && err.message ? err.message : err)); }
+        if (idx < scan.items.length - 1) {
+          openScanImageEditor(idx + 1);
+        } else {
+          $('#scanImgEditor').classList.remove('show');
+        }
+      } catch (err) {
+        console.error('[editor save]', err);
+        showToast('保存失败：' + (err && err.message ? err.message : err));
+      }
     });
+
     bind('#scanIeCancel', 'click', () => { $('#scanImgEditor').classList.remove('show'); });
     bind('#scanIeClose', 'click', () => { $('#scanImgEditor').classList.remove('show'); });
+
     bind('#scanClearBtn', 'click', () => {
       if (scan.items.length === 0) return;
       if (!confirm('确定要清空全部扫描页吗？')) return;
@@ -3156,6 +3783,7 @@
       say('#scanListStatus', '已清空');
       markScanDirty();
     });
+
     bind('#scanPdfBtn', 'click', async () => {
       if (scan.items.length === 0) { say('#scanListStatus', '请先拍照并添加到扫描列表', true); return; }
       const btn = $('#scanPdfBtn'); btn.disabled = true;
@@ -3175,7 +3803,8 @@
           ctx.fillRect(0, 0, cv.width, cv.height);
           ctx.drawImage(img, 0, 0);
           const blob = await new Promise(res => cv.toBlob(res, 'image/jpeg', 0.9));
-          const jpg = await doc.embedJpg(new Uint8Array(await blob.arrayBuffer()));
+          const jpgBytes = new Uint8Array(await blob.arrayBuffer());
+          const jpg = await doc.embedJpg(jpgBytes);
           let pageW, pageH;
           if (mode === 'a4') { pageW = A4[0]; pageH = A4[1]; }
           else if (mode === 'a4l') { pageW = A4[1]; pageH = A4[0]; }
@@ -3183,7 +3812,10 @@
           const page = doc.addPage([pageW, pageH]);
           const k = Math.min(pageW / jpg.width, pageH / jpg.height);
           const w = jpg.width * k, h = jpg.height * k;
-          page.drawImage(jpg, { x: (pageW - w) / 2, y: (pageH - h) / 2, width: w, height: h });
+          page.drawImage(jpg, {
+            x: (pageW - w) / 2, y: (pageH - h) / 2,
+            width: w, height: h
+          });
           if (i % 2 === 1) await new Promise(r => setTimeout(r, 0));
         }
         const bytes = await doc.save();
@@ -3192,9 +3824,11 @@
         say('#scanListStatus', '扫描 PDF 已生成！请选择一种保存方式', false, true);
         $('#scanResultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       } catch (err) {
+        console.error(err);
         say('#scanListStatus', '生成失败：' + (err && err.message ? err.message : err), true);
       } finally { btn.disabled = false; }
     });
+
     async function showScanPdfResult(bytes, filename, outPages) {
       revokeScanResult();
       scan.resultBytes = bytes;
@@ -3216,11 +3850,25 @@
     let idcardFrontImg = null;
     let idcardBackImg = null;
     let idcardCurrentMode = '';
-    bind('#idcardFrontCamBtn', 'click', () => { idcardCurrentMode = 'front'; openIdCardCamera(); });
-    bind('#idcardBackCamBtn', 'click', () => { idcardCurrentMode = 'back'; openIdCardCamera(); });
+
+    bind('#idcardFrontCamBtn', 'click', () => {
+      idcardCurrentMode = 'front';
+      openIdCardCamera();
+    });
+    bind('#idcardBackCamBtn', 'click', () => {
+      idcardCurrentMode = 'back';
+      openIdCardCamera();
+    });
+
     async function openIdCardCamera() {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { alert('当前浏览器不支持摄像头调用'); return; }
-      if (!env.isSecure) { alert('摄像头需要在 HTTPS 或 localhost 环境才能使用。'); return; }
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('当前浏览器不支持摄像头调用');
+        return;
+      }
+      if (!env.isSecure) {
+        alert('摄像头需要在 HTTPS 或 localhost 环境才能使用。');
+        return;
+      }
       try {
         if (scan.stream) { scan.stream.getTracks().forEach(t => t.stop()); scan.stream = null; }
         scan.stream = await navigator.mediaDevices.getUserMedia({
@@ -3230,22 +3878,29 @@
         const v = $('#scanFsVideo');
         v.srcObject = scan.stream;
         await v.play();
+
         const isFront = idcardCurrentMode === 'front';
         $('#scanFsTitle').textContent = isFront ? '拍摄身份证正面' : '拍摄身份证反面';
         const hintEl = $('#scanFsFrameHint');
-        if (hintEl) hintEl.textContent = isFront ? '请将「人像面」放入框内 · 人像朝右' : '请将「国徽面」放入框内 · 国徽在左上角';
+        if (hintEl) hintEl.textContent = isFront
+          ? '请将「人像面」放入框内 · 人像朝右'
+          : '请将「国徽面」放入框内 · 国徽在左上角';
         const guideFront = $('#scanFsGuideFront');
         const guideBack = $('#scanFsGuideBack');
         if (guideFront && guideBack) {
           guideFront.style.display = isFront ? '' : 'none';
-          guideBack.style.display = isFront ? 'none' : '';
+          guideBack.style.display  = isFront ? 'none' : '';
         }
+
         $('#scanFsFrame').classList.add('show');
         $('#scanFullscreen').classList.add('show');
         $('#scanFsThumb').style.display = 'none';
         $('#scanFsSwitch').style.display = 'none';
-      } catch (err) { alert('无法打开相机：' + err.message); }
+      } catch (err) {
+        alert('无法打开相机：' + err.message);
+      }
     }
+
     async function idcardShutter() {
       const v = $('#scanFsVideo');
       if (!v || !v.videoWidth) return;
@@ -3288,64 +3943,7 @@
       idcardCurrentMode = '';
       $('#idcardResultCard').classList.remove('hidden');
     }
-    bind('#scanFsShutter', 'click', async () => {
-      if (idcardCurrentMode) await idcardShutter();
-      else await takePhoto();
-    });
-    bind('#scanFsThumb', 'click', () => {
-      closeScanCamera();
-      const card = $('#scanListCard');
-      if (card) {
-        card.classList.remove('hidden');
-        card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    });
-    async function takePhoto() {
-      const v = $('#scanFsVideo');
-      if (!v || !v.videoWidth) { say('#scanStatus', '摄像头尚未准备好', true); return; }
-      showProcessing(true);
-      try {
-        await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-        const vw = v.videoWidth, vh = v.videoHeight;
-        const wrap = $('#scanFsVideoWrap');
-        const wrapRect = wrap.getBoundingClientRect();
-        const displayW = wrapRect.width, displayH = wrapRect.height;
-        const frameRect = $('#scanFsFrame').getBoundingClientRect();
-        const fw = frameRect.width, fh = frameRect.height;
-        const videoRatio = vw / vh;
-        const displayRatio = displayW / displayH;
-        let drawW, drawH, drawX, drawY;
-        if (videoRatio > displayRatio) {
-          drawH = displayH; drawW = displayH * videoRatio;
-          drawX = (displayW - drawW) / 2; drawY = 0;
-        } else {
-          drawW = displayW; drawH = displayW / videoRatio;
-          drawX = 0; drawY = (displayH - drawH) / 2;
-        }
-        const fx = frameRect.left - wrapRect.left;
-        const fy = frameRect.top - wrapRect.top;
-        const sx = clamp((fx - drawX) / drawW * vw, 0, vw);
-        const sy = clamp((fy - drawY) / drawH * vh, 0, vh);
-        const sw = clamp(fw / drawW * vw, 1, vw - sx);
-        const sh = clamp(fh / drawH * vh, 1, vh - sy);
-        const outW = Math.max(1, Math.round(sw));
-        const outH = Math.max(1, Math.round(sh));
-        const outCv = document.createElement('canvas');
-        outCv.width = outW; outCv.height = outH;
-        outCv.getContext('2d').drawImage(v, sx, sy, sw, sh, 0, 0, outW, outH);
-        const processed = processImageForScan(outCv, 'enhance');
-        const dataUrl = processed.toDataURL('image/jpeg', 0.92);
-        scan.items.push({ id: 's' + (++scan.idCounter), dataUrl, width: processed.width, height: processed.height });
-        updateScanCountBadge();
-        updateScanThumbnail();
-        $('#scanListCard').classList.remove('hidden');
-        renderScanResultGrid();
-        markScanDirty();
-        showToast('✓ 已添加第 ' + scan.items.length + ' 页');
-      } catch (err) {
-        say('#scanStatus', '拍照失败：' + (err && err.message ? err.message : err), true);
-      } finally { showProcessing(false); }
-    }
+
     bind('#idcardFrontFile', 'change', async (e) => {
       const f = e.target.files[0];
       if (f) {
@@ -3364,8 +3962,12 @@
         $('#idcardResultCard').classList.remove('hidden');
       }
     });
+
     bind('#idcardGenBtn', 'click', async () => {
-      if (!idcardFrontImg || !idcardBackImg) { say('#idcardStatus', '请先选择正反面两张图片', true); return; }
+      if (!idcardFrontImg || !idcardBackImg) {
+        say('#idcardStatus', '请先选择正反面两张图片', true);
+        return;
+      }
       say('#idcardStatus', '正在排版并生成 PDF…');
       try {
         const doc = await PDFDocument.create();
@@ -3410,15 +4012,24 @@
         bind('#idcardSaveBtn', 'click', () => sharedSave.saveAsPdf(bytes, filename, t => say('#idcardStatus', t)));
         say('#idcardStatus', '✅ 生成成功，已按真实物理尺寸 A4 排版', false, true);
         $('#idcardPdfResultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      } catch (err) { say('#idcardStatus', '生成失败：' + err.message, true); }
+      } catch (err) {
+        console.error(err);
+        say('#idcardStatus', '生成失败：' + err.message, true);
+      }
     });
 
-    /* ===== 模块 6：证件照制作（完整 AI 抠图版） ===== */
+    /* ===== 模块 6：证件照制作（AI / 涂抹 / 跳过） ===== */
     let idphotoImg = null;
     let idphotoCropped = null;
     let idphotoMatted = null;
     let idphotoMatteMode = 'skip';
     let idphotoCtx = null;
+    let idphotoAiMaskCanvas = null;
+    let idphotoAiSegmentation = null;
+    let idphotoAiBusy = false;
+    let idphotoAiBgColor = '#ffffff';
+    let idphotoAiBasePath = LOCAL.mediapipeBase;
+
     const idphotoState = { scale: 1, x: 0, y: 0, startX: 0, startY: 0, dragging: false };
     const idphotoTargetSizes = {
       '1inch':  { w: 295, h: 413 },
@@ -3426,23 +4037,200 @@
       'small1': { w: 260, h: 378 },
       'small2': { w: 413, h: 531 }
     };
+
     const idphotoCrop = {
       viewport: null,
       crop: { x: 0.1, y: 0.05, w: 0.8, h: 0.9 },
       dragMode: null,
       dragStart: null
     };
+
     let bordercutStrokes = [];
+    let bordercutDrawing = false;
     let bordercutSrcCanvas = null;
     let bordercutHistory = [];
 
     function updateBordercutButtons() {
       const hasHistory = bordercutHistory.length > 0;
-      $('#idphotoBordercutUndo').classList.toggle('hidden', !hasHistory);
-      $('#idphotoBordercutReset').classList.toggle('hidden', !(hasHistory || idphotoMatted));
-      $('#idphotoBordercutClear').classList.toggle('hidden', !idphotoMatted);
+      if (hasHistory) {
+        $('#idphotoBordercutUndo').classList.remove('hidden');
+      } else {
+        $('#idphotoBordercutUndo').classList.add('hidden');
+      }
+      if (hasHistory || idphotoMatted) {
+        $('#idphotoBordercutReset').classList.remove('hidden');
+      } else {
+        $('#idphotoBordercutReset').classList.add('hidden');
+      }
+      if (idphotoMatted) {
+        $('#idphotoBordercutClear').classList.remove('hidden');
+      } else {
+        $('#idphotoBordercutClear').classList.add('hidden');
+      }
     }
 
+    /* ---- AI 抠图核心 ---- */
+    async function ensureAiSegmentation() {
+      if (idphotoAiSegmentation) return idphotoAiSegmentation;
+
+      // 尝试本地加载 selfie_segmentation.js
+      if (typeof window.SelfieSegmentation === 'undefined') {
+        let loaded = false;
+        for (const p of LOCAL.mediapipeJs) {
+          try {
+            await loadScript(p, 'SelfieSegmentation', 2000);
+            loaded = true;
+            idphotoAiBasePath = LOCAL.mediapipeBase;
+            console.log('[AI] ✅ 本地 MediaPipe 加载成功');
+            break;
+          } catch (e) { /* 继续尝试 CDN */ }
+        }
+        if (!loaded) {
+          for (const url of CDN.mediapipeJs) {
+            try {
+              await loadScript(url, 'SelfieSegmentation', 10000);
+              loaded = true;
+              idphotoAiBasePath = CDN.mediapipeBase;
+              console.log('[AI] ✅ CDN MediaPipe 加载成功');
+              break;
+            } catch (e) { /* 继续 */ }
+          }
+        }
+        if (!loaded || typeof window.SelfieSegmentation === 'undefined') {
+          throw new Error('MediaPipe 加载失败，请检查网络或下载 selfie_segmentation.js 到 libs/');
+        }
+      }
+
+      const seg = new window.SelfieSegmentation({
+        locateFile: (f) => idphotoAiBasePath + f
+      });
+      seg.setOptions({ modelSelection: 1, selfieMode: false });
+      seg.onResults(onAiSegmentationResults);
+      idphotoAiSegmentation = seg;
+      return seg;
+    }
+
+    function onAiSegmentationResults(results) {
+      if (!idphotoCropped) return;
+      const src = idphotoCropped;
+      const W = src.width, H = src.height;
+
+      const tmp = document.createElement('canvas');
+      tmp.width = W; tmp.height = H;
+      const tctx = tmp.getContext('2d');
+      tctx.drawImage(results.segmentationMask, 0, 0, W, H);
+      tctx.globalCompositeOperation = 'source-in';
+      tctx.drawImage(src, 0, 0, W, H);
+
+      if (!idphotoAiMaskCanvas) idphotoAiMaskCanvas = document.createElement('canvas');
+      idphotoAiMaskCanvas.width = W;
+      idphotoAiMaskCanvas.height = H;
+      const mctx = idphotoAiMaskCanvas.getContext('2d');
+      mctx.clearRect(0, 0, W, H);
+      mctx.filter = 'blur(0.6px)';
+      mctx.drawImage(tmp, 0, 0);
+      mctx.filter = 'none';
+
+      renderAiPreview(idphotoAiBgColor);
+      const st = $('#idphotoAiStatus');
+      st.textContent = '✅ AI 抠图完成，可切换背景色或直接确认';
+      st.className = 'status ok';
+      idphotoAiBusy = false;
+    }
+
+    function renderAiPreview(bgColor) {
+      if (!idphotoAiMaskCanvas) return;
+      const cv = $('#idphotoAiPreviewCanvas');
+      const stage = $('#idphotoAiStage');
+      if (!cv || !stage) return;
+      const W = idphotoAiMaskCanvas.width;
+      const H = idphotoAiMaskCanvas.height;
+      const stageW = stage.clientWidth || 320;
+      const scale = stageW / W;
+      const dispW = Math.round(W * scale);
+      const dispH = Math.round(H * scale);
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      cv.width = Math.round(dispW * dpr);
+      cv.height = Math.round(dispH * dpr);
+      cv.style.width = dispW + 'px';
+      cv.style.height = dispH + 'px';
+      const ctx = cv.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(0, 0, dispW, dispH);
+      ctx.drawImage(idphotoAiMaskCanvas, 0, 0, dispW, dispH);
+    }
+
+    async function runAiSegmentation() {
+      if (!idphotoCropped) {
+        say('#idphotoBgStatus', '请先完成第 2 步的裁剪', true);
+        return;
+      }
+      if (idphotoAiBusy) return;
+      idphotoAiBusy = true;
+      idphotoAiMaskCanvas = null;
+
+      $('#idphotoAiArea').classList.remove('hidden');
+      const st = $('#idphotoAiStatus');
+      st.textContent = '⏳ 首次使用需加载约 2MB AI 模型，请耐心等待…';
+      st.className = 'status';
+
+      try {
+        const seg = await ensureAiSegmentation();
+        st.textContent = '🔍 正在识别人像轮廓…';
+        await seg.send({ image: idphotoCropped });
+      } catch (e) {
+        console.error('[AI]', e);
+        const errMsg = String(e.message || e);
+        idphotoAiBusy = false; // 确保错误后能重试
+
+        // 针对移动端 abort 的深度检测
+        if (errMsg.includes('abort') || errMsg.includes('Aborted') || errMsg.includes('native code')) {
+          st.innerHTML = '❌ <b>您的手机浏览器内存或 GPU 受限，无法运行 AI 模型。</b><br><br>请点击下方按钮改用「<b>涂抹擦除背景</b>」，或使用电脑浏览器打开。';
+          st.className = 'status err';
+          
+          // 隐藏 AI 区域，自动显示涂抹区域引导用户
+          setTimeout(() => {
+            $('#idphotoAiArea').classList.add('hidden');
+            $('#idphotoUseBordercutBtn').click();
+          }, 1200);
+        } else {
+          st.textContent = '❌ AI 抠图失败：' + errMsg + '（请尝试涂抹模式）';
+          st.className = 'status err';
+        }
+      }
+    }
+
+    bind('#idphotoUseAiBtn', 'click', () => {
+      if (!idphotoCropped) {
+        say('#idphotoBgStatus', '请先完成第 2 步的裁剪', true);
+        return;
+      }
+      idphotoMatteMode = 'ai';
+      $('#idphotoBordercutArea').classList.add('hidden');
+      runAiSegmentation();
+    });
+
+    bind('#idphotoAiRetry', 'click', () => {
+      idphotoAiMaskCanvas = null;
+      runAiSegmentation();
+    });
+
+    $('#idphotoAiArea').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-aibg]');
+      if (!btn) return;
+      idphotoAiBgColor = btn.dataset.aibg;
+      renderAiPreview(idphotoAiBgColor);
+    });
+
+    bind('#idphotoAiConfirm', 'click', async () => {
+      if (!idphotoAiMaskCanvas) return;
+      idphotoMatted = { canvas: idphotoAiMaskCanvas, mode: 'ai' };
+      idphotoMatteMode = 'ai';
+      await goToOptions();
+    });
+
+    /* ---- 文件上传 ---- */
     bind('#idphotoFile', 'change', async (e) => {
       const f = e.target.files[0];
       if (!f) return;
@@ -3450,19 +4238,29 @@
         idphotoImg = await loadImage(await readDataUrl(f));
         idphotoCropped = null;
         idphotoMatted = null;
+        idphotoAiMaskCanvas = null;
         idphotoState.x = 0; idphotoState.y = 0;
         idphotoCrop.crop = { x: 0.1, y: 0.05, w: 0.8, h: 0.9 };
         bordercutHistory = [];
         bordercutStrokes = [];
+
         $('#idphotoCropCard').classList.remove('hidden');
         $('#idphotoBgCard').classList.add('hidden');
         $('#idphotoOptCard').classList.add('hidden');
         $('#idphotoPreviewWrap').classList.add('hidden');
         $('#idphotoDownloadRow').classList.add('hidden');
         $('#idphotoBordercutArea').classList.add('hidden');
-        requestAnimationFrame(() => requestAnimationFrame(() => idphotoCropRender()));
+        $('#idphotoAiArea').classList.add('hidden');
+
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            idphotoCropRender();
+          });
+        });
         say('#idphotoCropStatus', '拖动虚线框，框选头顶到胸口的区域');
-      } catch (err) { say('#idphotoCropStatus', '图片载入失败：' + err.message, true); }
+      } catch (err) {
+        say('#idphotoCropStatus', '图片载入失败：' + err.message, true);
+      }
     });
 
     function idphotoCropRender() {
@@ -3471,6 +4269,7 @@
       const canvas = $('#idphotoCropCanvas');
       const overlay = $('#idphotoCropOverlay');
       if (!stage || !canvas || !overlay) return;
+
       const stageW = stage.clientWidth || 320;
       const imgW = idphotoImg.naturalWidth;
       const imgH = idphotoImg.naturalHeight;
@@ -3479,12 +4278,14 @@
       const dispH = imgH * scale;
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       idphotoCrop.viewport = { width: dispW, height: dispH, dpr };
+
       [canvas, overlay].forEach((cv) => {
         cv.width = Math.round(dispW * dpr);
         cv.height = Math.round(dispH * dpr);
         cv.style.width = dispW + 'px';
         cv.style.height = dispH + 'px';
       });
+
       const ctx = canvas.getContext('2d');
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.fillStyle = '#000';
@@ -3516,6 +4317,18 @@
       ctx.setLineDash([8, 6]);
       ctx.strokeRect(cx, cy, cw, ch);
       ctx.setLineDash([]);
+      ctx.save();
+      ctx.strokeStyle = 'rgba(96,165,250,0.35)';
+      ctx.lineWidth = 1;
+      for (let i = 1; i <= 2; i++) {
+        ctx.beginPath();
+        ctx.moveTo(cx + cw * i / 3, cy);
+        ctx.lineTo(cx + cw * i / 3, cy + ch);
+        ctx.moveTo(cx, cy + ch * i / 3);
+        ctx.lineTo(cx + cw, cy + ch * i / 3);
+        ctx.stroke();
+      }
+      ctx.restore();
       const HIT = isMobile ? 22 : 16;
       const pts = [
         [cx, cy], [cx + cw / 2, cy], [cx + cw, cy],
@@ -3531,6 +4344,16 @@
         ctx.lineWidth = 2;
         ctx.stroke();
       });
+      const ratio = (cw / ch).toFixed(2);
+      const text = '比例 ' + ratio + ' · 拖边框调整';
+      ctx.font = '600 12px -apple-system,"PingFang SC",sans-serif';
+      ctx.fillStyle = 'rgba(37,99,235,0.92)';
+      const tw = ctx.measureText(text).width + 14;
+      ctx.fillRect(cx + 4, cy + 4, tw, 22);
+      ctx.fillStyle = '#fff';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, cx + 11, cy + 16);
     }
 
     function idphotoCropHitTest(px, py) {
@@ -3646,37 +4469,54 @@
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(idphotoImg, sx, sy, sw, sh, 0, 0, outW, outH);
+
       idphotoCropped = cv;
       idphotoMatted = null;
+      idphotoAiMaskCanvas = null;
       idphotoState.x = 0; idphotoState.y = 0;
       bordercutSrcCanvas = cv;
       bordercutStrokes = [];
       bordercutHistory = [];
+
       $('#idphotoCropCard').classList.add('hidden');
       $('#idphotoBgCard').classList.remove('hidden');
       $('#idphotoOptCard').classList.add('hidden');
       $('#idphotoPreviewWrap').classList.add('hidden');
       $('#idphotoDownloadRow').classList.add('hidden');
       $('#idphotoBordercutArea').classList.add('hidden');
+      $('#idphotoAiArea').classList.add('hidden');
       $('#idphotoBgStatus').textContent = '';
-      say('#idphotoBgStatus', '✅ 裁剪完成！背景已处理好的可直接「直接生成证件照」，需要抠图的请点「AI 涂抹擦除背景」。');
+
+      say('#idphotoBgStatus', '✅ 裁剪完成！可选择「直接生成」「涂抹擦除」或「AI 智能抠图」。');
     });
 
     bind('#idphotoSkipBgBtn', 'click', async () => {
-      if (!idphotoCropped) { say('#idphotoBgStatus', '请先完成第 2 步的裁剪', true); return; }
+      if (!idphotoCropped) {
+        say('#idphotoBgStatus', '请先完成第 2 步的裁剪', true);
+        return;
+      }
       idphotoMatteMode = 'skip';
       idphotoMatted = null;
       $('#idphotoBordercutArea').classList.add('hidden');
+      $('#idphotoAiArea').classList.add('hidden');
       $('#idphotoBgStatus').textContent = '';
       await goToOptions();
-      say('#idphotoBgStatus', '✅ 已跳过涂抹，直接使用裁剪图生成证件照', false, true);
+      say('#idphotoBgStatus', '✅ 已跳过抠图，直接使用裁剪图生成证件照', false, true);
     });
 
     bind('#idphotoUseBordercutBtn', 'click', () => {
-      if (!idphotoCropped) { say('#idphotoBgStatus', '请先完成第 2 步的裁剪', true); return; }
+      if (!idphotoCropped) {
+        say('#idphotoBgStatus', '请先完成第 2 步的裁剪', true);
+        return;
+      }
       idphotoMatteMode = 'bordercut';
+      $('#idphotoAiArea').classList.add('hidden');
       $('#idphotoBordercutArea').classList.remove('hidden');
-      requestAnimationFrame(() => requestAnimationFrame(() => renderBordercutCanvas(idphotoCropped)));
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          renderBordercutCanvas(idphotoCropped);
+        });
+      });
       say('#idphotoBordercutStatus', '用手指在图上涂抹要去掉的背景，涂完点「应用涂抹」');
     });
 
@@ -3684,19 +4524,23 @@
       const stage = $('#idphotoBordercutStage');
       const canvas = $('#idphotoBordercutCanvas');
       if (!stage || !canvas) return;
+
       const stageW = stage.clientWidth || 320;
       const scale = stageW / srcCanvas.width;
       const dispW = Math.round(srcCanvas.width * scale);
       const dispH = Math.round(srcCanvas.height * scale);
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
       canvas.width = Math.round(dispW * dpr);
       canvas.height = Math.round(dispH * dpr);
       canvas.style.width = dispW + 'px';
       canvas.style.height = dispH + 'px';
+
       const ctx = canvas.getContext('2d');
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, dispW, dispH);
       ctx.drawImage(srcCanvas, 0, 0, dispW, dispH);
+
       bordercutStrokes = [];
       $('#idphotoBordercutStage').classList.remove('hidden');
       $('#idphotoBordercutPreviewStage').classList.add('hidden');
@@ -3711,17 +4555,24 @@
       if (!canvas) return;
       let isDrawing = false;
       let startX = 0, startY = 0;
+
       const getPos = (e) => {
         const rect = canvas.getBoundingClientRect();
         let x = (e.clientX - rect.left) / rect.width;
         let y = (e.clientY - rect.top) / rect.height;
-        return { x: Math.max(0, Math.min(1, x)), y: Math.max(0, Math.min(1, y)) };
+        return {
+          x: Math.max(0, Math.min(1, x)),
+          y: Math.max(0, Math.min(1, y))
+        };
       };
+
       canvas.addEventListener('pointerdown', (e) => {
         if (!bordercutSrcCanvas) return;
-        startX = e.clientX; startY = e.clientY;
+        startX = e.clientX;
+        startY = e.clientY;
         isDrawing = false;
       });
+
       canvas.addEventListener('pointermove', (e) => {
         if (!bordercutSrcCanvas) return;
         if (!e.buttons) return;
@@ -3745,6 +4596,7 @@
           e.preventDefault();
         }
       }, { passive: false });
+
       function endDraw(e) {
         isDrawing = false;
         try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
@@ -3776,6 +4628,7 @@
       bordercutStrokes = [];
       renderBordercutCanvas(bordercutSrcCanvas);
     });
+
     bind('#idphotoBordercutUndo', 'click', () => {
       if (bordercutHistory.length === 0) return;
       const last = bordercutHistory.pop();
@@ -3784,6 +4637,7 @@
       renderBordercutCanvas(bordercutSrcCanvas);
       say('#idphotoBordercutStatus', '已撤销上一步');
     });
+
     bind('#idphotoBordercutReset', 'click', () => {
       if (!idphotoCropped) return;
       if (!confirm('确定要放弃所有涂抹，回到最初的裁剪图吗？')) return;
@@ -3796,7 +4650,10 @@
     });
 
     bind('#idphotoBordercutApply', 'click', async () => {
-      if (!bordercutStrokes.length) { say('#idphotoBordercutStatus', '请先在图片上涂抹', true); return; }
+      if (!bordercutStrokes.length) {
+        say('#idphotoBordercutStatus', '请先在图片上涂抹', true);
+        return;
+      }
       if (!window.__bordercut) {
         say('#idphotoBordercutStatus', 'bordercut 库未加载，将直接使用原图（等同跳过）', true);
         idphotoMatteMode = 'skip';
@@ -3804,12 +4661,15 @@
         await goToOptions();
         return;
       }
+
       const btn = $('#idphotoBordercutApply');
       btn.disabled = true;
       say('#idphotoBordercutStatus', '正在处理涂抹区域…');
+
       try {
         const srcCanvas = bordercutSrcCanvas;
         const blob = await new Promise(res => srcCanvas.toBlob(res, 'image/png'));
+
         const points = bordercutStrokes.map(p => {
           let px = Math.round(p.x * srcCanvas.width);
           let py = Math.round(p.y * srcCanvas.height);
@@ -3817,24 +4677,29 @@
           py = Math.max(0, Math.min(srcCanvas.height - 1, py));
           return { x: px, y: py };
         });
+
         const { blob: resultBlob } = await window.__bordercut.removeBackgroundFromBlob(
           blob,
           { feather: 2 },
           { strokes: [{ kind: 'background', radius: 15, points: points }] }
         );
+
         const img = await loadImage(URL.createObjectURL(resultBlob));
         const out = document.createElement('canvas');
         out.width = img.width;
         out.height = img.height;
         out.getContext('2d').drawImage(img, 0, 0);
+
         const historyCanvas = document.createElement('canvas');
         historyCanvas.width = srcCanvas.width;
         historyCanvas.height = srcCanvas.height;
         historyCanvas.getContext('2d').drawImage(srcCanvas, 0, 0);
         bordercutHistory.push({ canvas: historyCanvas });
+
         bordercutSrcCanvas = out;
         idphotoMatted = { canvas: out, mode: 'bordercut' };
         bordercutStrokes = [];
+
         $('#idphotoBordercutStage').classList.add('hidden');
         $('#idphotoBordercutPreviewStage').classList.remove('hidden');
         const prevCanvas = $('#idphotoBordercutPreviewCanvas');
@@ -3856,6 +4721,7 @@
           }
         }
         ctx.drawImage(out, 0, 0, dispW, dispH);
+
         $('#idphotoBordercutApply').classList.add('hidden');
         $('#idphotoBordercutConfirm').classList.remove('hidden');
         updateBordercutButtons();
@@ -3863,13 +4729,20 @@
       } catch (err) {
         console.error('[bordercut]', err);
         say('#idphotoBordercutStatus', '处理失败：' + (err && err.message ? err.message : err), true);
-      } finally { btn.disabled = false; }
+      } finally {
+        btn.disabled = false;
+      }
     });
 
-    bind('#idphotoBordercutConfirm', 'click', async () => { await goToOptions(); });
+    bind('#idphotoBordercutConfirm', 'click', async () => {
+      await goToOptions();
+    });
 
     async function goToOptions() {
-      if (!idphotoCropped && !idphotoMatted) { say('#idphotoBgStatus', '请先完成裁剪', true); return; }
+      if (!idphotoCropped && !idphotoMatted) {
+        say('#idphotoBgStatus', '请先完成裁剪', true);
+        return;
+      }
       $('#idphotoBgCard').classList.add('hidden');
       $('#idphotoOptCard').classList.remove('hidden');
       idphotoState.x = 0;
@@ -3888,18 +4761,22 @@
       if (!idphotoImg) return;
       const srcCanvas = await ensureImageSource();
       if (!srcCanvas) return;
+
       const sizeKey = $('#idphotoSize').value;
       const bgColor = $('#idphotoBg').value;
       const layoutMode = $('#idphotoLayout').value;
       const target = idphotoTargetSizes[sizeKey];
       const srcW = srcCanvas.width, srcH = srcCanvas.height;
       const canvas = $('#idphotoCanvas');
+
       function composeSingle() {
         const c = document.createElement('canvas');
-        c.width = target.w; c.height = target.h;
+        c.width = target.w;
+        c.height = target.h;
         const g = c.getContext('2d');
         g.fillStyle = bgColor;
         g.fillRect(0, 0, target.w, target.h);
+
         const scale = Math.max(target.w / srcW, target.h / srcH);
         const drawW = srcW * scale;
         const drawH = srcH * scale;
@@ -3914,6 +4791,7 @@
         g.drawImage(srcCanvas, dx, dy, drawW, drawH);
         return c;
       }
+
       if (layoutMode === 'sheet') {
         canvas.width = 1050;
         canvas.height = 1500;
@@ -3922,12 +4800,14 @@
         idphotoCtx = canvas.getContext('2d');
         idphotoCtx.fillStyle = '#fff';
         idphotoCtx.fillRect(0, 0, canvas.width, canvas.height);
+
         const single = composeSingle();
         const margin = 40, gap = 20;
         const cols = Math.floor((canvas.width - margin * 2 + gap) / (target.w + gap));
         const rows = Math.floor((canvas.height - margin * 2 + gap) / (target.h + gap));
         const startX = (canvas.width - (cols * target.w + (cols - 1) * gap)) / 2;
         const startY = (canvas.height - (rows * target.h + (rows - 1) * gap)) / 2;
+
         for (let r = 0; r < rows; r++) {
           for (let c = 0; c < cols; c++) {
             const x = startX + c * (target.w + gap);
@@ -3999,7 +4879,10 @@
     bind('#idphotoDownloadBtn', 'click', async () => {
       const canvas = $('#idphotoCanvas');
       const btn = $('#idphotoDownloadBtn');
-      if (!canvas || !canvas.width) { say('#idphotoStatus', '请先生成证件照预览', true); return; }
+      if (!canvas || !canvas.width) {
+        say('#idphotoStatus', '请先生成证件照预览', true);
+        return;
+      }
       btn.disabled = true;
       try {
         const blob = await new Promise((res, rej) => {
@@ -4009,15 +4892,12 @@
         await saveIdPhotoWithPath(blob, filename);
       } catch (e) {
         say('#idphotoStatus', '保存失败：' + (e && e.message ? e.message : e), true);
-      } finally { btn.disabled = false; }
+      } finally {
+        btn.disabled = false;
+      }
     });
 
     async function saveIdPhotoWithPath(blob, filename) {
-      if (inAppBrowser) {
-        showInAppSaveGuide(t => say('#idphotoStatus', t), filename);
-        say('#idphotoStatus', '微信内请按提示在浏览器中打开后再保存', true);
-        return;
-      }
       if (window.isSecureContext && typeof window.showSaveFilePicker === 'function') {
         try {
           const handle = await window.showSaveFilePicker({
@@ -4030,7 +4910,10 @@
           say('#idphotoStatus', '✅ 已保存：' + (handle.name || filename), false, true);
           return;
         } catch (err) {
-          if (err && err.name === 'AbortError') { say('#idphotoStatus', '已取消保存'); return; }
+          if (err && err.name === 'AbortError') {
+            say('#idphotoStatus', '已取消保存');
+            return;
+          }
         }
       }
       const url = URL.createObjectURL(blob);
@@ -4041,7 +4924,13 @@
       a.target = '_self';
       a.style.display = 'none';
       document.body.appendChild(a);
-      try { a.click(); } catch (e) {}
+      try { a.click(); }
+      catch (e) {
+        const evt = document.createEvent('MouseEvents');
+        evt.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0,
+          false, false, false, false, 0, null);
+        a.dispatchEvent(evt);
+      }
       setTimeout(() => {
         try { document.body.removeChild(a); } catch (_) {}
         setTimeout(() => { try { URL.revokeObjectURL(url); } catch (_) {} }, 60000);
@@ -4059,6 +4948,7 @@
     };
     $('#img2pdfResultBody').innerHTML = buildResultCardHtml('img2pdfRes');
     bindResultCard('img2pdfRes', img2pdf, (t, e, o) => say('#img2pdfStatus2', t, e, o), true);
+
     function revokeImg2PdfResult() {
       if (img2pdf.resultUrl) { try { URL.revokeObjectURL(img2pdf.resultUrl); } catch (_) {} img2pdf.resultUrl = null; }
       if (img2pdf.previewDoc) { try { img2pdf.previewDoc.destroy(); } catch (_) {} img2pdf.previewDoc = null; }
@@ -4068,6 +4958,7 @@
       img2pdf.dirty = true;
       if (img2pdf._refresh) img2pdf._refresh();
     }
+
     bind('#img2pdfFile', 'change', async (e) => {
       const files = Array.from(e.target.files || []);
       e.target.value = '';
@@ -4077,7 +4968,11 @@
         try {
           const dataUrl = await readDataUrl(f);
           const img = await loadImage(dataUrl);
-          img2pdf.items.push({ id: 'i' + (++img2pdf.idCounter), file: f, dataUrl, width: img.naturalWidth, height: img.naturalHeight });
+          img2pdf.items.push({
+            id: 'i' + (++img2pdf.idCounter),
+            file: f, dataUrl,
+            width: img.naturalWidth, height: img.naturalHeight
+          });
         } catch (err) {}
       }
       if (img2pdf.items.length > 0) {
@@ -4086,6 +4981,7 @@
       }
       say('#img2pdfStatus', '共 ' + img2pdf.items.length + ' 张图片');
     });
+
     function renderImg2PdfList() {
       const list = $('#img2pdfList');
       list.innerHTML = '';
@@ -4121,6 +5017,7 @@
         list.appendChild(div);
       });
     }
+
     bind('#img2pdfClear', 'click', () => {
       img2pdf.items = [];
       renderImg2PdfList();
@@ -4128,6 +5025,7 @@
       say('#img2pdfStatus', '已清空');
       markImg2PdfDirty();
     });
+
     bind('#img2pdfBtn', 'click', async () => {
       if (img2pdf.items.length === 0) { say('#img2pdfStatus', '请先选择图片', true); return; }
       const btn = $('#img2pdfBtn'); btn.disabled = true;
@@ -4150,7 +5048,8 @@
           const img = await loadImage(item.dataUrl);
           ctx.drawImage(img, 0, 0, cw, ch);
           const blob = await new Promise(res => cv.toBlob(res, 'image/jpeg', 0.9));
-          const jpg = await doc.embedJpg(new Uint8Array(await blob.arrayBuffer()));
+          const jpgBytes = new Uint8Array(await blob.arrayBuffer());
+          const jpg = await doc.embedJpg(jpgBytes);
           let pageW = A4[0], pageH = A4[1];
           if (cw > ch) { pageW = A4[1]; pageH = A4[0]; }
           const page = doc.addPage([pageW, pageH]);
@@ -4168,6 +5067,7 @@
         say('#img2pdfStatus', '转换失败：' + (err && err.message ? err.message : err), true);
       } finally { btn.disabled = false; }
     });
+
     async function showImg2PdfResult(bytes, filename, outPages) {
       revokeImg2PdfResult();
       img2pdf.resultBytes = bytes;
@@ -4190,6 +5090,7 @@
       file: null, buf: null, doc: null,
       resultFiles: [], resultZipBlob: null, resultZipName: '', hasResult: false
     };
+
     bind('#pdf2imgFile', 'change', async (e) => {
       const f = e.target.files[0]; if (!f) return;
       say('#pdf2imgStatus', '');
@@ -4202,8 +5103,11 @@
         pdf2img.doc = await pdfjsLib.getDocument({ data: new Uint8Array(buf.slice(0)) }).promise;
         $('#pdf2imgOptCard').classList.remove('hidden');
         say('#pdf2imgStatus', '已载入 ' + pdf2img.doc.numPages + ' 页');
-      } catch (err) { say('#pdf2imgStatus', '载入失败：' + (err && err.message ? err.message : err), true); }
+      } catch (err) {
+        say('#pdf2imgStatus', '载入失败：' + (err && err.message ? err.message : err), true);
+      }
     });
+
     bind('#pdf2imgBtn', 'click', async () => {
       if (!pdf2img.doc) { say('#pdf2imgStatus', '请先选择 PDF', true); return; }
       const btn = $('#pdf2imgBtn'); btn.disabled = true;
@@ -4241,9 +5145,11 @@
         renderPdf2ImgResult();
         say('#pdf2imgStatus', '导出图片完成！', false, true);
         $('#pdf2imgResultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      } catch (err) { say('#pdf2imgStatus', '导出失败：' + (err && err.message ? err.message : err), true); }
-      finally { btn.disabled = false; }
+      } catch (err) {
+        say('#pdf2imgStatus', '导出失败：' + (err && err.message ? err.message : err), true);
+      } finally { btn.disabled = false; }
     });
+
     function renderPdf2ImgResult() {
       const body = $('#pdf2imgResultBody');
       if (!pdf2img.hasResult || !pdf2img.resultZipBlob) { body.innerHTML = ''; return; }
@@ -4273,21 +5179,28 @@
       body.querySelectorAll('.file-item').forEach(item => {
         const idx = parseInt(item.dataset.idx, 10);
         const file = pdf2img.resultFiles[idx];
-        bind(item.querySelector('[data-act="dl"]'), 'click', () => downloadBlob(file.blob, file.name));
+        bind(item.querySelector('[data-act="dl"]'), 'click', () => {
+          downloadBlob(file.blob, file.name);
+        });
       });
       $('#pdf2imgResultCard').classList.remove('hidden');
     }
 
     /* ===== 模块 9：Word 转 PDF ===== */
     let word2pdfFile = null;
+
     bind('#word2pdfFile', 'change', (e) => {
       const f = e.target.files[0];
       if (!f) return;
-      if (!/\.docx$/i.test(f.name)) { say('#word2pdfStatus', '只支持 .docx 文件（旧版 .doc 不支持）', true); return; }
+      if (!/\.docx$/i.test(f.name)) {
+        say('#word2pdfStatus', '只支持 .docx 文件（旧版 .doc 不支持）', true);
+        return;
+      }
       word2pdfFile = f;
       $('#word2pdfOptCard').classList.remove('hidden');
       say('#word2pdfStatus', '已选择：' + f.name);
     });
+
     bind('#word2pdfBtn', 'click', async () => {
       if (!word2pdfFile) { say('#word2pdfStatus', '请先选择 Word 文档', true); return; }
       const btn = $('#word2pdfBtn'); btn.disabled = true;
@@ -4325,8 +5238,9 @@
         w.focus();
         setTimeout(() => { try { w.print(); } catch (e) {} }, 700);
         say('#word2pdfStatus', '已打开打印窗口，请选择「另存为 PDF」', false, true);
-      } catch (err) { say('#word2pdfStatus', '转换失败：' + (err && err.message ? err.message : err), true); }
-      finally { btn.disabled = false; }
+      } catch (err) {
+        say('#word2pdfStatus', '转换失败：' + (err && err.message ? err.message : err), true);
+      } finally { btn.disabled = false; }
     });
 
     /* ===== 模块 10：PDF 合并 ===== */
@@ -4339,6 +5253,7 @@
     };
     $('#mergeResultBody').innerHTML = buildResultCardHtml('mergeRes');
     bindResultCard('mergeRes', merge, (t, e, o) => say('#mergeStatus2', t, e, o), true);
+
     function revokeMergeResult() {
       if (merge.resultUrl) { try { URL.revokeObjectURL(merge.resultUrl); } catch (_) {} merge.resultUrl = null; }
       if (merge.previewDoc) { try { merge.previewDoc.destroy(); } catch (_) {} merge.previewDoc = null; }
@@ -4348,6 +5263,7 @@
       merge.dirty = true;
       if (merge._refresh) merge._refresh();
     }
+
     bind('#mergeFile', 'change', async (e) => {
       const files = Array.from(e.target.files || []);
       e.target.value = '';
@@ -4359,7 +5275,10 @@
           const buffer = await readBuffer(f);
           const doc = await PDFDocument.load(buffer.slice(0), { ignoreEncryption: true });
           const pageCount = doc.getPageCount();
-          merge.files.push({ id: 'm' + (++merge.idCounter), file: f, name: f.name, size: f.size, pageCount, buffer });
+          merge.files.push({
+            id: 'm' + (++merge.idCounter),
+            file: f, name: f.name, size: f.size, pageCount, buffer
+          });
         } catch (err) {}
       }
       if (merge.files.length > 0) {
@@ -4368,6 +5287,7 @@
       }
       say('#mergeStatus', '共 ' + merge.files.length + ' 个文件');
     });
+
     function renderMergeList() {
       const list = $('#mergeList');
       list.innerHTML = '';
@@ -4405,6 +5325,7 @@
         list.appendChild(div);
       });
     }
+
     bind('#mergeClear', 'click', () => {
       merge.files = [];
       renderMergeList();
@@ -4412,6 +5333,7 @@
       say('#mergeStatus', '已清空');
       markMergeDirty();
     });
+
     bind('#mergeBtn', 'click', async () => {
       if (merge.files.length < 1) { say('#mergeStatus', '请至少选择一个 PDF', true); return; }
       const btn = $('#mergeBtn'); btn.disabled = true;
@@ -4432,9 +5354,11 @@
         await showMergeResult(bytes, filename, totalPages);
         say('#mergeStatus', '合并完成！请选择一种保存方式', false, true);
         $('#mergeResultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      } catch (err) { say('#mergeStatus', '合并失败：' + (err && err.message ? err.message : err), true); }
-      finally { btn.disabled = false; }
+      } catch (err) {
+        say('#mergeStatus', '合并失败：' + (err && err.message ? err.message : err), true);
+      } finally { btn.disabled = false; }
     });
+
     async function showMergeResult(bytes, filename, outPages) {
       revokeMergeResult();
       merge.resultBytes = bytes;
@@ -4457,6 +5381,7 @@
       file: null, buf: null, doc: null,
       resultFiles: [], resultZipBlob: null, resultZipName: '', hasResult: false
     };
+
     bind('#extractFile', 'change', async (e) => {
       const f = e.target.files[0]; if (!f) return;
       say('#extractStatus', '');
@@ -4470,8 +5395,11 @@
         $('#extractOptCard').classList.remove('hidden');
         $('#extractPages').value = 1;
         say('#extractStatus', '已载入 ' + extract.doc.numPages + ' 页');
-      } catch (err) { say('#extractStatus', '载入失败：' + (err && err.message ? err.message : err), true); }
+      } catch (err) {
+        say('#extractStatus', '载入失败：' + (err && err.message ? err.message : err), true);
+      }
     });
+
     bind('#extractBtn', 'click', async () => {
       if (!extract.doc || !extract.buf) { say('#extractStatus', '请先选择 PDF', true); return; }
       const per = Math.max(1, parseInt($('#extractPages').value, 10) || 1);
@@ -4507,9 +5435,11 @@
         renderExtractResult();
         say('#extractStatus', '拆分完成！', false, true);
         $('#extractResultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      } catch (err) { say('#extractStatus', '拆分失败：' + (err && err.message ? err.message : err), true); }
-      finally { btn.disabled = false; }
+      } catch (err) {
+        say('#extractStatus', '拆分失败：' + (err && err.message ? err.message : err), true);
+      } finally { btn.disabled = false; }
     });
+
     function renderExtractResult() {
       const body = $('#extractResultBody');
       if (!extract.hasResult || !extract.resultZipBlob) { body.innerHTML = ''; return; }
@@ -4557,6 +5487,7 @@
           if ($('#scanImgEditor').classList.contains('show')) drawEditorCanvas();
           if (!$('#idphotoCropCard').classList.contains('hidden') && idphotoImg) idphotoCropRender();
           if (!$('#idphotoBgCard').classList.contains('hidden') && bordercutSrcCanvas) renderBordercutCanvas(bordercutSrcCanvas);
+          if (!$('#idphotoAiArea').classList.contains('hidden') && idphotoAiMaskCanvas) renderAiPreview(idphotoAiBgColor);
         } catch (e) {}
       }, 200);
     });
@@ -4568,6 +5499,7 @@
           if ($('#scanImgEditor').classList.contains('show')) drawEditorCanvas();
           if (!$('#idphotoCropCard').classList.contains('hidden') && idphotoImg) idphotoCropRender();
           if (!$('#idphotoBgCard').classList.contains('hidden') && bordercutSrcCanvas) renderBordercutCanvas(bordercutSrcCanvas);
+          if (!$('#idphotoAiArea').classList.contains('hidden') && idphotoAiMaskCanvas) renderAiPreview(idphotoAiBgColor);
         } catch (e) {}
       }, 300);
     });
