@@ -164,6 +164,7 @@
   .btn.amber { background: linear-gradient(135deg, #d97706, #f59e0b); box-shadow: 0 2px 5px rgba(217,119,6,.22); }
   .btn.purple { background: linear-gradient(135deg, #7c3aed, #a855f7); box-shadow: 0 2px 5px rgba(124,58,237,.22); }
   .btn.red { background: linear-gradient(135deg, #dc2626, #ef4444); box-shadow: 0 2px 5px rgba(220,38,38,.22); }
+  .btn.blue { background: linear-gradient(135deg, #2563eb, #3b82f6); box-shadow: 0 2px 5px rgba(37,99,235,.22); }
   .btn.big { width: 100%; padding: 13px 16px; font-size: 15px; }
   .btn.small { padding: 7px 12px; font-size: 12px; border-radius: 7px; min-height: 36px; }
 
@@ -630,7 +631,7 @@
     border-radius: 10px;
     background: #0f172a;
     overflow: hidden;
-    touch-action: pan-y; 
+    touch-action: pan-y;
     line-height: 0;
     margin-top: 10px;
   }
@@ -647,6 +648,9 @@
     pointer-events: none;
     touch-action: none;
   }
+
+  #idphotoAiPreviewCanvas { display: block; margin: 0 auto; border-radius: 6px; }
+  #idphotoAiStage { margin-top: 10px; }
 
   @media (max-width: 640px) {
     .app-header { padding: 18px 16px 16px; }
@@ -739,7 +743,7 @@
         <span class="feature-icon">👤</span>
         <span class="feature-text">
           <span class="feature-name">证件照制作</span>
-          <span class="feature-desc">涂抹抠图 / 跳过直接生成</span>
+          <span class="feature-desc">AI / 涂抹 / 跳过</span>
         </span>
       </button>
     </div>
@@ -999,7 +1003,7 @@
       </div>
     </section>
 
-    <!-- 模块 6：证件照制作（重点优化） -->
+    <!-- 模块 6：证件照制作（AI / 涂抹 / 跳过） -->
     <section class="panel" id="panel-idphoto" data-theme="convert">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">上传人像照片</span></h2>
@@ -1023,22 +1027,47 @@
         <div class="status" id="idphotoCropStatus"></div>
       </div>
 
-      <!-- 第 3 步：背景处理（涂抹 / 直接生成） -->
+      <!-- 第 3 步：背景处理 -->
       <div class="card hidden" id="idphotoBgCard">
         <h2><span class="step-label">第 3 步</span><span class="step-title">背景处理</span></h2>
         <p class="hint" style="margin-bottom:14px">
-          若照片背景已是纯色或已去除背景，<b>可直接点击「直接生成证件照」跳过涂抹</b>。<br>
-          若需去除复杂背景，请点击「涂抹擦除背景」。
+          若照片背景已是纯色或已去除背景，<b>可直接点击「直接生成证件照」跳过抠图</b>。<br>
+          若背景复杂，推荐用 <b>AI 智能抠图</b> 自动识别人像；也可用 <b>涂抹擦除</b> 手动处理。
         </p>
         <div class="btn-row" style="margin-bottom:12px">
           <button class="btn amber" id="idphotoSkipBgBtn" type="button" style="flex:1">
-            ⚡ 直接生成证件照（跳过涂抹）
+            ⚡ 直接生成（跳过抠图）
           </button>
+        </div>
+        <div class="btn-row" style="margin-bottom:12px">
           <button class="btn purple" id="idphotoUseBordercutBtn" type="button" style="flex:1">
             ✏️ 涂抹擦除背景
           </button>
+          <button class="btn blue" id="idphotoUseAiBtn" type="button" style="flex:1">
+            🤖 AI 智能抠图
+          </button>
         </div>
 
+        <!-- AI 抠图预览区 -->
+        <div id="idphotoAiArea" class="hidden">
+          <div class="idphoto-crop-stage" id="idphotoAiStage">
+            <canvas id="idphotoAiPreviewCanvas"></canvas>
+          </div>
+          <div class="btn-row" style="margin-top:10px; align-items:center">
+            <span style="font-size:12px; color:#475569; margin-right:6px">背景色：</span>
+            <button class="btn small" data-aibg="#ffffff" style="background:#fff; color:#0f172a; border:1px solid #e2e8f0">白</button>
+            <button class="btn small" data-aibg="#d92b2b" style="background:#d92b2b">红</button>
+            <button class="btn small" data-aibg="#1d4ed8" style="background:#1d4ed8">蓝</button>
+            <button class="btn small" data-aibg="#4b5563" style="background:#4b5563">灰</button>
+          </div>
+          <div class="btn-row" style="margin-top:10px">
+            <button class="btn gray" id="idphotoAiRetry" type="button">🔄 重新识别</button>
+            <button class="btn green" id="idphotoAiConfirm" type="button" style="flex:1">✅ 满意，继续</button>
+          </div>
+          <div class="status" id="idphotoAiStatus"></div>
+        </div>
+
+        <!-- 涂抹区（保留原有） -->
         <div id="idphotoBordercutArea" class="hidden">
           <div class="idphoto-crop-stage" id="idphotoBordercutStage">
             <canvas id="idphotoBordercutCanvas"></canvas>
@@ -1055,6 +1084,7 @@
           <button class="btn big purple hidden" id="idphotoBordercutConfirm" type="button" style="margin-top:12px">✅ 满意，继续</button>
           <div class="status" id="idphotoBordercutStatus"></div>
         </div>
+
         <div class="status" id="idphotoBgStatus"></div>
       </div>
 
@@ -1232,7 +1262,7 @@
       <div class="scan-fs-corner br"></div>
     </div>
     <div class="scan-fs-focus" id="scanFsFocus"></div>
-    
+
     <div id="scanFsProcessing" class="scan-fs-processing hidden">
       <div class="spinner"></div>
       <div class="txt">正在处理…</div>
@@ -1307,7 +1337,9 @@
     pdfJs:     ['./libs/pdf.min.js',             './pdf.min.js'],
     pdfWorker: ['./libs/pdf.worker.min.js',      './pdf.worker.min.js'],
     jszip:     ['./libs/jszip.min.js',           './jszip.min.js'],
-    mammoth:   ['./libs/mammoth.browser.min.js', './mammoth.browser.min.js']
+    mammoth:   ['./libs/mammoth.browser.min.js', './mammoth.browser.min.js'],
+    mediapipeJs:   ['./libs/selfie_segmentation.js', './selfie_segmentation.js'],
+    mediapipeBase: './libs/'
   };
 
   const CDN = {
@@ -1328,7 +1360,11 @@
     mammoth: [
       'https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js',
       'https://unpkg.com/mammoth@1.6.0/mammoth.browser.min.js'
-    ]
+    ],
+    mediapipeJs: [
+      'https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation@0.1.1675465747/selfie_segmentation.js'
+    ],
+    mediapipeBase: 'https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation@0.1.1675465747/'
   };
 
   let loadingEl = null, progressValue = 0;
@@ -1469,13 +1505,15 @@
       +   '<div style="margin:20px 0;color:#475569;font-size:13px;line-height:1.9;text-align:left">'
       +   '<b style="color:#0f172a;font-size:14px">解决办法：</b><br><br>'
       +   '<b>1. 下载库文件到本地（推荐）</b><br>'
-      +   '在网页目录新建 <code style="background:#eef2ff;color:#3730a3;padding:1px 6px;border-radius:4px">libs</code> 文件夹，下载以下 5 个文件，然后刷新页面：<br>'
+      +   '在网页目录新建 <code style="background:#eef2ff;color:#3730a3;padding:1px 6px;border-radius:4px">libs</code> 文件夹，下载以下文件，然后刷新页面：<br>'
       +   '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;margin:8px 0;font-family:monospace;font-size:11px;line-height:1.9;word-break:break-all">'
       +   'pdf-lib.min.js ← https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js<br>'
       +   'pdf.min.js ← https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js<br>'
       +   'pdf.worker.min.js ← https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js<br>'
       +   'jszip.min.js ← https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js<br>'
-      +   'mammoth.browser.min.js ← https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js'
+      +   'mammoth.browser.min.js ← https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js<br>'
+      +   'selfie_segmentation.js ← https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation@0.1.1675465747/selfie_segmentation.js<br>'
+      +   '（以及同目录下的 _wasm_bin.js / .wasm / .data 三个文件）'
       +   '</div>'
       +   '<b>2. 网络问题</b><br>如果是网络限制导致 CDN 加载失败，请切换网络后重试。<br><br>'
       +   '<b>3. 浏览器兼容</b><br>建议用最新版 Chrome / Safari / Edge 打开。'
@@ -3978,12 +4016,18 @@
       }
     });
 
-    /* ===== 模块 6：证件照制作（涂抹 / 跳过直接生成） ===== */
+    /* ===== 模块 6：证件照制作（AI / 涂抹 / 跳过） ===== */
     let idphotoImg = null;
     let idphotoCropped = null;
     let idphotoMatted = null;
     let idphotoMatteMode = 'skip';
     let idphotoCtx = null;
+    let idphotoAiMaskCanvas = null;
+    let idphotoAiSegmentation = null;
+    let idphotoAiBusy = false;
+    let idphotoAiBgColor = '#ffffff';
+    let idphotoAiBasePath = LOCAL.mediapipeBase;
+
     const idphotoState = { scale: 1, x: 0, y: 0, startX: 0, startY: 0, dragging: false };
     const idphotoTargetSizes = {
       '1inch':  { w: 295, h: 413 },
@@ -4023,6 +4067,154 @@
       }
     }
 
+    /* ---- AI 抠图核心 ---- */
+    async function ensureAiSegmentation() {
+      if (idphotoAiSegmentation) return idphotoAiSegmentation;
+
+      // 尝试本地加载 selfie_segmentation.js
+      if (typeof window.SelfieSegmentation === 'undefined') {
+        let loaded = false;
+        for (const p of LOCAL.mediapipeJs) {
+          try {
+            await loadScript(p, 'SelfieSegmentation', 2000);
+            loaded = true;
+            idphotoAiBasePath = LOCAL.mediapipeBase;
+            console.log('[AI] ✅ 本地 MediaPipe 加载成功');
+            break;
+          } catch (e) { /* 继续尝试 CDN */ }
+        }
+        if (!loaded) {
+          for (const url of CDN.mediapipeJs) {
+            try {
+              await loadScript(url, 'SelfieSegmentation', 10000);
+              loaded = true;
+              idphotoAiBasePath = CDN.mediapipeBase;
+              console.log('[AI] ✅ CDN MediaPipe 加载成功');
+              break;
+            } catch (e) { /* 继续 */ }
+          }
+        }
+        if (!loaded || typeof window.SelfieSegmentation === 'undefined') {
+          throw new Error('MediaPipe 加载失败，请检查网络或下载 selfie_segmentation.js 到 libs/');
+        }
+      }
+
+      const seg = new window.SelfieSegmentation({
+        locateFile: (f) => idphotoAiBasePath + f
+      });
+      seg.setOptions({ modelSelection: 1, selfieMode: false });
+      seg.onResults(onAiSegmentationResults);
+      idphotoAiSegmentation = seg;
+      return seg;
+    }
+
+    function onAiSegmentationResults(results) {
+      if (!idphotoCropped) return;
+      const src = idphotoCropped;
+      const W = src.width, H = src.height;
+
+      const tmp = document.createElement('canvas');
+      tmp.width = W; tmp.height = H;
+      const tctx = tmp.getContext('2d');
+      tctx.drawImage(results.segmentationMask, 0, 0, W, H);
+      tctx.globalCompositeOperation = 'source-in';
+      tctx.drawImage(src, 0, 0, W, H);
+
+      if (!idphotoAiMaskCanvas) idphotoAiMaskCanvas = document.createElement('canvas');
+      idphotoAiMaskCanvas.width = W;
+      idphotoAiMaskCanvas.height = H;
+      const mctx = idphotoAiMaskCanvas.getContext('2d');
+      mctx.clearRect(0, 0, W, H);
+      mctx.filter = 'blur(0.6px)';
+      mctx.drawImage(tmp, 0, 0);
+      mctx.filter = 'none';
+
+      renderAiPreview(idphotoAiBgColor);
+      const st = $('#idphotoAiStatus');
+      st.textContent = '✅ AI 抠图完成，可切换背景色或直接确认';
+      st.className = 'status ok';
+      idphotoAiBusy = false;
+    }
+
+    function renderAiPreview(bgColor) {
+      if (!idphotoAiMaskCanvas) return;
+      const cv = $('#idphotoAiPreviewCanvas');
+      const stage = $('#idphotoAiStage');
+      if (!cv || !stage) return;
+      const W = idphotoAiMaskCanvas.width;
+      const H = idphotoAiMaskCanvas.height;
+      const stageW = stage.clientWidth || 320;
+      const scale = stageW / W;
+      const dispW = Math.round(W * scale);
+      const dispH = Math.round(H * scale);
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      cv.width = Math.round(dispW * dpr);
+      cv.height = Math.round(dispH * dpr);
+      cv.style.width = dispW + 'px';
+      cv.style.height = dispH + 'px';
+      const ctx = cv.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(0, 0, dispW, dispH);
+      ctx.drawImage(idphotoAiMaskCanvas, 0, 0, dispW, dispH);
+    }
+
+    async function runAiSegmentation() {
+      if (!idphotoCropped) {
+        say('#idphotoBgStatus', '请先完成第 2 步的裁剪', true);
+        return;
+      }
+      if (idphotoAiBusy) return;
+      idphotoAiBusy = true;
+      idphotoAiMaskCanvas = null;
+
+      $('#idphotoAiArea').classList.remove('hidden');
+      const st = $('#idphotoAiStatus');
+      st.textContent = '⏳ 首次使用需加载约 2MB AI 模型，请耐心等待…';
+      st.className = 'status';
+
+      try {
+        const seg = await ensureAiSegmentation();
+        st.textContent = '🔍 正在识别人像轮廓…';
+        await seg.send({ image: idphotoCropped });
+      } catch (e) {
+        console.error('[AI]', e);
+        st.textContent = '❌ AI 抠图失败：' + (e.message || e) + '（可改用涂抹模式）';
+        st.className = 'status err';
+        idphotoAiBusy = false;
+      }
+    }
+
+    bind('#idphotoUseAiBtn', 'click', () => {
+      if (!idphotoCropped) {
+        say('#idphotoBgStatus', '请先完成第 2 步的裁剪', true);
+        return;
+      }
+      idphotoMatteMode = 'ai';
+      $('#idphotoBordercutArea').classList.add('hidden');
+      runAiSegmentation();
+    });
+
+    bind('#idphotoAiRetry', 'click', () => {
+      idphotoAiMaskCanvas = null;
+      runAiSegmentation();
+    });
+
+    $('#idphotoAiArea').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-aibg]');
+      if (!btn) return;
+      idphotoAiBgColor = btn.dataset.aibg;
+      renderAiPreview(idphotoAiBgColor);
+    });
+
+    bind('#idphotoAiConfirm', 'click', async () => {
+      if (!idphotoAiMaskCanvas) return;
+      idphotoMatted = { canvas: idphotoAiMaskCanvas, mode: 'ai' };
+      idphotoMatteMode = 'ai';
+      await goToOptions();
+    });
+
+    /* ---- 文件上传 ---- */
     bind('#idphotoFile', 'change', async (e) => {
       const f = e.target.files[0];
       if (!f) return;
@@ -4030,6 +4222,7 @@
         idphotoImg = await loadImage(await readDataUrl(f));
         idphotoCropped = null;
         idphotoMatted = null;
+        idphotoAiMaskCanvas = null;
         idphotoState.x = 0; idphotoState.y = 0;
         idphotoCrop.crop = { x: 0.1, y: 0.05, w: 0.8, h: 0.9 };
         bordercutHistory = [];
@@ -4041,6 +4234,7 @@
         $('#idphotoPreviewWrap').classList.add('hidden');
         $('#idphotoDownloadRow').classList.add('hidden');
         $('#idphotoBordercutArea').classList.add('hidden');
+        $('#idphotoAiArea').classList.add('hidden');
 
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
@@ -4262,6 +4456,7 @@
 
       idphotoCropped = cv;
       idphotoMatted = null;
+      idphotoAiMaskCanvas = null;
       idphotoState.x = 0; idphotoState.y = 0;
       bordercutSrcCanvas = cv;
       bordercutStrokes = [];
@@ -4273,12 +4468,12 @@
       $('#idphotoPreviewWrap').classList.add('hidden');
       $('#idphotoDownloadRow').classList.add('hidden');
       $('#idphotoBordercutArea').classList.add('hidden');
+      $('#idphotoAiArea').classList.add('hidden');
       $('#idphotoBgStatus').textContent = '';
 
-      say('#idphotoBgStatus', '✅ 裁剪完成！背景已处理好的可直接「直接生成证件照」，需要抠图的请点「涂抹擦除背景」。');
+      say('#idphotoBgStatus', '✅ 裁剪完成！可选择「直接生成」「涂抹擦除」或「AI 智能抠图」。');
     });
 
-    // 【新增】直接生成（跳过涂抹）
     bind('#idphotoSkipBgBtn', 'click', async () => {
       if (!idphotoCropped) {
         say('#idphotoBgStatus', '请先完成第 2 步的裁剪', true);
@@ -4287,18 +4482,19 @@
       idphotoMatteMode = 'skip';
       idphotoMatted = null;
       $('#idphotoBordercutArea').classList.add('hidden');
+      $('#idphotoAiArea').classList.add('hidden');
       $('#idphotoBgStatus').textContent = '';
       await goToOptions();
-      say('#idphotoBgStatus', '✅ 已跳过涂抹，直接使用裁剪图生成证件照', false, true);
+      say('#idphotoBgStatus', '✅ 已跳过抠图，直接使用裁剪图生成证件照', false, true);
     });
 
-    // 涂抹抠图
     bind('#idphotoUseBordercutBtn', 'click', () => {
       if (!idphotoCropped) {
         say('#idphotoBgStatus', '请先完成第 2 步的裁剪', true);
         return;
       }
       idphotoMatteMode = 'bordercut';
+      $('#idphotoAiArea').classList.add('hidden');
       $('#idphotoBordercutArea').classList.remove('hidden');
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -4540,12 +4736,8 @@
     }
 
     async function ensureImageSource() {
-      if (idphotoMatteMode === 'skip') {
-        return idphotoCropped;
-      }
-      if (idphotoMatted && idphotoMatted.canvas) {
-        return idphotoMatted.canvas;
-      }
+      if (idphotoMatteMode === 'skip') return idphotoCropped;
+      if (idphotoMatted && idphotoMatted.canvas) return idphotoMatted.canvas;
       return idphotoCropped;
     }
 
@@ -5279,6 +5471,7 @@
           if ($('#scanImgEditor').classList.contains('show')) drawEditorCanvas();
           if (!$('#idphotoCropCard').classList.contains('hidden') && idphotoImg) idphotoCropRender();
           if (!$('#idphotoBgCard').classList.contains('hidden') && bordercutSrcCanvas) renderBordercutCanvas(bordercutSrcCanvas);
+          if (!$('#idphotoAiArea').classList.contains('hidden') && idphotoAiMaskCanvas) renderAiPreview(idphotoAiBgColor);
         } catch (e) {}
       }, 200);
     });
@@ -5290,6 +5483,7 @@
           if ($('#scanImgEditor').classList.contains('show')) drawEditorCanvas();
           if (!$('#idphotoCropCard').classList.contains('hidden') && idphotoImg) idphotoCropRender();
           if (!$('#idphotoBgCard').classList.contains('hidden') && bordercutSrcCanvas) renderBordercutCanvas(bordercutSrcCanvas);
+          if (!$('#idphotoAiArea').classList.contains('hidden') && idphotoAiMaskCanvas) renderAiPreview(idphotoAiBgColor);
         } catch (e) {}
       }, 300);
     });
