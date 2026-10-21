@@ -3,11 +3,11 @@
 
 | 文件路径 | 简介 | 访问链接 |
 | ---- | ---- | ---- |
-| index.html | 自用常用PDF工具箱：A3试卷拆分、PDF页面调整、身份证复印、证件照制作 | https://seadai794.github.io/pdf-tool/ |
-| ai.html | 收集的第三方证件照制作页面 | https://seadai794.github.io/pdf-tool/ai.html |
-| hx/index.html | 房屋户型、装修设计单文件工具合集 | https://seadai794.github.io/pdf-tool/hx |
-| A3-A4.html | 单独的A3试卷拆分为A4工具（收集别人制作） | https://seadai794.github.io/pdf-tool/A3-A4.html |
-| xcpdf.html | 新创PDF工具集，PDF功能更多更全 | https://seadai794.github.io/pdf-tool/xcpdf.html |
+| index.html | 自用常用PDF工具箱：A3试卷拆分、PDF页面调整、身份证复印、证件照制作。 | https://seadai794.github.io/pdf-tool/ |
+| ai.html | 收集的第三方证件照制作页面，增加了证件照排版，可以直接下载用相纸打印。 | https://seadai794.github.io/pdf-tool/ai.html |
+| hx/index.html | 房屋户型、装修设计单文件工具合集。 | https://seadai794.github.io/pdf-tool/hx |
+| A3-A4.html | 单独的A3试卷拆分为A4工具（收集别人制作）。 | https://seadai794.github.io/pdf-tool/A3-A4.html |
+| xcpdf.html | 新创PDF工具集，PDF功能更多更全。 | https://seadai794.github.io/pdf-tool/xcpdf.html |
 
 > 说明：大部分工具来源于网络收集整理，为单HTML静态页面，本地保存也可离线打开。
 
