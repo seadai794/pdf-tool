@@ -1,2342 +1,1350 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>📸 证件照制作工具-00pluto制作</title>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js"></script>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      body {
-        font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-        padding: 20px;
-      }
-
-      .container {
-        max-width: 1400px;
-        margin: 0 auto;
-      }
-
-      header {
-        text-align: center;
-        margin-bottom: 30px;
-        color: white;
-      }
-
-      h1 {
-        font-size: 2.5em;
-        margin-bottom: 10px;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-      }
-
-      .subtitle {
-        font-size: 1.1em;
-        opacity: 0.9;
-      }
-
-      .tool-container {
-        background: white;
-        border-radius: 20px;
-        padding: 30px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-        display: grid;
-        grid-template-columns: 1fr 1.5fr 1fr;
-        gap: 30px;
-      }
-
-      @media (max-width: 1200px) {
-        .tool-container {
-          grid-template-columns: 1fr;
-        }
-      }
-
-      .upload-section,
-      .preview-section,
-      .controls-section {
-        padding: 20px;
-      }
-
-      .section-title {
-        font-size: 1.4em;
-        margin-bottom: 20px;
-        color: #333;
-        border-bottom: 3px solid #667eea;
-        padding-bottom: 10px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .upload-area {
-        border: 3px dashed #ccc;
-        border-radius: 15px;
-        padding: 40px 20px;
-        text-align: center;
-        background: #f8f9fa;
-        cursor: pointer;
-        transition: all 0.3s;
-      }
-
-      .upload-area:hover {
-        border-color: #667eea;
-        background: #e8e9ff;
-      }
-
-      .upload-area.drag-over {
-        border-color: #4caf50;
-        background: #e8f5e9;
-      }
-
-      .upload-icon {
-        font-size: 4em;
-        color: #667eea;
-        margin-bottom: 15px;
-      }
-
-      .upload-text {
-        font-size: 1.1em;
-        color: #666;
-        margin-bottom: 10px;
-      }
-
-      .upload-hint {
-        color: #999;
-        font-size: 0.9em;
-      }
-
-      .file-input {
-        display: none;
-      }
-
-      .image-info-card {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        border-radius: 15px;
-        padding: 20px;
-        margin-top: 20px;
-        display: none;
-      }
-
-      .image-info-card.active {
-        display: block;
-        animation: slideIn 0.5s ease;
-      }
-
-      @keyframes slideIn {
-        from {
-          opacity: 0;
-          transform: translateY(-20px);
-        }
-
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      .info-title {
-        font-size: 1.1em;
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 15px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .info-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-      }
-
-      .info-item {
-        background: white;
-        padding: 12px;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      }
-
-      .info-label {
-        font-size: 0.85em;
-        color: #666;
-        margin-bottom: 5px;
-      }
-
-      .info-value {
-        font-size: 1em;
-        font-weight: 600;
-        color: #333;
-        word-break: break-all;
-      }
-
-      .info-value.highlight {
-        color: #667eea;
-      }
-
-      .info-value.success {
-        color: #4caf50;
-      }
-
-      .info-value.warning {
-        color: #ff9800;
-      }
-
-      .preview-container {
-        text-align: center;
-      }
-
-      .preview-tabs {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 20px;
-        justify-content: center;
-        flex-wrap: wrap;
-      }
-
-      .preview-tab {
-        padding: 10px 20px;
-        border: 2px solid #ddd;
-        border-radius: 25px;
-        background: white;
-        cursor: pointer;
-        font-weight: 600;
-        transition: all 0.3s;
-      }
-
-      .preview-tab:hover {
-        border-color: #667eea;
-        background: #e8e9ff;
-      }
-
-      .preview-tab.active {
-        border-color: #667eea;
-        background: #667eea;
-        color: white;
-      }
-
-      .preview-box {
-        border: 2px solid #ddd;
-        border-radius: 10px;
-        padding: 20px;
-        background: #f0f0f0;
-        min-height: 350px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 20px;
-        position: relative;
-        overflow: hidden;
-      }
-
-      .preview-box::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background:
-          linear-gradient(45deg, #ccc 25%, transparent 25%),
-          linear-gradient(-45deg, #ccc 25%, transparent 25%),
-          linear-gradient(45deg, transparent 75%, #ccc 75%),
-          linear-gradient(-45deg, transparent 75%, #ccc 75%);
-        background-size: 20px 20px;
-        background-position:
-          0 0,
-          0 10px,
-          10px -10px,
-          -10px 0px;
-        opacity: 0.3;
-        z-index: 0;
-      }
-
-      #previewImage,
-      #segmentedImage,
-      #resultCanvas {
-        max-width: 100%;
-        max-height: 300px;
-        border-radius: 8px;
-        display: none;
-        position: relative;
-        z-index: 1;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-      }
-
-      #placeholderText {
-        position: relative;
-        z-index: 1;
-        color: #999;
-        font-size: 1.1em;
-      }
-
-      .preview-info {
-        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-        padding: 15px;
-        border-radius: 8px;
-        margin-top: 15px;
-        font-size: 0.9em;
-        color: #1976d2;
-        border-left: 4px solid #2196f3;
-      }
-
-      .preview-stats {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
-        margin-top: 15px;
-      }
-
-      .stat-item {
-        background: white;
-        padding: 10px;
-        border-radius: 8px;
-        text-align: center;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      }
-
-      .stat-label {
-        font-size: 0.8em;
-        color: #666;
-        margin-bottom: 5px;
-      }
-
-      .stat-value {
-        font-size: 1.1em;
-        font-weight: 600;
-        color: #667eea;
-      }
-
-      .control-group {
-        margin-bottom: 25px;
-        background: #f8f9fa;
-        padding: 15px;
-        border-radius: 10px;
-      }
-
-      .control-label {
-        display: block;
-        margin-bottom: 10px;
-        font-weight: 600;
-        color: #333;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .live-indicator {
-        display: inline-block;
-        width: 8px;
-        height: 8px;
-        background: #4caf50;
-        border-radius: 50%;
-        animation: pulse 2s infinite;
-      }
-
-      @keyframes pulse {
-        0%,
-        100% {
-          opacity: 1;
-        }
-
-        50% {
-          opacity: 0.5;
-        }
-      }
-
-      .size-selector {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
-        margin-bottom: 15px;
-      }
-
-      .size-btn {
-        padding: 12px;
-        border: 2px solid #ddd;
-        border-radius: 8px;
-        background: white;
-        cursor: pointer;
-        text-align: center;
-        transition: all 0.3s;
-        font-weight: 600;
-      }
-
-      .size-btn:hover {
-        border-color: #667eea;
-        background: #e8e9ff;
-      }
-
-      .size-btn.active {
-        border-color: #4caf50;
-        background: #e8f5e9;
-        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
-      }
-
-      .size-btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-
-      .size-name {
-        display: block;
-        font-size: 0.9em;
-        color: #666;
-        margin-top: 5px;
-      }
-
-      .size-dimensions {
-        font-size: 0.8em;
-        color: #999;
-      }
-
-      .color-picker {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-      }
-
-      .color-option {
-        width: 45px;
-        height: 45px;
-        border-radius: 50%;
-        border: 3px solid transparent;
-        cursor: pointer;
-        transition: all 0.3s;
-        position: relative;
-      }
-
-      .color-option:hover {
-        transform: scale(1.1);
-      }
-
-      .color-option.selected {
-        border-color: #333;
-        box-shadow:
-          0 0 0 3px white,
-          0 0 0 6px #667eea;
-      }
-
-      .color-option:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-
-      .custom-color {
-        margin-top: 15px;
-      }
-
-      .custom-color input {
-        width: 100%;
-        padding: 10px;
-        border: 2px solid #ddd;
-        border-radius: 8px;
-        cursor: pointer;
-        height: 45px;
-      }
-
-      .format-selector {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-      }
-
-      .format-btn {
-        padding: 10px 20px;
-        border: 2px solid #ddd;
-        border-radius: 8px;
-        background: white;
-        cursor: pointer;
-        transition: all 0.3s;
-        font-weight: 600;
-      }
-
-      .format-btn:hover {
-        border-color: #667eea;
-        background: #e8e9ff;
-      }
-
-      .format-btn.active {
-        border-color: #2196f3;
-        background: #e3f2fd;
-        box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
-      }
-
-      .quality-slider {
-        margin-top: 15px;
-      }
-
-      .quality-slider input {
-        width: 100%;
-        margin-top: 5px;
-      }
-
-      .quality-value {
-        text-align: right;
-        font-weight: 600;
-        color: #667eea;
-        margin-top: 5px;
-      }
-
-      .action-buttons {
-        display: flex;
-        gap: 15px;
-        margin-top: 25px;
-      }
-
-      .btn {
-        flex: 1;
-        padding: 15px 30px;
-        border: none;
-        border-radius: 10px;
-        font-size: 1.1em;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-      }
-
-      .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-      }
-
-      .btn-primary:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-      }
-
-      .btn-primary:disabled {
-        background: #ccc;
-        cursor: not-allowed;
-        transform: none;
-      }
-
-      .btn-segment {
-        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-        color: white;
-      }
-
-      .btn-segment:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
-      }
-
-      .btn-segment:disabled {
-        background: #ccc;
-        cursor: not-allowed;
-      }
-
-      .btn-download {
-        background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
-        color: white;
-        display: none;
-      }
-
-      .btn-download:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
-      }
-
-      footer {
-        text-align: center;
-        margin-top: 40px;
-        color: white;
-        font-size: 0.9em;
-        opacity: 0.8;
-      }
-
-      .info-box {
-        background: #fff3cd;
-        border-left: 4px solid #ffc107;
-        padding: 15px;
-        margin: 15px 0;
-        border-radius: 5px;
-        font-size: 0.9em;
-      }
-
-      .ai-info-box {
-        background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
-        border-left: 4px solid #f44336;
-        padding: 15px;
-        margin: 15px 0;
-        border-radius: 5px;
-        font-size: 0.9em;
-        color: #c62828;
-      }
-
-      .step-guide {
-        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-        border-left: 4px solid #4caf50;
-        padding: 20px;
-        margin: 20px 0;
-        border-radius: 10px;
-        font-size: 1em;
-        color: #2e7d32;
-        display: none;
-      }
-
-      .step-guide.active {
-        display: block;
-        animation: fadeIn 0.3s ease;
-      }
-
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-        }
-
-        to {
-          opacity: 1;
-        }
-      }
-
-      .step-list {
-        margin-top: 15px;
-        counter-reset: step-counter;
-      }
-
-      .step-item {
-        counter-increment: step-counter;
-        position: relative;
-        padding-left: 40px;
-        margin-bottom: 15px;
-        line-height: 1.6;
-      }
-
-      .step-item::before {
-        content: counter(step-counter);
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 28px;
-        height: 28px;
-        background: #4caf50;
-        color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        font-size: 0.9em;
-      }
-
-      .step-item.current::before {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        animation: pulse 2s infinite;
-      }
-
-      .step-item.completed::before {
-        background: #4caf50;
-      }
-
-      .step-item.disabled::before {
-        background: #ccc;
-      }
-
-      .step-title {
-        font-weight: 600;
-        margin-bottom: 5px;
-        color: #333;
-      }
-
-      .step-desc {
-        font-size: 0.9em;
-        color: #666;
-      }
-
-      .step-action {
-        margin-top: 10px;
-        padding: 10px;
-        background: rgba(102, 126, 234, 0.1);
-        border-radius: 5px;
-        font-size: 0.9em;
-        color: #667eea;
-      }
-
-      .dimensions-card {
-        background: #f8f9fa;
-        padding: 15px;
-        border-radius: 8px;
-        margin-top: 15px;
-        font-size: 0.9em;
-      }
-
-      .dimensions-card h4 {
-        margin-bottom: 10px;
-        color: #333;
-      }
-
-      .dimensions-list {
-        line-height: 1.8;
-      }
-
-      .live-preview-badge {
-        display: inline-block;
-        background: linear-gradient(135deg, #4caf50, #45a049);
-        color: white;
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-size: 0.8em;
-        font-weight: 600;
-        margin-left: 10px;
-      }
-
-      .loading-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.8);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-        flex-direction: column;
-        gap: 20px;
-      }
-
-      .loading-overlay.active {
-        display: flex;
-      }
-
-      .loading-spinner {
-        width: 80px;
-        height: 80px;
-        border: 6px solid #f3f3f3;
-        border-top: 6px solid #667eea;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-      }
-
-      @keyframes spin {
-        0% {
-          transform: rotate(0deg);
-        }
-
-        100% {
-          transform: rotate(360deg);
-        }
-      }
-
-      .loading-text {
-        color: white;
-        font-size: 1.2em;
-        font-weight: 600;
-      }
-
-      .loading-subtext {
-        color: rgba(255, 255, 255, 0.8);
-        font-size: 0.9em;
-      }
-
-      .file-size-display {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        color: white;
-        padding: 10px 20px;
-        border-radius: 25px;
-        display: inline-block;
-        margin-top: 10px;
-        font-weight: 600;
-      }
-
-      .bg-color-notice {
-        background: linear-gradient(135deg, #fff3e0, #ffe0b2);
-        border-left: 4px solid #ff9800;
-        padding: 10px 15px;
-        border-radius: 5px;
-        margin-top: 10px;
-        font-size: 0.85em;
-        color: #e65100;
-        display: none;
-      }
-
-      .bg-color-notice.active {
-        display: block;
-        animation: fadeIn 0.3s ease;
-      }
-
-      .progress-container {
-        width: 300px;
-        height: 8px;
-        background: rgba(255, 255, 255, 0.3);
-        border-radius: 4px;
-        overflow: hidden;
-      }
-
-      .progress-fill {
-        height: 100%;
-        background: linear-gradient(90deg, #667eea, #764ba2);
-        width: 0%;
-        transition: width 0.3s;
-      }
-
-      .hidden {
-        display: none !important;
-      }
-
-      .mode-selector {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 15px;
-      }
-
-      .mode-btn {
-        flex: 1;
-        padding: 12px;
-        border: 2px solid #ddd;
-        border-radius: 8px;
-        background: white;
-        cursor: pointer;
-        font-weight: 600;
-        transition: all 0.3s;
-      }
-
-      .mode-btn:hover {
-        border-color: #667eea;
-        background: #e8e9ff;
-      }
-
-      .mode-btn.active {
-        border-color: #667eea;
-        background: #667eea;
-        color: white;
-      }
-
-      .status-badge {
-        display: inline-block;
-        padding: 4px 12px;
-        border-radius: 15px;
-        font-size: 0.8em;
-        font-weight: 600;
-        margin-left: 8px;
-      }
-
-      .status-ready {
-        background: linear-gradient(135deg, #4caf50, #45a049);
-        color: white;
-      }
-
-      .status-processing {
-        background: linear-gradient(135deg, #ff9800, #f57c00);
-        color: white;
-      }
-
-      .status-error {
-        background: linear-gradient(135deg, #f44336, #e53935);
-        color: white;
-      }
-
-      .status-disabled {
-        background: #ccc;
-        color: #666;
-      }
-
-      .tooltip {
-        position: relative;
-        display: inline-block;
-      }
-
-      .tooltip .tooltip-text {
-        visibility: hidden;
-        width: 200px;
-        background: rgba(0, 0, 0, 0.8);
-        color: #fff;
-        text-align: center;
-        border-radius: 6px;
-        padding: 8px;
-        position: absolute;
-        z-index: 1;
-        bottom: 125%;
-        left: 50%;
-        transform: translateX(-50%);
-        opacity: 0;
-        transition: opacity 0.3s;
-        font-size: 0.9em;
-        line-height: 1.4;
-      }
-
-      .tooltip:hover .tooltip-text {
-        visibility: visible;
-        opacity: 1;
-      }
-
-      .tooltip .tooltip-text::after {
-        content: "";
-        position: absolute;
-        top: 100%;
-        left: 50%;
-        margin-left: -5px;
-        border-width: 5px;
-        border-style: solid;
-        border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
-      }
-
-      .mode-notice {
-        background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-        border-left: 4px solid #2196f3;
-        padding: 12px;
-        border-radius: 8px;
-        margin-top: 12px;
-        font-size: 0.85em;
-        color: #1565c0;
-        display: none;
-      }
-
-      .mode-notice.active {
-        display: block;
-        animation: fadeIn 0.3s ease;
-      }
-
-      .manual-tips {
-        background: linear-gradient(135deg, #fff8e1, #ffecb3);
-        border-left: 4px solid #ffc107;
-        padding: 12px;
-        border-radius: 8px;
-        margin-top: 12px;
-        font-size: 0.85em;
-        color: #ff6f00;
-        display: none;
-      }
-
-      .manual-tips.active {
-        display: block;
-        animation: fadeIn 0.3s ease;
-      }
-
-      .manual-tips ul {
-        margin-top: 8px;
-        padding-left: 20px;
-      }
-
-      .manual-tips li {
-        margin-bottom: 5px;
-      }
-
-      .color-live-hint {
-        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
-        border-left: 4px solid #4caf50;
-        padding: 10px 15px;
-        border-radius: 5px;
-        margin-top: 10px;
-        font-size: 0.85em;
-        color: #2e7d32;
-        display: none;
-      }
-
-      .color-live-hint.active {
-        display: block;
-        animation: fadeIn 0.3s ease;
-      }
-    </style>
-  </head>
-
-  <body>
-    <div class="container">
-      <header>
-        <h1>📸 证件照制作工具</h1>
-        <p class="subtitle">
-          AI 智能抠图 | 背景替换 | 实时预览 | 1 寸/小二寸/二寸
-        </p>
-      </header>
-
-      <div class="tool-container">
-        <div class="upload-section">
-          <h2 class="section-title">📤 上传照片</h2>
-          <div class="upload-area" id="uploadArea">
-            <div class="upload-icon">📷</div>
-            <div class="upload-text">点击或拖拽照片到此处</div>
-            <div class="upload-hint">
-              支持 JPG, PNG, WebP 格式 | 建议使用正面清晰照片
-            </div>
-            <input
-              type="file"
-              id="fileInput"
-              class="file-input"
-              accept="image/*"
-            />
-          </div>
-
-          <div class="image-info-card" id="imageInfoCard">
-            <div class="info-title">📊 原始图片信息</div>
-            <div class="info-grid">
-              <div class="info-item">
-                <div class="info-label">文件名</div>
-                <div class="info-value" id="infoFileName">-</div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">文件格式</div>
-                <div class="info-value highlight" id="infoFormat">-</div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">图片尺寸</div>
-                <div class="info-value success" id="infoDimensions">-</div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">文件大小</div>
-                <div class="info-value warning" id="infoFileSize">-</div>
-              </div>
-            </div>
-            <div class="file-size-display" id="fileSizeDisplay">
-              ✨ 上传照片后查看信息
-            </div>
-          </div>
-
-          <div class="ai-info-box" id="aiInfoBox">
-            <strong>🤖 抠图模式说明：</strong><br />
-            <strong>AI 智能抠图：</strong
-            >自动识别人物轮廓，效果最佳（需联网加载模型）<br />
-            <strong>手动背景替换：</strong
-            >智能检测背景并替换，速度快（适合纯色背景照片）
-          </div>
-
-          <div class="info-box">
-            <strong>💡 使用提示：</strong><br />
-            1. 请上传正面免冠照片，背景尽量简单<br />
-            2. 照片清晰度越高，处理效果越好<br />
-            3. 建议人物占照片高度的 70%-80%
-          </div>
-
-          <div class="step-guide" id="stepGuide">
-            <div class="step-title">📋 制作流程</div>
-            <div class="step-list">
-              <div class="step-item current" id="step1">
-                <div class="step-title">上传照片</div>
-                <div class="step-desc">点击上方区域上传您的照片</div>
-              </div>
-              <div class="step-item disabled" id="step2">
-                <div class="step-title">选择抠图模式</div>
-                <div class="step-desc">AI 智能抠图或手动背景替换</div>
-                <div class="step-action">上传照片后自动启用</div>
-              </div>
-              <div class="step-item disabled" id="step3">
-                <div class="step-title">选择证件照尺寸</div>
-                <div class="step-desc">1 寸、小二寸或二寸</div>
-              </div>
-              <div class="step-item disabled" id="step4">
-                <div class="step-title">选择背景颜色</div>
-                <div class="step-desc">白、红、蓝等 8 种标准颜色</div>
-              </div>
-              <div class="step-item disabled" id="step5">
-                <div class="step-title">确认并下载</div>
-                <div class="step-desc">生成证件照并下载保存</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="preview-section">
-          <h2 class="section-title">
-            🖼️ 预览效果
-            <span class="live-preview-badge">✨ 上传后实时预览</span>
-          </h2>
-
-          <div class="preview-tabs">
-            <div class="preview-tab active" data-view="original">原始图片</div>
-            <div class="preview-tab" data-view="segmented">处理后</div>
-            <div class="preview-tab" data-view="result">最终效果</div>
-          </div>
-
-          <div class="preview-container">
-            <div class="preview-box">
-              <img id="previewImage" alt="预览图片" />
-              <img id="segmentedImage" alt="处理后图片" />
-              <canvas id="resultCanvas"></canvas>
-              <div id="placeholderText">📷 上传照片后将显示预览</div>
-            </div>
-
-            <div class="bg-color-notice" id="bgColorNotice">
-              💡 已选择背景颜色：<span
-                id="currentColorName"
-                style="font-weight: 600; color: #e65100"
-                >白色</span
-              >
-            </div>
-
-            <div class="color-live-hint" id="colorLiveHint">
-              ✨ 点击颜色后实时更新预览效果
-            </div>
-
-            <div class="preview-info" id="previewInfo">
-              <strong>📊 处理状态：</strong><br />
-              <span id="statusText">等待上传照片</span>
-              <span class="status-badge status-disabled" id="statusBadge"
-                >未开始</span
-              >
-            </div>
-
-            <div class="preview-stats" id="previewStats">
-              <div class="stat-item">
-                <div class="stat-label">输出尺寸</div>
-                <div class="stat-value" id="statDimensions">-</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-label">输出格式</div>
-                <div class="stat-value" id="statFormat">-</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-label">预估大小</div>
-                <div class="stat-value" id="statFileSize">-</div>
-              </div>
-            </div>
-
-            <div class="dimensions-card">
-              <h4>📏 标准证件照尺寸参考</h4>
-              <div class="dimensions-list">
-                <strong>1 寸：</strong> 2.5×3.5cm (295×413px @300dpi)<br />
-                <strong>小二寸：</strong> 3.5×4.5cm (413×531px @300dpi)<br />
-                <strong>二寸：</strong> 3.5×4.9cm (413×579px @300dpi)
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="controls-section">
-          <h2 class="section-title">⚙️ 处理设置</h2>
-
-          <div class="control-group">
-            <label class="control-label">🤖 选择抠图模式</label>
-            <div class="mode-selector">
-              <button class="mode-btn active" data-mode="ai">
-                🤖 AI 智能抠图
-              </button>
-              <button class="mode-btn" data-mode="manual">
-                🎨 手动背景替换
-              </button>
-            </div>
-            <button class="btn btn-segment" id="segmentBtn" disabled>
-              <span id="segmentBtnText">上传照片后启用</span>
-            </button>
-            <div class="mode-notice" id="modeNotice">
-              💡
-              <strong>手动模式说明：</strong
-              >选择颜色后，背景将直接替换为所选颜色。适合背景简单、人物轮廓清晰的照片。
-            </div>
-            <div class="manual-tips" id="manualTips">
-              <strong>📌 手动模式最佳实践：</strong>
-              <ul>
-                <li>✅ 适合：纯色背景、人物与背景对比明显的照片</li>
-                <li>❌ 不适合：复杂背景、头发细节多的照片（建议用 AI 模式）</li>
-                <li>💡 提示：选择与人物衣服颜色差异大的背景色效果更佳</li>
-              </ul>
-            </div>
-            <div
-              class="segmentation-settings"
-              id="segmentSettings"
-              style="display: none"
-            >
-              <div class="setting-row">
-                <span class="setting-label">边缘平滑度</span>
-                <div class="setting-control">
-                  <input
-                    type="range"
-                    id="edgeSmooth"
-                    min="0"
-                    max="10"
-                    value="3"
-                    disabled
-                  />
-                </div>
-                <span class="setting-value" id="edgeSmoothValue">3</span>
-              </div>
-              <button
-                class="btn btn-secondary"
-                id="reSegmentBtn"
-                style="width: 100%; margin-top: 10px; display: none"
-              >
-                🔄 重新处理
-              </button>
-            </div>
-          </div>
-
-          <div class="control-group">
-            <label class="control-label"
-              >选择证件照尺寸：<span class="tooltip"
-                ><span class="live-indicator"></span
-                ><span class="tooltip-text">选择后将应用到预览</span></span
-              ></label
-            >
-            <div class="size-selector">
-              <div
-                class="size-btn"
-                data-size="1inch"
-                data-width="295"
-                data-height="413"
-                disabled
-              >
-                1 寸
-                <span class="size-name">标准 1 寸</span>
-                <span class="size-dimensions">295×413px</span>
-              </div>
-              <div
-                class="size-btn"
-                data-size="small2inch"
-                data-width="413"
-                data-height="531"
-                disabled
-              >
-                小二寸
-                <span class="size-name">小二寸</span>
-                <span class="size-dimensions">413×531px</span>
-              </div>
-              <div
-                class="size-btn"
-                data-size="2inch"
-                data-width="413"
-                data-height="579"
-                disabled
-              >
-                二寸
-                <span class="size-name">标准 2 寸</span>
-                <span class="size-dimensions">413×579px</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="control-group">
-            <label class="control-label"
-              >选择背景颜色：<span class="tooltip"
-                ><span class="live-indicator"></span
-                ><span class="tooltip-text">选择后实时预览效果</span></span
-              ></label
-            >
-            <div class="color-picker">
-              <div
-                class="color-option selected"
-                style="background: #ffffff"
-                data-color="#ffffff"
-                title="白色"
-                disabled
-              ></div>
-              <div
-                class="color-option"
-                style="background: #ff0000"
-                data-color="#ff0000"
-                title="红色"
-                disabled
-              ></div>
-              <div
-                class="color-option"
-                style="background: #0000ff"
-                data-color="#0000ff"
-                title="蓝色"
-                disabled
-              ></div>
-              <div
-                class="color-option"
-                style="background: #008000"
-                data-color="#008000"
-                title="绿色"
-                disabled
-              ></div>
-              <div
-                class="color-option"
-                style="background: #ffff00"
-                data-color="#ffff00"
-                title="黄色"
-                disabled
-              ></div>
-              <div
-                class="color-option"
-                style="background: #ffa500"
-                data-color="#ffa500"
-                title="橙色"
-                disabled
-              ></div>
-              <div
-                class="color-option"
-                style="background: #800080"
-                data-color="#800080"
-                title="紫色"
-                disabled
-              ></div>
-              <div
-                class="color-option"
-                style="background: #00ced1"
-                data-color="#00ced1"
-                title="青色"
-                disabled
-              ></div>
-            </div>
-            <div class="custom-color">
-              <label
-                class="control-label"
-                style="margin-top: 10px; margin-bottom: 5px"
-                >自定义颜色：</label
-              >
-              <input
-                type="color"
-                id="customColorPicker"
-                value="#ffffff"
-                disabled
-              />
-            </div>
-          </div>
-
-          <div class="control-group">
-            <label class="control-label"
-              >输出格式：<span class="tooltip"
-                ><span class="live-indicator"></span
-                ><span class="tooltip-text"
-                  >JPG 适合打印，PNG 保留透明，WebP 体积小</span
-                ></span
-              ></label
-            >
-            <div class="format-selector">
-              <button class="format-btn active" data-format="jpg">JPG</button>
-              <button class="format-btn" data-format="png">PNG</button>
-              <button class="format-btn" data-format="webp">WebP</button>
-            </div>
-
-            <div class="quality-slider">
-              <label class="control-label">图片质量 (仅 JPG/WebP)：</label>
-              <input
-                type="range"
-                id="qualitySlider"
-                min="0.1"
-                max="1.0"
-                step="0.1"
-                value="0.9"
-              />
-              <div class="quality-value">
-                质量：<span id="qualityValue">90%</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="action-buttons">
-            <button class="btn btn-primary" id="convertBtn" disabled>
-              <span id="convertBtnText">处理完成后启用</span>
-            </button>
-            <button class="btn btn-download" id="downloadBtn">
-              <span id="downloadBtnText">下载证件照</span>
-            </button>
-          </div>
-        </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📸 证件照制作工具 - 排版增强版</title>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js"></script>
+  <style>
+    /* 原有样式保持不变，仅新增排版相关样式 */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container { max-width: 1400px; margin: 0 auto; }
+    header { text-align: center; margin-bottom: 30px; color: white; }
+    h1 { font-size: 2.5em; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+    .subtitle { font-size: 1.1em; opacity: 0.9; }
+    .tool-container {
+      background: white; border-radius: 20px; padding: 30px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      display: grid; grid-template-columns: 1fr 1.5fr 1fr; gap: 30px;
+    }
+    @media (max-width: 1200px) { .tool-container { grid-template-columns: 1fr; } }
+    .upload-section, .preview-section, .controls-section { padding: 20px; }
+    .section-title {
+      font-size: 1.4em; margin-bottom: 20px; color: #333;
+      border-bottom: 3px solid #667eea; padding-bottom: 10px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .upload-area {
+      border: 3px dashed #ccc; border-radius: 15px; padding: 40px 20px;
+      text-align: center; background: #f8f9fa; cursor: pointer; transition: all 0.3s;
+    }
+    .upload-area:hover { border-color: #667eea; background: #e8e9ff; }
+    .upload-area.drag-over { border-color: #4caf50; background: #e8f5e9; }
+    .upload-icon { font-size: 4em; color: #667eea; margin-bottom: 15px; }
+    .upload-text { font-size: 1.1em; color: #666; margin-bottom: 10px; }
+    .upload-hint { color: #999; font-size: 0.9em; }
+    .file-input { display: none; }
+    .image-info-card {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 15px; padding: 20px; margin-top: 20px; display: none;
+    }
+    .image-info-card.active { display: block; animation: slideIn 0.5s ease; }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    .info-title { font-size: 1.1em; font-weight: 600; color: #333; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+    .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .info-item { background: white; padding: 12px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .info-label { font-size: 0.85em; color: #666; margin-bottom: 5px; }
+    .info-value { font-size: 1em; font-weight: 600; color: #333; word-break: break-all; }
+    .info-value.highlight { color: #667eea; }
+    .info-value.success { color: #4caf50; }
+    .info-value.warning { color: #ff9800; }
+    .preview-container { text-align: center; }
+    .preview-tabs { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; flex-wrap: wrap; }
+    .preview-tab {
+      padding: 10px 20px; border: 2px solid #ddd; border-radius: 25px;
+      background: white; cursor: pointer; font-weight: 600; transition: all 0.3s;
+    }
+    .preview-tab:hover { border-color: #667eea; background: #e8e9ff; }
+    .preview-tab.active { border-color: #667eea; background: #667eea; color: white; }
+    .preview-box {
+      border: 2px solid #ddd; border-radius: 10px; padding: 20px;
+      background: #f0f0f0; min-height: 350px; display: flex; align-items: center;
+      justify-content: center; margin-bottom: 20px; position: relative; overflow: hidden;
+    }
+    .preview-box::before {
+      content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(45deg, #ccc 25%, transparent 25%),
+                  linear-gradient(-45deg, #ccc 25%, transparent 25%),
+                  linear-gradient(45deg, transparent 75%, #ccc 75%),
+                  linear-gradient(-45deg, transparent 75%, #ccc 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+      opacity: 0.3; z-index: 0;
+    }
+    #previewImage, #segmentedImage, #resultCanvas {
+      max-width: 100%; max-height: 300px; border-radius: 8px; display: none;
+      position: relative; z-index: 1; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    #placeholderText { position: relative; z-index: 1; color: #999; font-size: 1.1em; }
+    .preview-info {
+      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+      padding: 15px; border-radius: 8px; margin-top: 15px;
+      font-size: 0.9em; color: #1976d2; border-left: 4px solid #2196f3;
+    }
+    .preview-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+    .stat-item { background: white; padding: 10px; border-radius: 8px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .stat-label { font-size: 0.8em; color: #666; margin-bottom: 5px; }
+    .stat-value { font-size: 1.1em; font-weight: 600; color: #667eea; }
+    .control-group { margin-bottom: 25px; background: #f8f9fa; padding: 15px; border-radius: 10px; }
+    .control-label {
+      display: block; margin-bottom: 10px; font-weight: 600; color: #333;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .live-indicator {
+      display: inline-block; width: 8px; height: 8px; background: #4caf50;
+      border-radius: 50%; animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .size-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
+    .size-btn {
+      padding: 12px; border: 2px solid #ddd; border-radius: 8px;
+      background: white; cursor: pointer; text-align: center; transition: all 0.3s; font-weight: 600;
+    }
+    .size-btn:hover { border-color: #667eea; background: #e8e9ff; }
+    .size-btn.active { border-color: #4caf50; background: #e8f5e9; box-shadow: 0 4px 12px rgba(76,175,80,0.3); }
+    .size-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .size-name { display: block; font-size: 0.9em; color: #666; margin-top: 5px; }
+    .size-dimensions { font-size: 0.8em; color: #999; }
+    .color-picker { display: flex; gap: 10px; flex-wrap: wrap; }
+    .color-option {
+      width: 45px; height: 45px; border-radius: 50%; border: 3px solid transparent;
+      cursor: pointer; transition: all 0.3s; position: relative;
+    }
+    .color-option:hover { transform: scale(1.1); }
+    .color-option.selected { border-color: #333; box-shadow: 0 0 0 3px white, 0 0 0 6px #667eea; }
+    .color-option:disabled { opacity: 0.5; cursor: not-allowed; }
+    .custom-color { margin-top: 15px; }
+    .custom-color input { width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; height: 45px; }
+    .format-selector { display: flex; gap: 10px; flex-wrap: wrap; }
+    .format-btn {
+      padding: 10px 20px; border: 2px solid #ddd; border-radius: 8px;
+      background: white; cursor: pointer; transition: all 0.3s; font-weight: 600;
+    }
+    .format-btn:hover { border-color: #667eea; background: #e8e9ff; }
+    .format-btn.active { border-color: #2196f3; background: #e3f2fd; box-shadow: 0 4px 12px rgba(33,150,243,0.3); }
+    .quality-slider { margin-top: 15px; }
+    .quality-slider input { width: 100%; margin-top: 5px; }
+    .quality-value { text-align: right; font-weight: 600; color: #667eea; margin-top: 5px; }
+    .action-buttons { display: flex; gap: 15px; margin-top: 25px; flex-wrap: wrap; }
+    .btn {
+      flex: 1; padding: 15px 30px; border: none; border-radius: 10px;
+      font-size: 1.1em; font-weight: 600; cursor: pointer; transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2); min-width: 120px;
+    }
+    .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+    .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102,126,234,0.4); }
+    .btn-primary:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+    .btn-segment { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); color: white; }
+    .btn-segment:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,107,107,0.4); }
+    .btn-segment:disabled { background: #ccc; cursor: not-allowed; }
+    .btn-download { background: linear-gradient(135deg, #4caf50 0%, #45a049 100%); color: white; display: none; }
+    .btn-download:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(76,175,80,0.4); }
+    .btn-secondary { background: linear-gradient(135deg, #9e9e9e, #757575); color: white; }
+    .btn-secondary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(158,158,158,0.4); }
+    footer { text-align: center; margin-top: 40px; color: white; font-size: 0.9em; opacity: 0.8; }
+    .info-box { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 15px 0; border-radius: 5px; font-size: 0.9em; }
+    .ai-info-box { background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%); border-left: 4px solid #f44336; padding: 15px; margin: 15px 0; border-radius: 5px; font-size: 0.9em; color: #c62828; }
+    .step-guide { background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border-left: 4px solid #4caf50; padding: 20px; margin: 20px 0; border-radius: 10px; font-size: 1em; color: #2e7d32; display: none; }
+    .step-guide.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .step-list { margin-top: 15px; counter-reset: step-counter; }
+    .step-item { counter-increment: step-counter; position: relative; padding-left: 40px; margin-bottom: 15px; line-height: 1.6; }
+    .step-item::before { content: counter(step-counter); position: absolute; left: 0; top: 0; width: 28px; height: 28px; background: #4caf50; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9em; }
+    .step-item.current::before { background: linear-gradient(135deg, #667eea, #764ba2); animation: pulse 2s infinite; }
+    .step-item.completed::before { background: #4caf50; }
+    .step-item.disabled::before { background: #ccc; }
+    .step-title { font-weight: 600; margin-bottom: 5px; color: #333; }
+    .step-desc { font-size: 0.9em; color: #666; }
+    .step-action { margin-top: 10px; padding: 10px; background: rgba(102,126,234,0.1); border-radius: 5px; font-size: 0.9em; color: #667eea; }
+    .dimensions-card { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 15px; font-size: 0.9em; }
+    .dimensions-card h4 { margin-bottom: 10px; color: #333; }
+    .dimensions-list { line-height: 1.8; }
+    .live-preview-badge { display: inline-block; background: linear-gradient(135deg, #4caf50, #45a049); color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.8em; font-weight: 600; margin-left: 10px; }
+    .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 1000; flex-direction: column; gap: 20px; }
+    .loading-overlay.active { display: flex; }
+    .loading-spinner { width: 80px; height: 80px; border: 6px solid #f3f3f3; border-top: 6px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .loading-text { color: white; font-size: 1.2em; font-weight: 600; }
+    .loading-subtext { color: rgba(255,255,255,0.8); font-size: 0.9em; }
+    .file-size-display { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 10px 20px; border-radius: 25px; display: inline-block; margin-top: 10px; font-weight: 600; }
+    .bg-color-notice { background: linear-gradient(135deg, #fff3e0, #ffe0b2); border-left: 4px solid #ff9800; padding: 10px 15px; border-radius: 5px; margin-top: 10px; font-size: 0.85em; color: #e65100; display: none; }
+    .bg-color-notice.active { display: block; animation: fadeIn 0.3s ease; }
+    .progress-container { width: 300px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 4px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); width: 0%; transition: width 0.3s; }
+    .hidden { display: none !important; }
+    .mode-selector { display: flex; gap: 10px; margin-bottom: 15px; }
+    .mode-btn { flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 8px; background: white; cursor: pointer; font-weight: 600; transition: all 0.3s; }
+    .mode-btn:hover { border-color: #667eea; background: #e8e9ff; }
+    .mode-btn.active { border-color: #667eea; background: #667eea; color: white; }
+    .status-badge { display: inline-block; padding: 4px 12px; border-radius: 15px; font-size: 0.8em; font-weight: 600; margin-left: 8px; }
+    .status-ready { background: linear-gradient(135deg, #4caf50, #45a049); color: white; }
+    .status-processing { background: linear-gradient(135deg, #ff9800, #f57c00); color: white; }
+    .status-error { background: linear-gradient(135deg, #f44336, #e53935); color: white; }
+    .status-disabled { background: #ccc; color: #666; }
+    .tooltip { position: relative; display: inline-block; }
+    .tooltip .tooltip-text { visibility: hidden; width: 200px; background: rgba(0,0,0,0.8); color: #fff; text-align: center; border-radius: 6px; padding: 8px; position: absolute; z-index: 1; bottom: 125%; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.3s; font-size: 0.9em; line-height: 1.4; }
+    .tooltip:hover .tooltip-text { visibility: visible; opacity: 1; }
+    .tooltip .tooltip-text::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: rgba(0,0,0,0.8) transparent transparent transparent; }
+    .mode-notice { background: linear-gradient(135deg, #e3f2fd, #bbdefb); border-left: 4px solid #2196f3; padding: 12px; border-radius: 8px; margin-top: 12px; font-size: 0.85em; color: #1565c0; display: none; }
+    .mode-notice.active { display: block; animation: fadeIn 0.3s ease; }
+    .manual-tips { background: linear-gradient(135deg, #fff8e1, #ffecb3); border-left: 4px solid #ffc107; padding: 12px; border-radius: 8px; margin-top: 12px; font-size: 0.85em; color: #ff6f00; display: none; }
+    .manual-tips.active { display: block; animation: fadeIn 0.3s ease; }
+    .manual-tips ul { margin-top: 8px; padding-left: 20px; }
+    .manual-tips li { margin-bottom: 5px; }
+    .color-live-hint { background: linear-gradient(135deg, #e8f5e9, #c8e6c9); border-left: 4px solid #4caf50; padding: 10px 15px; border-radius: 5px; margin-top: 10px; font-size: 0.85em; color: #2e7d32; display: none; }
+    .color-live-hint.active { display: block; animation: fadeIn 0.3s ease; }
+    .segmentation-settings { margin-top: 15px; padding: 12px; background: #f1f3f5; border-radius: 10px; }
+    .setting-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .setting-label { font-weight: 600; font-size: 0.9em; color: #555; min-width: 80px; }
+    .setting-control { flex: 1; }
+    .setting-control input[type="range"] { width: 100%; }
+    .setting-value { min-width: 30px; text-align: center; font-weight: 600; color: #667eea; }
+    
+    /* 新增排版相关样式 */
+    .layout-section { margin-top: 20px; border-top: 2px dashed #ddd; padding-top: 20px; }
+    .layout-options { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 15px; }
+    .layout-btn {
+      padding: 10px 18px; border: 2px solid #ddd; border-radius: 8px;
+      background: white; cursor: pointer; transition: all 0.3s; font-weight: 600;
+    }
+    .layout-btn:hover { border-color: #667eea; background: #e8e9ff; }
+    .layout-btn.active { border-color: #2196f3; background: #e3f2fd; box-shadow: 0 4px 12px rgba(33,150,243,0.3); }
+    .layout-preview-container { text-align: center; margin-top: 15px; }
+    #layoutCanvas { max-width: 100%; max-height: 200px; border: 1px solid #ddd; border-radius: 8px; display: none; }
+    .margin-control { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+    .margin-control label { font-weight: 600; font-size: 0.9em; color: #555; }
+    .margin-control input { width: 80px; padding: 6px 8px; border: 1px solid #ccc; border-radius: 6px; }
+    .margin-control span { font-size: 0.9em; color: #888; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>📸 证件照制作工具</h1>
+    <p class="subtitle">AI 智能抠图 | 背景替换 | 实时预览 | 1寸/小二寸/二寸 | 多图排版</p>
+  </header>
+
+  <div class="tool-container">
+    <!-- 左侧：上传与步骤 -->
+    <div class="upload-section">
+      <h2 class="section-title">📤 上传照片</h2>
+      <div class="upload-area" id="uploadArea">
+        <div class="upload-icon">📷</div>
+        <div class="upload-text">点击或拖拽照片到此处</div>
+        <div class="upload-hint">支持 JPG, PNG, WebP 格式 | 建议使用正面清晰照片</div>
+        <input type="file" id="fileInput" class="file-input" accept="image/*" />
       </div>
 
-      <footer>
-        <p>© 2026 证件照制作工具 | 纯前端处理，图片不会上传到服务器</p>
-      </footer>
-    </div>
+      <div class="image-info-card" id="imageInfoCard">
+        <div class="info-title">📊 原始图片信息</div>
+        <div class="info-grid">
+          <div class="info-item"><div class="info-label">文件名</div><div class="info-value" id="infoFileName">-</div></div>
+          <div class="info-item"><div class="info-label">文件格式</div><div class="info-value highlight" id="infoFormat">-</div></div>
+          <div class="info-item"><div class="info-label">图片尺寸</div><div class="info-value success" id="infoDimensions">-</div></div>
+          <div class="info-item"><div class="info-label">文件大小</div><div class="info-value warning" id="infoFileSize">-</div></div>
+        </div>
+        <div class="file-size-display" id="fileSizeDisplay">✨ 上传照片后查看信息</div>
+      </div>
 
-    <div class="loading-overlay" id="loadingOverlay">
-      <div class="loading-spinner"></div>
-      <div class="loading-text" id="loadingText">正在处理中...</div>
-      <div class="loading-subtext" id="loadingSubtext">请稍候</div>
-      <div class="progress-container">
-        <div class="progress-fill" id="progressFill"></div>
+      <div class="ai-info-box" id="aiInfoBox">
+        <strong>🤖 抠图模式说明：</strong><br />
+        <strong>AI 智能抠图：</strong>自动识别人物轮廓，效果最佳（需联网加载模型）<br />
+        <strong>手动背景替换：</strong>智能检测背景并替换，速度快（适合纯色背景照片）
+      </div>
+
+      <div class="info-box">
+        <strong>💡 使用提示：</strong><br />
+        1. 请上传正面免冠照片，背景尽量简单<br />
+        2. 照片清晰度越高，处理效果越好<br />
+        3. 建议人物占照片高度的 70%-80%
+      </div>
+
+      <div class="step-guide" id="stepGuide">
+        <div class="step-title">📋 制作流程</div>
+        <div class="step-list">
+          <div class="step-item current" id="step1"><div class="step-title">上传照片</div><div class="step-desc">点击上方区域上传您的照片</div></div>
+          <div class="step-item disabled" id="step2"><div class="step-title">选择抠图模式</div><div class="step-desc">AI 智能抠图或手动背景替换</div><div class="step-action">上传照片后自动启用</div></div>
+          <div class="step-item disabled" id="step3"><div class="step-title">选择证件照尺寸</div><div class="step-desc">1 寸、小二寸或二寸</div></div>
+          <div class="step-item disabled" id="step4"><div class="step-title">选择背景颜色</div><div class="step-desc">白、红、蓝等 8 种标准颜色</div></div>
+          <div class="step-item disabled" id="step5"><div class="step-title">确认并下载</div><div class="step-desc">生成证件照并下载保存</div></div>
+        </div>
       </div>
     </div>
 
-    <script>
-      // ==================== 全局变量 ====================
-      let originalImage = null;
-      let originalFile = null;
-      let segmentedCanvas = null;
-      let maskCanvas = null; // ✅ 新增：单独存储掩码
-      let currentSize = null;
-      let currentBgColor = "#ffffff";
-      let currentFormat = "jpg";
-      let currentQuality = 0.9;
-      let currentView = "original";
-      let isProcessed = false;
-      let currentMode = "ai";
-      let selfieSegmentation = null;
-      let aiReady = false;
-      let currentStep = 1;
+    <!-- 中间：预览 -->
+    <div class="preview-section">
+      <h2 class="section-title">
+        🖼️ 预览效果
+        <span class="live-preview-badge">✨ 上传后实时预览</span>
+      </h2>
 
-      // ==================== DOM 元素 ====================
-      const fileInput = document.getElementById("fileInput");
-      const uploadArea = document.getElementById("uploadArea");
-      const previewImage = document.getElementById("previewImage");
-      const segmentedImage = document.getElementById("segmentedImage");
-      const resultCanvas = document.getElementById("resultCanvas");
-      const placeholderText = document.getElementById("placeholderText");
-      const previewInfo = document.getElementById("previewInfo");
-      const segmentBtn = document.getElementById("segmentBtn");
-      const segmentBtnText = document.getElementById("segmentBtnText");
-      const convertBtn = document.getElementById("convertBtn");
-      const convertBtnText = document.getElementById("convertBtnText");
-      const downloadBtn = document.getElementById("downloadBtn");
-      const downloadBtnText = document.getElementById("downloadBtnText");
-      const sizeBtns = document.querySelectorAll(".size-btn");
-      const colorOptions = document.querySelectorAll(".color-option");
-      const customColorPicker = document.getElementById("customColorPicker");
-      const formatBtns = document.querySelectorAll(".format-btn");
-      const qualitySlider = document.getElementById("qualitySlider");
-      const qualityValue = document.getElementById("qualityValue");
-      const previewTabs = document.querySelectorAll(".preview-tab");
-      const loadingOverlay = document.getElementById("loadingOverlay");
-      const loadingText = document.getElementById("loadingText");
-      const loadingSubtext = document.getElementById("loadingSubtext");
-      const progressFill = document.getElementById("progressFill");
-      const imageInfoCard = document.getElementById("imageInfoCard");
-      const stepGuide = document.getElementById("stepGuide");
-      const bgColorNotice = document.getElementById("bgColorNotice");
-      const colorLiveHint = document.getElementById("colorLiveHint");
-      const currentColorName = document.getElementById("currentColorName");
-      const segmentSettings = document.getElementById("segmentSettings");
-      const edgeSmooth = document.getElementById("edgeSmooth");
-      const edgeSmoothValue = document.getElementById("edgeSmoothValue");
-      const reSegmentBtn = document.getElementById("reSegmentBtn");
-      const modeBtns = document.querySelectorAll(".mode-btn");
-      const statusText = document.getElementById("statusText");
-      const statusBadge = document.getElementById("statusBadge");
-      const stepItems = document.querySelectorAll(".step-item");
-      const modeNotice = document.getElementById("modeNotice");
-      const manualTips = document.getElementById("manualTips");
+      <div class="preview-tabs">
+        <div class="preview-tab active" data-view="original">原始图片</div>
+        <div class="preview-tab" data-view="segmented">处理后</div>
+        <div class="preview-tab" data-view="result">最终效果</div>
+      </div>
 
-      const infoFileName = document.getElementById("infoFileName");
-      const infoFormat = document.getElementById("infoFormat");
-      const infoDimensions = document.getElementById("infoDimensions");
-      const infoFileSize = document.getElementById("infoFileSize");
-      const fileSizeDisplay = document.getElementById("fileSizeDisplay");
-      const statDimensions = document.getElementById("statDimensions");
-      const statFormat = document.getElementById("statFormat");
-      const statFileSize = document.getElementById("statFileSize");
+      <div class="preview-container">
+        <div class="preview-box">
+          <img id="previewImage" alt="预览图片" />
+          <img id="segmentedImage" alt="处理后图片" />
+          <canvas id="resultCanvas"></canvas>
+          <div id="placeholderText">📷 上传照片后将显示预览</div>
+        </div>
 
-      // ==================== 初始化 ====================
-      window.addEventListener("load", () => {
-        console.log("🎉 证件照制作工具已加载完成！");
-        disableControls();
-        updateStatus("等待上传照片", "disabled");
-        initSelfieSegmentation();
-      });
+        <div class="bg-color-notice" id="bgColorNotice">
+          💡 已选择背景颜色：<span id="currentColorName" style="font-weight:600;color:#e65100;">白色</span>
+        </div>
 
-      // ==================== AI 模型初始化 ====================
-      function initSelfieSegmentation() {
-        try {
-          if (typeof SelfieSegmentation !== "undefined") {
-            selfieSegmentation = new SelfieSegmentation({
-              locateFile: (file) => {
-                return `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`;
-              },
-            });
-            selfieSegmentation.setOptions({
-              modelSelection: 1,
-              selfieMode: false,
-            });
-            selfieSegmentation.onResults(onSegmentationResults);
-            aiReady = true;
-            console.log("✅ AI 模型已加载");
-            updateStatus("AI 模型就绪", "ready");
-          } else {
-            console.warn("⚠️ AI 模型未加载");
-            aiReady = false;
-            updateStatus("AI 模型加载失败，将使用手动模式", "error");
-          }
-        } catch (error) {
-          console.error("初始化 AI 模型时出错:", error);
-          aiReady = false;
-          updateStatus("AI 模型初始化失败", "error");
-        }
-      }
+        <div class="color-live-hint" id="colorLiveHint">✨ 点击颜色后实时更新预览效果</div>
 
-      // ==================== AI 分割结果处理 ====================
-      function onSegmentationResults(results) {
-        try {
-          if (!originalImage) return;
+        <div class="preview-info" id="previewInfo">
+          <strong>📊 处理状态：</strong><br />
+          <span id="statusText">等待上传照片</span>
+          <span class="status-badge status-disabled" id="statusBadge">未开始</span>
+        </div>
 
-          const canvas = segmentedCanvas;
-          const ctx = canvas.getContext("2d");
-          canvas.width = originalImage.width;
-          canvas.height = originalImage.height;
+        <div class="preview-stats" id="previewStats">
+          <div class="stat-item"><div class="stat-label">输出尺寸</div><div class="stat-value" id="statDimensions">-</div></div>
+          <div class="stat-item"><div class="stat-label">输出格式</div><div class="stat-value" id="statFormat">-</div></div>
+          <div class="stat-item"><div class="stat-label">预估大小</div><div class="stat-value" id="statFileSize">-</div></div>
+        </div>
 
-          ctx.save();
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.drawImage(
-            results.segmentationMask,
-            0,
-            0,
-            canvas.width,
-            canvas.height,
-          );
-          ctx.globalCompositeOperation = "source-in";
-          ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
-          ctx.restore();
+        <div class="dimensions-card">
+          <h4>📏 标准证件照尺寸参考</h4>
+          <div class="dimensions-list">
+            <strong>1 寸：</strong> 2.5×3.5cm (295×413px @300dpi)<br />
+            <strong>小二寸：</strong> 3.5×4.5cm (413×531px @300dpi)<br />
+            <strong>二寸：</strong> 3.5×4.9cm (413×579px @300dpi)
+          </div>
+        </div>
 
-          // ✅ 保存掩码供后续使用
-          saveMask(canvas);
+        <!-- 新增：排版预览区域 -->
+        <div class="layout-section" id="layoutSection" style="display: none;">
+          <h4 style="margin-bottom: 10px; color: #333;">🖨️ 排版预览</h4>
+          <div class="layout-preview-container">
+            <canvas id="layoutCanvas"></canvas>
+            <div id="layoutPlaceholder" style="color: #999; font-size: 0.9em; padding: 10px;">选择排版尺寸后预览</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-          segmentedImage.src = canvas.toDataURL("image/png");
-          segmentedImage.style.display = "block";
-          isProcessed = true;
+    <!-- 右侧：控制 -->
+    <div class="controls-section">
+      <h2 class="section-title">⚙️ 处理设置</h2>
 
-          segmentBtnText.textContent = "✅ 处理完成";
-          segmentBtn.disabled = true;
-          segmentSettings.style.display = "block";
-          reSegmentBtn.style.display = "block";
-          edgeSmooth.disabled = false;
+      <div class="control-group">
+        <label class="control-label">🤖 选择抠图模式</label>
+        <div class="mode-selector">
+          <button class="mode-btn active" data-mode="ai">🤖 AI 智能抠图</button>
+          <button class="mode-btn" data-mode="manual">🎨 手动背景替换</button>
+        </div>
+        <button class="btn btn-segment" id="segmentBtn" disabled>
+          <span id="segmentBtnText">上传照片后启用</span>
+        </button>
+        <div class="mode-notice" id="modeNotice">💡 <strong>手动模式说明：</strong>选择颜色后，背景将直接替换为所选颜色。适合背景简单、人物轮廓清晰的照片。</div>
+        <div class="manual-tips" id="manualTips">
+          <strong>📌 手动模式最佳实践：</strong>
+          <ul>
+            <li>✅ 适合：纯色背景、人物与背景对比明显的照片</li>
+            <li>❌ 不适合：复杂背景、头发细节多的照片（建议用 AI 模式）</li>
+            <li>💡 提示：选择与人物衣服颜色差异大的背景色效果更佳</li>
+          </ul>
+        </div>
+        <div class="segmentation-settings" id="segmentSettings" style="display: none">
+          <div class="setting-row">
+            <span class="setting-label">边缘平滑度</span>
+            <div class="setting-control"><input type="range" id="edgeSmooth" min="0" max="10" value="3" disabled /></div>
+            <span class="setting-value" id="edgeSmoothValue">3</span>
+          </div>
+          <button class="btn btn-secondary" id="reSegmentBtn" style="width: 100%; margin-top: 10px; display: none">🔄 重新处理</button>
+        </div>
+      </div>
 
-          enableControls();
-          updateStep(3);
-          updateStatus("✅ 抠图完成，可选择尺寸和背景颜色", "ready");
-          showLoading(false);
-          switchPreviewTab({
-            target: document.querySelector(
-              '.preview-tab[data-view="segmented"]',
-            ),
-          });
-          showSuccessToast("🎉 AI 抠图完成！现在可以选择背景颜色");
-        } catch (error) {
-          console.error("处理分割结果时出错:", error);
-          fallbackToManual();
-        }
-      }
+      <div class="control-group">
+        <label class="control-label">选择证件照尺寸：<span class="tooltip"><span class="live-indicator"></span><span class="tooltip-text">选择后将应用到预览</span></span></label>
+        <div class="size-selector">
+          <div class="size-btn" data-size="1inch" data-width="295" data-height="413" disabled>1 寸<span class="size-name">标准 1 寸</span><span class="size-dimensions">295×413px</span></div>
+          <div class="size-btn" data-size="small2inch" data-width="413" data-height="531" disabled>小二寸<span class="size-name">小二寸</span><span class="size-dimensions">413×531px</span></div>
+          <div class="size-btn" data-size="2inch" data-width="413" data-height="579" disabled>二寸<span class="size-name">标准 2 寸</span><span class="size-dimensions">413×579px</span></div>
+        </div>
+      </div>
 
-      // ==================== 保存掩码 ====================
-      function saveMask(sourceCanvas) {
-        if (!maskCanvas) {
-          maskCanvas = document.createElement("canvas");
-        }
-        maskCanvas.width = sourceCanvas.width;
-        maskCanvas.height = sourceCanvas.height;
-        const ctx = maskCanvas.getContext("2d");
-        ctx.drawImage(sourceCanvas, 0, 0);
-      }
+      <div class="control-group">
+        <label class="control-label">选择背景颜色：<span class="tooltip"><span class="live-indicator"></span><span class="tooltip-text">选择后实时预览效果</span></span></label>
+        <div class="color-picker">
+          <div class="color-option selected" style="background:#ffffff" data-color="#ffffff" title="白色" disabled></div>
+          <div class="color-option" style="background:#ff0000" data-color="#ff0000" title="红色" disabled></div>
+          <div class="color-option" style="background:#0000ff" data-color="#0000ff" title="蓝色" disabled></div>
+          <div class="color-option" style="background:#008000" data-color="#008000" title="绿色" disabled></div>
+          <div class="color-option" style="background:#ffff00" data-color="#ffff00" title="黄色" disabled></div>
+          <div class="color-option" style="background:#ffa500" data-color="#ffa500" title="橙色" disabled></div>
+          <div class="color-option" style="background:#800080" data-color="#800080" title="紫色" disabled></div>
+          <div class="color-option" style="background:#00ced1" data-color="#00ced1" title="青色" disabled></div>
+        </div>
+        <div class="custom-color">
+          <label class="control-label" style="margin-top:10px;margin-bottom:5px;">自定义颜色：</label>
+          <input type="color" id="customColorPicker" value="#ffffff" disabled />
+        </div>
+      </div>
 
-      // ==================== 更新状态显示 ====================
-      function updateStatus(text, type) {
-        statusText.textContent = text;
-        statusBadge.textContent =
-          type === "ready"
-            ? "就绪"
-            : type === "processing"
-              ? "处理中"
-              : type === "error"
-                ? "错误"
-                : "未开始";
-        statusBadge.className = "status-badge";
-        statusBadge.classList.add(`status-${type}`);
-      }
+      <div class="control-group">
+        <label class="control-label">输出格式：<span class="tooltip"><span class="live-indicator"></span><span class="tooltip-text">JPG 适合打印，PNG 保留透明，WebP 体积小</span></span></label>
+        <div class="format-selector">
+          <button class="format-btn active" data-format="jpg">JPG</button>
+          <button class="format-btn" data-format="png">PNG</button>
+          <button class="format-btn" data-format="webp">WebP</button>
+        </div>
+        <div class="quality-slider">
+          <label class="control-label">图片质量 (仅 JPG/WebP)：</label>
+          <input type="range" id="qualitySlider" min="0.1" max="1.0" step="0.1" value="0.9" />
+          <div class="quality-value">质量：<span id="qualityValue">90%</span></div>
+        </div>
+      </div>
 
-      // ==================== 更新步骤指示 ====================
-      function updateStep(step) {
-        stepItems.forEach((item, index) => {
-          item.classList.remove("current", "completed", "disabled");
-          if (index + 1 < step) {
-            item.classList.add("completed");
-          } else if (index + 1 === step) {
-            item.classList.add("current");
-          } else {
-            item.classList.add("disabled");
-          }
+      <!-- 新增：排版设置 -->
+      <div class="control-group" id="layoutControls" style="display: none;">
+        <label class="control-label">🖨️ 排版设置</label>
+        <div class="layout-options">
+          <button class="layout-btn active" data-layout="none">不排版</button>
+          <button class="layout-btn" data-layout="5inch">5寸相纸 (3.5×5英寸)</button>
+          <button class="layout-btn" data-layout="6inch">6寸相纸 (4×6英寸)</button>
+          <button class="layout-btn" data-layout="a4">A4纸 (21×29.7cm)</button>
+        </div>
+        <div class="margin-control">
+          <label>图片间距 (px)：</label>
+          <input type="number" id="marginInput" value="10" min="0" max="100" step="1" />
+          <span>像素</span>
+        </div>
+        <div style="font-size:0.8em;color:#888;margin-top:8px;">※ 排版后可用于打印，间距可自行调整</div>
+      </div>
+
+      <div class="action-buttons">
+        <button class="btn btn-primary" id="convertBtn" disabled><span id="convertBtnText">处理完成后启用</span></button>
+        <button class="btn btn-download" id="downloadBtn"><span id="downloadBtnText">下载证件照</span></button>
+      </div>
+      <!-- 新增：下载排版图 -->
+      <button class="btn btn-secondary" id="downloadLayoutBtn" style="display: none; width: 100%; margin-top: 10px;">🖨️ 下载排版图</button>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2026 证件照制作工具 | 纯前端处理，图片不会上传到服务器</p>
+  </footer>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text" id="loadingText">正在处理中...</div>
+  <div class="loading-subtext" id="loadingSubtext">请稍候</div>
+  <div class="progress-container"><div class="progress-fill" id="progressFill"></div></div>
+</div>
+
+<script>
+  // ==================== 全局变量 ====================
+  let originalImage = null;
+  let originalFile = null;
+  let segmentedCanvas = null;
+  let maskCanvas = null;
+  let currentSize = null;
+  let currentBgColor = "#ffffff";
+  let currentFormat = "jpg";
+  let currentQuality = 0.9;
+  let currentView = "original";
+  let isProcessed = false;
+  let currentMode = "ai";
+  let selfieSegmentation = null;
+  let aiReady = false;
+  let currentStep = 1;
+  let currentLayout = "none"; // 排版类型: none, 5inch, 6inch, a4
+  let marginPx = 10; // 图片间距
+
+  // 相纸尺寸（像素@300dpi）
+  const PAPER_SIZES = {
+    "5inch": { width: 1500, height: 1050 },  // 5×3.5英寸
+    "6inch": { width: 1800, height: 1200 },  // 6×4英寸
+    "a4": { width: 2480, height: 3508 }      // A4 @300dpi
+  };
+
+  // DOM 元素
+  const fileInput = document.getElementById("fileInput");
+  const uploadArea = document.getElementById("uploadArea");
+  const previewImage = document.getElementById("previewImage");
+  const segmentedImage = document.getElementById("segmentedImage");
+  const resultCanvas = document.getElementById("resultCanvas");
+  const placeholderText = document.getElementById("placeholderText");
+  const previewInfo = document.getElementById("previewInfo");
+  const segmentBtn = document.getElementById("segmentBtn");
+  const segmentBtnText = document.getElementById("segmentBtnText");
+  const convertBtn = document.getElementById("convertBtn");
+  const convertBtnText = document.getElementById("convertBtnText");
+  const downloadBtn = document.getElementById("downloadBtn");
+  const downloadBtnText = document.getElementById("downloadBtnText");
+  const sizeBtns = document.querySelectorAll(".size-btn");
+  const colorOptions = document.querySelectorAll(".color-option");
+  const customColorPicker = document.getElementById("customColorPicker");
+  const formatBtns = document.querySelectorAll(".format-btn");
+  const qualitySlider = document.getElementById("qualitySlider");
+  const qualityValue = document.getElementById("qualityValue");
+  const previewTabs = document.querySelectorAll(".preview-tab");
+  const loadingOverlay = document.getElementById("loadingOverlay");
+  const loadingText = document.getElementById("loadingText");
+  const loadingSubtext = document.getElementById("loadingSubtext");
+  const progressFill = document.getElementById("progressFill");
+  const imageInfoCard = document.getElementById("imageInfoCard");
+  const stepGuide = document.getElementById("stepGuide");
+  const bgColorNotice = document.getElementById("bgColorNotice");
+  const colorLiveHint = document.getElementById("colorLiveHint");
+  const currentColorName = document.getElementById("currentColorName");
+  const segmentSettings = document.getElementById("segmentSettings");
+  const edgeSmooth = document.getElementById("edgeSmooth");
+  const edgeSmoothValue = document.getElementById("edgeSmoothValue");
+  const reSegmentBtn = document.getElementById("reSegmentBtn");
+  const modeBtns = document.querySelectorAll(".mode-btn");
+  const statusText = document.getElementById("statusText");
+  const statusBadge = document.getElementById("statusBadge");
+  const stepItems = document.querySelectorAll(".step-item");
+  const modeNotice = document.getElementById("modeNotice");
+  const manualTips = document.getElementById("manualTips");
+
+  const infoFileName = document.getElementById("infoFileName");
+  const infoFormat = document.getElementById("infoFormat");
+  const infoDimensions = document.getElementById("infoDimensions");
+  const infoFileSize = document.getElementById("infoFileSize");
+  const fileSizeDisplay = document.getElementById("fileSizeDisplay");
+  const statDimensions = document.getElementById("statDimensions");
+  const statFormat = document.getElementById("statFormat");
+  const statFileSize = document.getElementById("statFileSize");
+
+  // 排版相关
+  const layoutSection = document.getElementById("layoutSection");
+  const layoutCanvas = document.getElementById("layoutCanvas");
+  const layoutPlaceholder = document.getElementById("layoutPlaceholder");
+  const layoutBtns = document.querySelectorAll(".layout-btn");
+  const marginInput = document.getElementById("marginInput");
+  const downloadLayoutBtn = document.getElementById("downloadLayoutBtn");
+  const layoutControls = document.getElementById("layoutControls");
+
+  // ==================== 初始化 ====================
+  window.addEventListener("load", () => {
+    console.log("🎉 证件照制作工具已加载完成！");
+    disableControls();
+    updateStatus("等待上传照片", "disabled");
+    initSelfieSegmentation();
+    // 设置默认背景色
+    currentBgColor = "#ffffff";
+  });
+
+  // AI 模型初始化 (保持不变)
+  function initSelfieSegmentation() {
+    try {
+      if (typeof SelfieSegmentation !== "undefined") {
+        selfieSegmentation = new SelfieSegmentation({
+          locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`,
         });
-        currentStep = step;
+        selfieSegmentation.setOptions({ modelSelection: 1, selfieMode: false });
+        selfieSegmentation.onResults(onSegmentationResults);
+        aiReady = true;
+        console.log("✅ AI 模型已加载");
+        updateStatus("AI 模型就绪", "ready");
+      } else {
+        console.warn("⚠️ AI 模型未加载");
+        aiReady = false;
+        updateStatus("AI 模型加载失败，将使用手动模式", "error");
       }
-
-      // ==================== 启用/禁用控件 ====================
-      function enableControls() {
-        sizeBtns.forEach((btn) => (btn.disabled = false));
-        colorOptions.forEach((opt) => (opt.disabled = false));
-        customColorPicker.disabled = false;
-        convertBtn.disabled = false;
-        convertBtnText.textContent = "确认转换";
-        colorLiveHint.classList.add("active");
-      }
-
-      function disableControls() {
-        sizeBtns.forEach((btn) => (btn.disabled = true));
-        colorOptions.forEach((opt) => (opt.disabled = true));
-        customColorPicker.disabled = true;
-        convertBtn.disabled = true;
-        convertBtnText.textContent = "处理完成后启用";
-        colorLiveHint.classList.remove("active");
-      }
-
-      // ==================== 事件监听 ====================
-      uploadArea.addEventListener("click", () => fileInput.click());
-      uploadArea.addEventListener("dragover", handleDragOver);
-      uploadArea.addEventListener("dragleave", handleDragLeave);
-      uploadArea.addEventListener("drop", handleDrop);
-      fileInput.addEventListener("change", handleFileSelect);
-      segmentBtn.addEventListener("click", startProcessing);
-      reSegmentBtn.addEventListener("click", startProcessing);
-      convertBtn.addEventListener("click", convertPhoto);
-      downloadBtn.addEventListener("click", downloadPhoto);
-      customColorPicker.addEventListener("input", handleCustomColorChange);
-      qualitySlider.addEventListener("input", updateQualityValue);
-      previewTabs.forEach((tab) =>
-        tab.addEventListener("click", switchPreviewTab),
-      );
-      edgeSmooth.addEventListener("input", () => {
-        edgeSmoothValue.textContent = edgeSmooth.value;
-        if (isProcessed) {
-          updateBackgroundWithCurrentColor();
-        }
-      });
-
-      // 模式切换
-      modeBtns.forEach((btn) => {
-        btn.addEventListener("click", () => {
-          modeBtns.forEach((b) => b.classList.remove("active"));
-          btn.classList.add("active");
-          currentMode = btn.dataset.mode;
-
-          if (currentMode === "ai") {
-            segmentBtnText.textContent = "🎭 开始 AI 抠图";
-            modeNotice.classList.remove("active");
-            manualTips.classList.remove("active");
-          } else {
-            segmentBtnText.textContent = "🎨 开始背景替换";
-            modeNotice.classList.add("active");
-            manualTips.classList.add("active");
-          }
-
-          if (originalImage) {
-            segmentBtn.disabled = false;
-            isProcessed = false;
-            segmentBtnText.textContent =
-              currentMode === "ai" ? "🎭 开始 AI 抠图" : "🎨 开始背景替换";
-            segmentSettings.style.display = "none";
-            reSegmentBtn.style.display = "none";
-            disableControls();
-            updateStatus("✅ 照片已上传，选择模式后开始处理", "ready");
-
-            previewImage.style.display = "block";
-            segmentedImage.style.display = "none";
-            resultCanvas.style.display = "none";
-            placeholderText.style.display = "none";
-
-            // 重置掩码
-            maskCanvas = null;
-          }
-        });
-      });
-
-      colorOptions.forEach((option) => {
-        option.addEventListener("click", () =>
-          selectColor(option.dataset.color),
-        );
-      });
-
-      sizeBtns.forEach((btn) => {
-        btn.addEventListener("click", () => selectSize(btn));
-      });
-
-      formatBtns.forEach((btn) => {
-        btn.addEventListener("click", () => selectFormat(btn.dataset.format));
-      });
-
-      // ==================== 文件处理 ====================
-      function handleDragOver(e) {
-        e.preventDefault();
-        uploadArea.classList.add("drag-over");
-      }
-
-      function handleDragLeave(e) {
-        e.preventDefault();
-        uploadArea.classList.remove("drag-over");
-      }
-
-      function handleDrop(e) {
-        e.preventDefault();
-        uploadArea.classList.remove("drag-over");
-        if (e.dataTransfer.files.length) {
-          fileInput.files = e.dataTransfer.files;
-          handleFileSelect();
-        }
-      }
-
-      function handleFileSelect() {
-        const file = fileInput.files[0];
-        if (!file) return;
-
-        if (!file.type.match("image.*")) {
-          alert("请选择图片文件！");
-          return;
-        }
-
-        originalFile = file;
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          loadImage(e.target.result, file);
-        };
-        reader.readAsDataURL(file);
-      }
-
-      function loadImage(src, file) {
-        const img = new Image();
-        img.onload = function () {
-          originalImage = img;
-          previewImage.src = src;
-          previewImage.style.display = "block";
-          segmentedImage.style.display = "none";
-          resultCanvas.style.display = "none";
-          placeholderText.style.display = "none";
-
-          segmentBtn.disabled = false;
-          segmentBtnText.textContent =
-            currentMode === "ai" ? "🎭 开始 AI 抠图" : "🎨 开始背景替换";
-          segmentSettings.style.display = "none";
-          reSegmentBtn.style.display = "none";
-          isProcessed = false;
-          maskCanvas = null;
-
-          disableControls();
-          segmentedCanvas = null;
-
-          displayImageInfo(file, img);
-          updateStatus("✅ 照片上传成功，可开始处理", "ready");
-          updateStep(2);
-          stepGuide.classList.add("active");
-          switchPreviewTab({
-            target: document.querySelector(
-              '.preview-tab[data-view="original"]',
-            ),
-          });
-
-          if (!selfieSegmentation && currentMode === "ai") {
-            initSelfieSegmentation();
-          }
-        };
-        img.onerror = function () {
-          alert("图片加载失败，请重试！");
-        };
-        img.src = src;
-      }
-
-      function displayImageInfo(file, img) {
-        imageInfoCard.classList.add("active");
-        infoFileName.textContent =
-          file.name.length > 20
-            ? file.name.substring(0, 17) + "..."
-            : file.name;
-        const format = file.type.split("/")[1].toUpperCase();
-        infoFormat.textContent = format;
-        infoDimensions.textContent = `${img.width} × ${img.height} px`;
-        infoFileSize.textContent = formatFileSize(file.size);
-        estimateOutputSize();
-      }
-
-      function formatFileSize(bytes) {
-        if (bytes === 0) return "0 B";
-        const k = 1024;
-        const sizes = ["B", "KB", "MB", "GB"];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-      }
-
-      function estimateOutputSize() {
-        if (!originalImage || !currentSize) {
-          fileSizeDisplay.textContent = "✨ 选择尺寸后查看预估大小";
-          return;
-        }
-        const originalPixels = originalImage.width * originalImage.height;
-        const outputPixels = currentSize.width * currentSize.height;
-        const pixelRatio = outputPixels / originalPixels;
-        let formatMultiplier = 1;
-        if (currentFormat === "jpg") {
-          formatMultiplier = currentQuality * 0.8;
-        } else if (currentFormat === "png") {
-          formatMultiplier = 1.2;
-        } else if (currentFormat === "webp") {
-          formatMultiplier = currentQuality * 0.6;
-        }
-        const estimatedSize = originalFile.size * pixelRatio * formatMultiplier;
-        fileSizeDisplay.textContent = `✨ 预估输出大小：${formatFileSize(estimatedSize)}`;
-        statFileSize.textContent = formatFileSize(estimatedSize);
-      }
-
-      // ==================== 开始处理 ====================
-      function startProcessing() {
-        if (!originalImage) {
-          alert("请先上传照片！");
-          return;
-        }
-
-        showLoading(true, "正在处理中...", "请稍候", 0);
-        updateStatus("🔄 正在处理图片...", "processing");
-
-        segmentedCanvas = document.createElement("canvas");
-        segmentedCanvas.width = originalImage.width;
-        segmentedCanvas.height = originalImage.height;
-
-        if (currentMode === "ai" && aiReady) {
-          let progress = 0;
-          const progressInterval = setInterval(() => {
-            progress += 5;
-            if (progress <= 90) {
-              updateLoadingProgress(progress);
-            }
-          }, 200);
-
-          selfieSegmentation
-            .send({ image: originalImage })
-            .then(() => {
-              clearInterval(progressInterval);
-              updateLoadingProgress(100);
-            })
-            .catch((err) => {
-              console.error("AI 处理失败:", err);
-              clearInterval(progressInterval);
-              fallbackToManual();
-            });
-        } else {
-          setTimeout(() => {
-            processManualBackground();
-          }, 300);
-        }
-      }
-
-      // ==================== 手动背景替换 - ✅ 核心修复 ====================
-      function processManualBackground() {
-        if (!originalImage) {
-          showLoading(false);
-          alert("请先上传照片！");
-          return;
-        }
-
-        const canvas = segmentedCanvas;
-        const ctx = canvas.getContext("2d");
-        const width = originalImage.width;
-        const height = originalImage.height;
-
-        canvas.width = width;
-        canvas.height = height;
-
-        // ✅ 创建掩码画布
-        if (!maskCanvas) {
-          maskCanvas = document.createElement("canvas");
-          maskCanvas.width = width;
-          maskCanvas.height = height;
-        }
-        const maskCtx = maskCanvas.getContext("2d");
-
-        // ✅ 获取原图数据
-        ctx.drawImage(originalImage, 0, 0);
-        const imageData = ctx.getImageData(0, 0, width, height);
-        const data = imageData.data;
-
-        // ✅ 创建掩码数据
-        const maskData = maskCtx.createImageData(width, height);
-        const maskPixels = maskData.data;
-
-        const smoothLevel = parseInt(edgeSmooth.value) / 10;
-
-        // ✅ 从四角采样背景颜色
-        const cornerSamples = [
-          getPixelColor(data, 0, 0, width),
-          getPixelColor(data, Math.min(width - 1, 10), 0, width),
-          getPixelColor(data, 0, Math.min(height - 1, 10), width),
-          getPixelColor(
-            data,
-            Math.min(width - 1, 10),
-            Math.min(height - 1, 10),
-            width,
-          ),
-        ];
-        const bgColor = averageColor(cornerSamples);
-
-        console.log("📊 背景颜色采样:", bgColor);
-
-        // ✅ 创建掩码
-        for (let y = 0; y < height; y++) {
-          for (let x = 0; x < width; x++) {
-            const idx = (y * width + x) * 4;
-            const pixelColor = {
-              r: data[idx],
-              g: data[idx + 1],
-              b: data[idx + 2],
-            };
-            const colorDiff = colorDistance(pixelColor, bgColor);
-            const threshold = 50 + smoothLevel * 30;
-
-            if (colorDiff > threshold - 20 && colorDiff < threshold + 20) {
-              const smoothAlpha = ((colorDiff - (threshold - 20)) / 40) * 255;
-              maskPixels[idx + 3] = smoothAlpha;
-            } else {
-              maskPixels[idx + 3] = colorDiff > threshold ? 255 : 0;
-            }
-          }
-        }
-
-        // ✅ 应用形态学操作
-        applyMorphologicalOperation(maskData, width, height, smoothLevel);
-        maskCtx.putImageData(maskData, 0, 0);
-
-        // ✅ 应用掩码到原图（只保存人物，背景透明）
-        ctx.putImageData(imageData, 0, 0);
-        ctx.globalCompositeOperation = "destination-in";
-        ctx.drawImage(maskCanvas, 0, 0);
-        ctx.globalCompositeOperation = "source-over";
-
-        // ✅ 保存掩码供后续颜色切换使用
-        saveMask(canvas);
-
-        // ✅ 应用当前背景颜色
-        applyBackgroundColor(currentBgColor);
-
-        segmentedImage.src = canvas.toDataURL("image/png");
-        segmentedImage.style.display = "block";
-        isProcessed = true;
-
-        segmentBtnText.textContent = "✅ 处理完成";
-        segmentBtn.disabled = true;
-        segmentSettings.style.display = "block";
-        reSegmentBtn.style.display = "block";
-        edgeSmooth.disabled = false;
-
-        enableControls();
-        updateStep(3);
-        updateStatus("✅ 处理完成，可选择尺寸和背景颜色", "ready");
-        showLoading(false);
-        switchPreviewTab({
-          target: document.querySelector('.preview-tab[data-view="segmented"]'),
-        });
-        showSuccessToast("🎉 处理完成！现在可以切换背景颜色");
-      }
-
-      // ==================== ✅ 新增：应用背景颜色函数 ====================
-      function applyBackgroundColor(color) {
-        if (!segmentedCanvas || !maskCanvas) return;
-
-        const canvas = segmentedCanvas;
-        const ctx = canvas.getContext("2d");
-
-        // 重新绘制带透明背景的人物
-        ctx.globalCompositeOperation = "source-over";
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(maskCanvas, 0, 0);
-
-        // 在人物下方填充背景色
-        ctx.globalCompositeOperation = "destination-over";
-        ctx.fillStyle = color;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.globalCompositeOperation = "source-over";
-
-        // 更新预览
-        segmentedImage.src = canvas.toDataURL("image/png");
-      }
-
-      // ==================== ✅ 新增：更新背景颜色（切换颜色时调用）====================
-      function updateBackgroundWithCurrentColor() {
-        if (!isProcessed) return;
-
-        showLoading(true, "正在更新背景...", "处理中", 50);
-
-        setTimeout(() => {
-          applyBackgroundColor(currentBgColor);
-          showLoading(false);
-
-          // 如果已选择尺寸，同时更新最终效果预览
-          if (currentSize) {
-            processImageLive();
-            updateStep(5);
-          }
-
-          showSuccessToast(`✅ 背景已切换 ${getColorName(currentBgColor)}`);
-        }, 200);
-      }
-
-      // ==================== 辅助函数 ====================
-      function getPixelColor(data, x, y, width) {
-        const idx = (y * width + x) * 4;
-        return { r: data[idx], g: data[idx + 1], b: data[idx + 2] };
-      }
-
-      function averageColor(colors) {
-        const r = colors.reduce((sum, c) => sum + c.r, 0) / colors.length;
-        const g = colors.reduce((sum, c) => sum + c.g, 0) / colors.length;
-        const b = colors.reduce((sum, c) => sum + c.b, 0) / colors.length;
-        return { r, g, b };
-      }
-
-      function colorDistance(c1, c2) {
-        return Math.sqrt(
-          Math.pow(c1.r - c2.r, 2) +
-            Math.pow(c1.g - c2.g, 2) +
-            Math.pow(c1.b - c2.b, 2),
-        );
-      }
-
-      function applyMorphologicalOperation(
-        imageData,
-        width,
-        height,
-        smoothLevel,
-      ) {
-        if (smoothLevel < 0.3) return;
-
-        const data = imageData.data;
-        const original = new Uint8ClampedArray(data);
-        const radius = Math.floor(smoothLevel * 3);
-
-        for (let y = radius; y < height - radius; y++) {
-          for (let x = radius; x < width - radius; x++) {
-            let sum = 0;
-            let count = 0;
-            for (let dy = -radius; dy <= radius; dy++) {
-              for (let dx = -radius; dx <= radius; dx++) {
-                const idx = ((y + dy) * width + (x + dx)) * 4 + 3;
-                sum += original[idx];
-                count++;
-              }
-            }
-            const idx = (y * width + x) * 4 + 3;
-            data[idx] = sum / count;
-          }
-        }
-      }
-
-      function fallbackToManual() {
-        showLoading(false);
-        currentMode = "manual";
-        modeBtns.forEach((btn) => {
-          btn.classList.remove("active");
-          if (btn.dataset.mode === "manual") {
-            btn.classList.add("active");
-          }
-        });
+    } catch (error) {
+      console.error("初始化 AI 模型时出错:", error);
+      aiReady = false;
+      updateStatus("AI 模型初始化失败", "error");
+    }
+  }
+
+  function onSegmentationResults(results) {
+    try {
+      if (!originalImage) return;
+      const canvas = segmentedCanvas;
+      const ctx = canvas.getContext("2d");
+      canvas.width = originalImage.width;
+      canvas.height = originalImage.height;
+      ctx.save();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(results.segmentationMask, 0, 0, canvas.width, canvas.height);
+      ctx.globalCompositeOperation = "source-in";
+      ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
+      ctx.restore();
+
+      saveMask(canvas);
+      segmentedImage.src = canvas.toDataURL("image/png");
+      segmentedImage.style.display = "block";
+      isProcessed = true;
+
+      segmentBtnText.textContent = "✅ 处理完成";
+      segmentBtn.disabled = true;
+      segmentSettings.style.display = "block";
+      reSegmentBtn.style.display = "block";
+      edgeSmooth.disabled = false;
+
+      enableControls();
+      updateStep(3);
+      updateStatus("✅ 抠图完成，可选择尺寸和背景颜色", "ready");
+      showLoading(false);
+      switchPreviewTab({ target: document.querySelector('.preview-tab[data-view="segmented"]') });
+      showSuccessToast("🎉 AI 抠图完成！现在可以选择背景颜色");
+      // 显示排版控件
+      layoutControls.style.display = "block";
+      layoutSection.style.display = "block";
+    } catch (error) {
+      console.error("处理分割结果时出错:", error);
+      fallbackToManual();
+    }
+  }
+
+  function saveMask(sourceCanvas) {
+    if (!maskCanvas) maskCanvas = document.createElement("canvas");
+    maskCanvas.width = sourceCanvas.width;
+    maskCanvas.height = sourceCanvas.height;
+    const ctx = maskCanvas.getContext("2d");
+    ctx.drawImage(sourceCanvas, 0, 0);
+  }
+
+  function updateStatus(text, type) {
+    statusText.textContent = text;
+    statusBadge.textContent = type === "ready" ? "就绪" : type === "processing" ? "处理中" : type === "error" ? "错误" : "未开始";
+    statusBadge.className = "status-badge";
+    statusBadge.classList.add(`status-${type}`);
+  }
+
+  function updateStep(step) {
+    stepItems.forEach((item, index) => {
+      item.classList.remove("current", "completed", "disabled");
+      if (index + 1 < step) item.classList.add("completed");
+      else if (index + 1 === step) item.classList.add("current");
+      else item.classList.add("disabled");
+    });
+    currentStep = step;
+  }
+
+  function enableControls() {
+    sizeBtns.forEach(btn => btn.disabled = false);
+    colorOptions.forEach(opt => opt.disabled = false);
+    customColorPicker.disabled = false;
+    convertBtn.disabled = false;
+    convertBtnText.textContent = "确认转换";
+    colorLiveHint.classList.add("active");
+  }
+
+  function disableControls() {
+    sizeBtns.forEach(btn => btn.disabled = true);
+    colorOptions.forEach(opt => opt.disabled = true);
+    customColorPicker.disabled = true;
+    convertBtn.disabled = true;
+    convertBtnText.textContent = "处理完成后启用";
+    colorLiveHint.classList.remove("active");
+  }
+
+  // 事件监听 (原有 + 新增排版事件)
+  uploadArea.addEventListener("click", () => fileInput.click());
+  uploadArea.addEventListener("dragover", handleDragOver);
+  uploadArea.addEventListener("dragleave", handleDragLeave);
+  uploadArea.addEventListener("drop", handleDrop);
+  fileInput.addEventListener("change", handleFileSelect);
+  segmentBtn.addEventListener("click", startProcessing);
+  reSegmentBtn.addEventListener("click", startProcessing);
+  convertBtn.addEventListener("click", convertPhoto);
+  downloadBtn.addEventListener("click", downloadPhoto);
+  customColorPicker.addEventListener("input", handleCustomColorChange);
+  qualitySlider.addEventListener("input", updateQualityValue);
+  previewTabs.forEach(tab => tab.addEventListener("click", switchPreviewTab));
+  edgeSmooth.addEventListener("input", () => {
+    edgeSmoothValue.textContent = edgeSmooth.value;
+    if (isProcessed) updateBackgroundWithCurrentColor();
+  });
+
+  // 模式切换
+  modeBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      modeBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentMode = btn.dataset.mode;
+      if (currentMode === "ai") {
+        segmentBtnText.textContent = "🎭 开始 AI 抠图";
+        modeNotice.classList.remove("active");
+        manualTips.classList.remove("active");
+      } else {
         segmentBtnText.textContent = "🎨 开始背景替换";
-        segmentBtn.disabled = false;
         modeNotice.classList.add("active");
         manualTips.classList.add("active");
-        updateStatus("⚠️ AI 失败，已切换到手动模式", "error");
-        alert("⚠️ AI 模型加载失败，已自动切换到手动背景替换模式。");
       }
-
-      function updateLoadingProgress(percent) {
-        progressFill.style.width = `${percent}%`;
-        if (percent > 30) loadingSubtext.textContent = "正在识别人物轮廓...";
-        if (percent > 60) loadingSubtext.textContent = "正在优化边缘细节...";
-        if (percent > 85) loadingSubtext.textContent = "正在完成处理...";
+      if (originalImage) {
+        segmentBtn.disabled = false;
+        isProcessed = false;
+        segmentBtnText.textContent = currentMode === "ai" ? "🎭 开始 AI 抠图" : "🎨 开始背景替换";
+        segmentSettings.style.display = "none";
+        reSegmentBtn.style.display = "none";
+        disableControls();
+        updateStatus("✅ 照片已上传，选择模式后开始处理", "ready");
+        previewImage.style.display = "block";
+        segmentedImage.style.display = "none";
+        resultCanvas.style.display = "none";
+        placeholderText.style.display = "none";
+        maskCanvas = null;
+        layoutSection.style.display = "none";
+        downloadLayoutBtn.style.display = "none";
       }
+    });
+  });
 
-      // ==================== ✅ 修复：选择颜色函数 ====================
-      function selectColor(color) {
-        if (!isProcessed) {
-          alert("请先处理图片！");
-          return;
-        }
+  colorOptions.forEach(option => option.addEventListener("click", () => selectColor(option.dataset.color)));
+  sizeBtns.forEach(btn => btn.addEventListener("click", () => selectSize(btn)));
+  formatBtns.forEach(btn => btn.addEventListener("click", () => selectFormat(btn.dataset.format)));
 
-        currentBgColor = color;
-        colorOptions.forEach((opt) => opt.classList.remove("selected"));
-        const selectedOption = Array.from(colorOptions).find(
-          (opt) => opt.dataset.color === color,
-        );
-        if (selectedOption) selectedOption.classList.add("selected");
-        customColorPicker.value = color;
-        updatePreviewInfo();
-
-        const colorName = getColorName(color);
-        currentColorName.textContent = colorName;
-        currentColorName.style.color = color;
-        bgColorNotice.classList.add("active");
-
-        updateStep(4);
-        updateStatus("✅ 背景颜色已选择", "ready");
-
-        // ✅ 修复：无论是否选择尺寸，都更新背景颜色
-        updateBackgroundWithCurrentColor();
+  // 排版按钮事件
+  layoutBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      layoutBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentLayout = btn.dataset.layout;
+      if (currentLayout !== "none" && isProcessed && currentSize) {
+        generateLayoutPreview();
+        downloadLayoutBtn.style.display = "block";
+      } else {
+        layoutCanvas.style.display = "none";
+        layoutPlaceholder.style.display = "block";
+        downloadLayoutBtn.style.display = "none";
       }
+    });
+  });
 
-      function handleCustomColorChange() {
-        if (!isProcessed) {
-          alert("请先处理图片！");
-          return;
-        }
-        const color = customColorPicker.value;
-        currentBgColor = color;
-        colorOptions.forEach((opt) => opt.classList.remove("selected"));
-        updatePreviewInfo();
+  marginInput.addEventListener("input", () => {
+    marginPx = parseInt(marginInput.value) || 0;
+    if (currentLayout !== "none" && isProcessed && currentSize) generateLayoutPreview();
+  });
 
-        currentColorName.textContent = "自定义";
-        currentColorName.style.color = color;
-        bgColorNotice.classList.add("active");
+  // 下载排版图
+  downloadLayoutBtn.addEventListener("click", () => {
+    if (!layoutCanvas || layoutCanvas.style.display === "none") {
+      alert("请先生成排版预览！");
+      return;
+    }
+    const link = document.createElement("a");
+    link.download = `证件照排版_${currentLayout}_${Date.now()}.jpg`;
+    link.href = layoutCanvas.toDataURL("image/jpeg", 0.95);
+    link.click();
+    showSuccessToast("✅ 排版图已下载！");
+  });
 
-        updateStep(4);
-        updateStatus("✅ 背景颜色已选择", "ready");
+  // 文件处理 (保持不变)
+  function handleDragOver(e) { e.preventDefault(); uploadArea.classList.add("drag-over"); }
+  function handleDragLeave(e) { e.preventDefault(); uploadArea.classList.remove("drag-over"); }
+  function handleDrop(e) {
+    e.preventDefault();
+    uploadArea.classList.remove("drag-over");
+    if (e.dataTransfer.files.length) {
+      fileInput.files = e.dataTransfer.files;
+      handleFileSelect();
+    }
+  }
 
-        // ✅ 修复：无论是否选择尺寸，都更新背景颜色
-        updateBackgroundWithCurrentColor();
-      }
+  function handleFileSelect() {
+    const file = fileInput.files[0];
+    if (!file) return;
+    if (!file.type.match("image.*")) { alert("请选择图片文件！"); return; }
+    originalFile = file;
+    const reader = new FileReader();
+    reader.onload = e => loadImage(e.target.result, file);
+    reader.readAsDataURL(file);
+  }
 
-      function selectSize(btn) {
-        if (!isProcessed) {
-          alert("请先处理图片！");
-          return;
-        }
-        sizeBtns.forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-        currentSize = {
-          name: btn.dataset.size,
-          width: parseInt(btn.dataset.width),
-          height: parseInt(btn.dataset.height),
-        };
-        updatePreviewInfo();
-        updatePreviewStats();
-        estimateOutputSize();
-        updateStep(5);
-        updateStatus("✅ 尺寸已选择，可确认转换", "ready");
+  function loadImage(src, file) {
+    const img = new Image();
+    img.onload = function () {
+      originalImage = img;
+      previewImage.src = src;
+      previewImage.style.display = "block";
+      segmentedImage.style.display = "none";
+      resultCanvas.style.display = "none";
+      placeholderText.style.display = "none";
+      segmentBtn.disabled = false;
+      segmentBtnText.textContent = currentMode === "ai" ? "🎭 开始 AI 抠图" : "🎨 开始背景替换";
+      segmentSettings.style.display = "none";
+      reSegmentBtn.style.display = "none";
+      isProcessed = false;
+      maskCanvas = null;
+      disableControls();
+      segmentedCanvas = null;
 
-        if (originalImage && isProcessed) {
-          processImageLive();
-        }
-      }
+      displayImageInfo(file, img);
+      updateStatus("✅ 照片上传成功，可开始处理", "ready");
+      updateStep(2);
+      stepGuide.classList.add("active");
+      switchPreviewTab({ target: document.querySelector('.preview-tab[data-view="original"]') });
 
-      function selectFormat(format) {
-        currentFormat = format;
-        formatBtns.forEach((btn) => btn.classList.remove("active"));
-        Array.from(formatBtns)
-          .find((btn) => btn.dataset.format === format)
-          .classList.add("active");
-        updatePreviewInfo();
-        updatePreviewStats();
-        estimateOutputSize();
-      }
+      if (!selfieSegmentation && currentMode === "ai") initSelfieSegmentation();
 
-      function updateQualityValue() {
-        currentQuality = parseFloat(qualitySlider.value);
-        qualityValue.textContent = `${Math.round(currentQuality * 100)}%`;
-        estimateOutputSize();
-      }
+      // 重置排版
+      layoutSection.style.display = "none";
+      downloadLayoutBtn.style.display = "none";
+      layoutCanvas.style.display = "none";
+      layoutPlaceholder.style.display = "block";
+      layoutControls.style.display = "none";
+      currentLayout = "none";
+      layoutBtns.forEach(b => b.classList.remove("active"));
+      layoutBtns[0].classList.add("active");
+    };
+    img.onerror = () => alert("图片加载失败，请重试！");
+    img.src = src;
+  }
 
-      function getColorName(color) {
-        const colors = {
-          "#ffffff": "白色",
-          "#ff0000": "红色",
-          "#0000ff": "蓝色",
-          "#008000": "绿色",
-          "#ffff00": "黄色",
-          "#ffa500": "橙色",
-          "#800080": "紫色",
-          "#00ced1": "青色",
-        };
-        return colors[color.toLowerCase()] || "自定义";
-      }
+  function displayImageInfo(file, img) {
+    imageInfoCard.classList.add("active");
+    infoFileName.textContent = file.name.length > 20 ? file.name.substring(0, 17) + "..." : file.name;
+    infoFormat.textContent = file.type.split("/")[1].toUpperCase();
+    infoDimensions.textContent = `${img.width} × ${img.height} px`;
+    infoFileSize.textContent = formatFileSize(file.size);
+    estimateOutputSize();
+  }
 
-      function updatePreviewInfo() {
-        const status = isProcessed ? "✅ 已处理" : "❌ 未处理";
-        const sizeName = currentSize
-          ? currentSize.name === "1inch"
-            ? "1 寸"
-            : currentSize.name === "small2inch"
-              ? "小二寸"
-              : "二寸"
-          : "未选择";
-        const colorName = getColorName(currentBgColor);
-        previewInfo.innerHTML = `<strong>📊 处理状态：</strong><br>
-                    ${status} | 尺寸：${sizeName} | 背景：<span style="color:${currentBgColor}">●</span> ${colorName} | 格式：${currentFormat.toUpperCase()}`;
-      }
+  function formatFileSize(bytes) {
+    if (bytes === 0) return "0 B";
+    const k = 1024, sizes = ["B", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  }
 
-      function updatePreviewStats() {
-        statDimensions.textContent = currentSize
-          ? `${currentSize.width} × ${currentSize.height} px`
-          : "-";
-        statFormat.textContent = currentFormat.toUpperCase();
-      }
+  function estimateOutputSize() {
+    if (!originalImage || !currentSize) {
+      fileSizeDisplay.textContent = "✨ 选择尺寸后查看预估大小";
+      statFileSize.textContent = "-";
+      return;
+    }
+    const originalPixels = originalImage.width * originalImage.height;
+    const outputPixels = currentSize.width * currentSize.height;
+    const pixelRatio = outputPixels / originalPixels;
+    let formatMultiplier = 1;
+    if (currentFormat === "jpg") formatMultiplier = currentQuality * 0.8;
+    else if (currentFormat === "png") formatMultiplier = 1.2;
+    else if (currentFormat === "webp") formatMultiplier = currentQuality * 0.6;
+    const estimatedSize = originalFile.size * pixelRatio * formatMultiplier;
+    fileSizeDisplay.textContent = `✨ 预估输出大小：${formatFileSize(estimatedSize)}`;
+    statFileSize.textContent = formatFileSize(estimatedSize);
+  }
 
-      function switchPreviewTab(e) {
-        const view = e.target.dataset.view;
-        currentView = view;
+  // 开始处理 (保持不变)
+  function startProcessing() {
+    if (!originalImage) { alert("请先上传照片！"); return; }
+    showLoading(true, "正在处理中...", "请稍候", 0);
+    updateStatus("🔄 正在处理图片...", "processing");
+    segmentedCanvas = document.createElement("canvas");
+    segmentedCanvas.width = originalImage.width;
+    segmentedCanvas.height = originalImage.height;
 
-        previewTabs.forEach((tab) => tab.classList.remove("active"));
-        e.target.classList.add("active");
+    if (currentMode === "ai" && aiReady) {
+      let progress = 0;
+      const progressInterval = setInterval(() => {
+        progress += 5;
+        if (progress <= 90) updateLoadingProgress(progress);
+      }, 200);
+      selfieSegmentation.send({ image: originalImage })
+        .then(() => { clearInterval(progressInterval); updateLoadingProgress(100); })
+        .catch(err => { console.error("AI 处理失败:", err); clearInterval(progressInterval); fallbackToManual(); });
+    } else {
+      setTimeout(() => processManualBackground(), 300);
+    }
+  }
 
-        if (view === "original") {
-          previewImage.style.display = "block";
-          segmentedImage.style.display = "none";
-          resultCanvas.style.display = "none";
-          placeholderText.style.display = "none";
-        } else if (view === "segmented") {
-          previewImage.style.display = "none";
-          if (isProcessed) {
-            segmentedImage.style.display = "block";
-            resultCanvas.style.display = "none";
-            placeholderText.style.display = "none";
-          } else {
-            segmentedImage.style.display = "none";
-            placeholderText.style.display = "block";
-            placeholderText.textContent = "请先处理图片";
-          }
-        } else if (view === "result") {
-          previewImage.style.display = "none";
-          segmentedImage.style.display = "none";
-          if (originalImage && isProcessed && currentSize) {
-            resultCanvas.style.display = "block";
-            placeholderText.style.display = "none";
-          } else {
-            placeholderText.style.display = "block";
-            placeholderText.textContent = isProcessed
-              ? "请先选择尺寸"
-              : "请先处理图片";
-          }
-        }
-      }
+  // 手动背景替换 (保持不变，但增加了排版显示)
+  function processManualBackground() {
+    if (!originalImage) { showLoading(false); alert("请先上传照片！"); return; }
+    const canvas = segmentedCanvas;
+    const ctx = canvas.getContext("2d");
+    const width = originalImage.width, height = originalImage.height;
+    canvas.width = width; canvas.height = height;
 
-      // ==================== 实时预览处理 ====================
-      function processImageLive() {
-        if (!originalImage || !isProcessed || !currentSize) return;
+    if (!maskCanvas) {
+      maskCanvas = document.createElement("canvas");
+      maskCanvas.width = width; maskCanvas.height = height;
+    }
+    const maskCtx = maskCanvas.getContext("2d");
 
-        const canvas = resultCanvas;
-        const ctx = canvas.getContext("2d");
+    ctx.drawImage(originalImage, 0, 0);
+    const imageData = ctx.getImageData(0, 0, width, height);
+    const data = imageData.data;
+    const maskData = maskCtx.createImageData(width, height);
+    const maskPixels = maskData.data;
+    const smoothLevel = parseInt(edgeSmooth.value) / 10;
 
-        canvas.width = currentSize.width;
-        canvas.height = currentSize.height;
+    const cornerSamples = [
+      getPixelColor(data, 0, 0, width),
+      getPixelColor(data, Math.min(width - 1, 10), 0, width),
+      getPixelColor(data, 0, Math.min(height - 1, 10), width),
+      getPixelColor(data, Math.min(width - 1, 10), Math.min(height - 1, 10), width),
+    ];
+    const bgColor = averageColor(cornerSamples);
 
-        ctx.fillStyle = currentBgColor;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        const sourceImage = segmentedCanvas || originalImage;
-        const imgRatio = sourceImage.width / sourceImage.height;
-        const canvasRatio = canvas.width / canvas.height;
-
-        let drawWidth, drawHeight, offsetX, offsetY;
-
-        if (imgRatio > canvasRatio) {
-          drawHeight = canvas.height;
-          drawWidth = drawHeight * imgRatio;
-          offsetX = (canvas.width - drawWidth) / 2;
-          offsetY = 0;
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const idx = (y * width + x) * 4;
+        const pixelColor = { r: data[idx], g: data[idx + 1], b: data[idx + 2] };
+        const colorDiff = colorDistance(pixelColor, bgColor);
+        const threshold = 50 + smoothLevel * 30;
+        if (colorDiff > threshold - 20 && colorDiff < threshold + 20) {
+          const smoothAlpha = ((colorDiff - (threshold - 20)) / 40) * 255;
+          maskPixels[idx + 3] = smoothAlpha;
         } else {
-          drawWidth = canvas.width;
-          drawHeight = drawWidth / imgRatio;
-          offsetX = 0;
-          offsetY = (canvas.height - drawHeight) / 2;
-        }
-
-        ctx.drawImage(
-          sourceImage,
-          0,
-          0,
-          sourceImage.width,
-          sourceImage.height,
-          offsetX,
-          offsetY,
-          drawWidth,
-          drawHeight,
-        );
-
-        if (currentView === "result") {
-          resultCanvas.style.display = "block";
-          placeholderText.style.display = "none";
+          maskPixels[idx + 3] = colorDiff > threshold ? 255 : 0;
         }
       }
+    }
 
-      function convertPhoto() {
-        if (!originalImage) {
-          alert("请先上传照片！");
-          return;
-        }
-        if (!isProcessed) {
-          alert("请先处理图片！");
-          return;
-        }
-        if (!currentSize) {
-          alert("请选择证件照尺寸！");
-          return;
-        }
+    applyMorphologicalOperation(maskData, width, height, smoothLevel);
+    maskCtx.putImageData(maskData, 0, 0);
 
-        showLoading(true, "正在生成证件照...", "处理中", 100);
-        updateStatus("🔄 正在生成证件照...", "processing");
+    ctx.putImageData(imageData, 0, 0);
+    ctx.globalCompositeOperation = "destination-in";
+    ctx.drawImage(maskCanvas, 0, 0);
+    ctx.globalCompositeOperation = "source-over";
 
-        setTimeout(() => {
-          processImageLive();
-          downloadBtn.style.display = "block";
-          downloadBtnText.textContent = "下载证件照";
-          showLoading(false);
-          updateStatus("✅ 证件照已生成，点击下载", "ready");
+    saveMask(canvas);
+    applyBackgroundColor(currentBgColor);
 
-          const resultTab = document.querySelector(
-            '.preview-tab[data-view="result"]',
-          );
-          switchPreviewTab({ target: resultTab });
+    segmentedImage.src = canvas.toDataURL("image/png");
+    segmentedImage.style.display = "block";
+    isProcessed = true;
 
-          showSuccessToast("✅ 证件照转换成功！点击下方按钮下载");
-        }, 500);
+    segmentBtnText.textContent = "✅ 处理完成";
+    segmentBtn.disabled = true;
+    segmentSettings.style.display = "block";
+    reSegmentBtn.style.display = "block";
+    edgeSmooth.disabled = false;
+
+    enableControls();
+    updateStep(3);
+    updateStatus("✅ 处理完成，可选择尺寸和背景颜色", "ready");
+    showLoading(false);
+    switchPreviewTab({ target: document.querySelector('.preview-tab[data-view="segmented"]') });
+    showSuccessToast("🎉 处理完成！现在可以切换背景颜色");
+    layoutControls.style.display = "block";
+    layoutSection.style.display = "block";
+  }
+
+  function applyBackgroundColor(color) {
+    if (!segmentedCanvas || !maskCanvas) return;
+    const canvas = segmentedCanvas;
+    const ctx = canvas.getContext("2d");
+    ctx.globalCompositeOperation = "source-over";
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(maskCanvas, 0, 0);
+    ctx.globalCompositeOperation = "destination-over";
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.globalCompositeOperation = "source-over";
+    segmentedImage.src = canvas.toDataURL("image/png");
+  }
+
+  function updateBackgroundWithCurrentColor() {
+    if (!isProcessed) return;
+    showLoading(true, "正在更新背景...", "处理中", 50);
+    setTimeout(() => {
+      applyBackgroundColor(currentBgColor);
+      showLoading(false);
+      if (currentSize) {
+        processImageLive();
+        updateStep(5);
+        if (currentLayout !== "none") generateLayoutPreview();
       }
+      showSuccessToast(`✅ 背景已切换 ${getColorName(currentBgColor)}`);
+    }, 200);
+  }
 
-      function showLoading(
-        show,
-        text = "处理中...",
-        subtext = "",
-        progress = 0,
-      ) {
-        loadingOverlay.classList.toggle("active", show);
-        if (show) {
-          loadingText.textContent = text;
-          loadingSubtext.textContent = subtext;
-          progressFill.style.width = `${progress}%`;
+  // 辅助函数 (保持不变)
+  function getPixelColor(data, x, y, width) {
+    const idx = (y * width + x) * 4;
+    return { r: data[idx], g: data[idx + 1], b: data[idx + 2] };
+  }
+  function averageColor(colors) {
+    return {
+      r: colors.reduce((s, c) => s + c.r, 0) / colors.length,
+      g: colors.reduce((s, c) => s + c.g, 0) / colors.length,
+      b: colors.reduce((s, c) => s + c.b, 0) / colors.length,
+    };
+  }
+  function colorDistance(c1, c2) {
+    return Math.sqrt(Math.pow(c1.r - c2.r, 2) + Math.pow(c1.g - c2.g, 2) + Math.pow(c1.b - c2.b, 2));
+  }
+  function applyMorphologicalOperation(imageData, width, height, smoothLevel) {
+    if (smoothLevel < 0.3) return;
+    const data = imageData.data;
+    const original = new Uint8ClampedArray(data);
+    const radius = Math.floor(smoothLevel * 3);
+    for (let y = radius; y < height - radius; y++) {
+      for (let x = radius; x < width - radius; x++) {
+        let sum = 0, count = 0;
+        for (let dy = -radius; dy <= radius; dy++) {
+          for (let dx = -radius; dx <= radius; dx++) {
+            const idx = ((y + dy) * width + (x + dx)) * 4 + 3;
+            sum += original[idx]; count++;
+          }
         }
+        const idx = (y * width + x) * 4 + 3;
+        data[idx] = sum / count;
       }
+    }
+  }
+  function fallbackToManual() {
+    showLoading(false);
+    currentMode = "manual";
+    modeBtns.forEach(btn => {
+      btn.classList.remove("active");
+      if (btn.dataset.mode === "manual") btn.classList.add("active");
+    });
+    segmentBtnText.textContent = "🎨 开始背景替换";
+    segmentBtn.disabled = false;
+    modeNotice.classList.add("active");
+    manualTips.classList.add("active");
+    updateStatus("⚠️ AI 失败，已切换到手动模式", "error");
+    alert("⚠️ AI 模型加载失败，已自动切换到手动背景替换模式。");
+  }
+  function updateLoadingProgress(percent) {
+    progressFill.style.width = `${percent}%`;
+    if (percent > 30) loadingSubtext.textContent = "正在识别人物轮廓...";
+    if (percent > 60) loadingSubtext.textContent = "正在优化边缘细节...";
+    if (percent > 85) loadingSubtext.textContent = "正在完成处理...";
+  }
 
-      function showSuccessToast(message) {
-        const toast = document.createElement("div");
-        toast.style.cssText = `
-                position: fixed;
-                top: 20px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: linear-gradient(135deg, #4caf50, #45a049);
-                color: white;
-                padding: 15px 30px;
-                border-radius: 50px;
-                font-size: 1.1em;
-                font-weight: 600;
-                box-shadow: 0 4px 20px rgba(76, 175, 80, 0.4);
-                z-index: 2000;
-                animation: slideDown 0.5s ease;
-            `;
-        toast.textContent = message;
-        document.body.appendChild(toast);
+  function selectColor(color) {
+    if (!isProcessed) { alert("请先处理图片！"); return; }
+    currentBgColor = color;
+    colorOptions.forEach(opt => opt.classList.remove("selected"));
+    const selectedOption = Array.from(colorOptions).find(opt => opt.dataset.color === color);
+    if (selectedOption) selectedOption.classList.add("selected");
+    customColorPicker.value = color;
+    updatePreviewInfo();
+    const colorName = getColorName(color);
+    currentColorName.textContent = colorName;
+    currentColorName.style.color = color;
+    bgColorNotice.classList.add("active");
+    updateStep(4);
+    updateStatus("✅ 背景颜色已选择", "ready");
+    updateBackgroundWithCurrentColor();
+  }
 
-        setTimeout(() => {
-          toast.style.animation = "slideUp 0.5s ease";
-          setTimeout(() => toast.remove(), 500);
-        }, 2000);
+  function handleCustomColorChange() {
+    if (!isProcessed) { alert("请先处理图片！"); return; }
+    const color = customColorPicker.value;
+    currentBgColor = color;
+    colorOptions.forEach(opt => opt.classList.remove("selected"));
+    updatePreviewInfo();
+    currentColorName.textContent = "自定义";
+    currentColorName.style.color = color;
+    bgColorNotice.classList.add("active");
+    updateStep(4);
+    updateStatus("✅ 背景颜色已选择", "ready");
+    updateBackgroundWithCurrentColor();
+  }
+
+  function selectSize(btn) {
+    if (!isProcessed) { alert("请先处理图片！"); return; }
+    sizeBtns.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentSize = {
+      name: btn.dataset.size,
+      width: parseInt(btn.dataset.width),
+      height: parseInt(btn.dataset.height),
+    };
+    updatePreviewInfo();
+    updatePreviewStats();
+    estimateOutputSize();
+    updateStep(5);
+    updateStatus("✅ 尺寸已选择，可确认转换", "ready");
+    if (originalImage && isProcessed) {
+      processImageLive();
+      if (currentLayout !== "none") generateLayoutPreview();
+    }
+  }
+
+  function selectFormat(format) {
+    currentFormat = format;
+    formatBtns.forEach(btn => btn.classList.remove("active"));
+    Array.from(formatBtns).find(btn => btn.dataset.format === format).classList.add("active");
+    updatePreviewInfo();
+    updatePreviewStats();
+    estimateOutputSize();
+  }
+
+  function updateQualityValue() {
+    currentQuality = parseFloat(qualitySlider.value);
+    qualityValue.textContent = `${Math.round(currentQuality * 100)}%`;
+    estimateOutputSize();
+  }
+
+  function getColorName(color) {
+    const colors = {
+      "#ffffff": "白色", "#ff0000": "红色", "#0000ff": "蓝色", "#008000": "绿色",
+      "#ffff00": "黄色", "#ffa500": "橙色", "#800080": "紫色", "#00ced1": "青色",
+    };
+    return colors[color.toLowerCase()] || "自定义";
+  }
+
+  function updatePreviewInfo() {
+    const status = isProcessed ? "✅ 已处理" : "❌ 未处理";
+    const sizeName = currentSize ? (currentSize.name === "1inch" ? "1 寸" : currentSize.name === "small2inch" ? "小二寸" : "二寸") : "未选择";
+    const colorName = getColorName(currentBgColor);
+    previewInfo.innerHTML = `<strong>📊 处理状态：</strong><br>
+      ${status} | 尺寸：${sizeName} | 背景：<span style="color:${currentBgColor}">●</span> ${colorName} | 格式：${currentFormat.toUpperCase()}`;
+  }
+
+  function updatePreviewStats() {
+    statDimensions.textContent = currentSize ? `${currentSize.width} × ${currentSize.height} px` : "-";
+    statFormat.textContent = currentFormat.toUpperCase();
+  }
+
+  function switchPreviewTab(e) {
+    const view = e.target.dataset.view;
+    currentView = view;
+    previewTabs.forEach(tab => tab.classList.remove("active"));
+    e.target.classList.add("active");
+
+    if (view === "original") {
+      previewImage.style.display = "block";
+      segmentedImage.style.display = "none";
+      resultCanvas.style.display = "none";
+      placeholderText.style.display = "none";
+    } else if (view === "segmented") {
+      previewImage.style.display = "none";
+      if (isProcessed) {
+        segmentedImage.style.display = "block";
+        resultCanvas.style.display = "none";
+        placeholderText.style.display = "none";
+      } else {
+        segmentedImage.style.display = "none";
+        placeholderText.style.display = "block";
+        placeholderText.textContent = "请先处理图片";
       }
-
-      function downloadPhoto() {
-        const canvas = resultCanvas;
-        let link = document.createElement("a");
-
-        const timestamp = new Date().getTime();
-        const sizeName =
-          currentSize.name === "1inch"
-            ? "1 寸"
-            : currentSize.name === "small2inch"
-              ? "小二寸"
-              : "2 寸";
-
-        if (currentFormat === "jpg") {
-          link.download = `证件照_${sizeName}_${timestamp}.jpg`;
-          link.href = canvas.toDataURL("image/jpeg", currentQuality);
-        } else if (currentFormat === "png") {
-          link.download = `证件照_${sizeName}_${timestamp}.png`;
-          link.href = canvas.toDataURL("image/png");
-        } else if (currentFormat === "webp") {
-          link.download = `证件照_${sizeName}_${timestamp}.webp`;
-          link.href = canvas.toDataURL("image/webp", currentQuality);
-        }
-
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        showSuccessToast("✅ 证件照已下载！");
+    } else if (view === "result") {
+      previewImage.style.display = "none";
+      segmentedImage.style.display = "none";
+      if (originalImage && isProcessed && currentSize) {
+        resultCanvas.style.display = "block";
+        placeholderText.style.display = "none";
+      } else {
+        placeholderText.style.display = "block";
+        placeholderText.textContent = isProcessed ? "请先选择尺寸" : "请先处理图片";
       }
+    }
+  }
 
-      const style = document.createElement("style");
-      style.textContent = `
-            @keyframes slideDown {
-                from { transform: translateX(-50%) translateY(-100px); opacity: 0; }
-                to { transform: translateX(-50%) translateY(0); opacity: 1; }
-            }
-            @keyframes slideUp {
-                from { transform: translateX(-50%) translateY(0); opacity: 1; }
-                to { transform: translateX(-50%) translateY(-100px); opacity: 0; }
-            }
-        `;
-      document.head.appendChild(style);
-    </script>
-  </body>
+  function processImageLive() {
+    if (!originalImage || !isProcessed || !currentSize) return;
+    const canvas = resultCanvas;
+    const ctx = canvas.getContext("2d");
+    canvas.width = currentSize.width;
+    canvas.height = currentSize.height;
+    ctx.fillStyle = currentBgColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const sourceImage = segmentedCanvas || originalImage;
+    const imgRatio = sourceImage.width / sourceImage.height;
+    const canvasRatio = canvas.width / canvas.height;
+    let drawWidth, drawHeight, offsetX, offsetY;
+
+    if (imgRatio > canvasRatio) {
+      drawHeight = canvas.height;
+      drawWidth = drawHeight * imgRatio;
+      offsetX = (canvas.width - drawWidth) / 2;
+      offsetY = 0;
+    } else {
+      drawWidth = canvas.width;
+      drawHeight = drawWidth / imgRatio;
+      offsetX = 0;
+      offsetY = (canvas.height - drawHeight) / 2;
+    }
+    ctx.drawImage(sourceImage, 0, 0, sourceImage.width, sourceImage.height, offsetX, offsetY, drawWidth, drawHeight);
+
+    if (currentView === "result") {
+      resultCanvas.style.display = "block";
+      placeholderText.style.display = "none";
+    }
+  }
+
+  function convertPhoto() {
+    if (!originalImage) { alert("请先上传照片！"); return; }
+    if (!isProcessed) { alert("请先处理图片！"); return; }
+    if (!currentSize) { alert("请选择证件照尺寸！"); return; }
+
+    showLoading(true, "正在生成证件照...", "处理中", 100);
+    updateStatus("🔄 正在生成证件照...", "processing");
+
+    setTimeout(() => {
+      processImageLive();
+      downloadBtn.style.display = "block";
+      downloadBtnText.textContent = "下载证件照";
+      showLoading(false);
+      updateStatus("✅ 证件照已生成，点击下载", "ready");
+      const resultTab = document.querySelector('.preview-tab[data-view="result"]');
+      switchPreviewTab({ target: resultTab });
+      showSuccessToast("✅ 证件照转换成功！点击下方按钮下载");
+      // 如果当前有排版，也更新排版预览
+      if (currentLayout !== "none") generateLayoutPreview();
+    }, 500);
+  }
+
+  function showLoading(show, text = "处理中...", subtext = "", progress = 0) {
+    loadingOverlay.classList.toggle("active", show);
+    if (show) {
+      loadingText.textContent = text;
+      loadingSubtext.textContent = subtext;
+      progressFill.style.width = `${progress}%`;
+    }
+  }
+
+  function showSuccessToast(message) {
+    const toast = document.createElement("div");
+    toast.style.cssText = `
+      position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+      background: linear-gradient(135deg, #4caf50, #45a049); color: white;
+      padding: 15px 30px; border-radius: 50px; font-size: 1.1em;
+      font-weight: 600; box-shadow: 0 4px 20px rgba(76,175,80,0.4);
+      z-index: 2000; animation: slideDown 0.5s ease;
+    `;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+      toast.style.animation = "slideUp 0.5s ease";
+      setTimeout(() => toast.remove(), 500);
+    }, 2000);
+  }
+
+  function downloadPhoto() {
+    const canvas = resultCanvas;
+    const link = document.createElement("a");
+    const timestamp = new Date().getTime();
+    const sizeName = currentSize.name === "1inch" ? "1寸" : currentSize.name === "small2inch" ? "小二寸" : "2寸";
+    if (currentFormat === "jpg") {
+      link.download = `证件照_${sizeName}_${timestamp}.jpg`;
+      link.href = canvas.toDataURL("image/jpeg", currentQuality);
+    } else if (currentFormat === "png") {
+      link.download = `证件照_${sizeName}_${timestamp}.png`;
+      link.href = canvas.toDataURL("image/png");
+    } else if (currentFormat === "webp") {
+      link.download = `证件照_${sizeName}_${timestamp}.webp`;
+      link.href = canvas.toDataURL("image/webp", currentQuality);
+    }
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showSuccessToast("✅ 证件照已下载！");
+  }
+
+  // ==================== 排版生成核心函数 ====================
+  function generateLayoutPreview() {
+    if (!currentSize || !isProcessed) {
+      alert("请先处理照片并选择证件照尺寸！");
+      return;
+    }
+    if (currentLayout === "none") {
+      layoutCanvas.style.display = "none";
+      layoutPlaceholder.style.display = "block";
+      downloadLayoutBtn.style.display = "none";
+      return;
+    }
+
+    const paper = PAPER_SIZES[currentLayout];
+    if (!paper) return;
+
+    const canvas = layoutCanvas;
+    const ctx = canvas.getContext("2d");
+    canvas.width = paper.width;
+    canvas.height = paper.height;
+
+    // 填充白色背景（相纸）
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // 计算能放多少张
+    const photoW = currentSize.width;
+    const photoH = currentSize.height;
+    const cols = Math.floor((paper.width + marginPx) / (photoW + marginPx));
+    const rows = Math.floor((paper.height + marginPx) / (photoH + marginPx));
+    if (cols === 0 || rows === 0) {
+      alert("当前证件照尺寸太大，无法排版到所选相纸！");
+      return;
+    }
+
+    // 计算总占用宽度和高度（用于居中）
+    const totalW = cols * photoW + (cols - 1) * marginPx;
+    const totalH = rows * photoH + (rows - 1) * marginPx;
+    const startX = (paper.width - totalW) / 2;
+    const startY = (paper.height - totalH) / 2;
+
+    // 获取处理后的证件照图像（已经带背景色）
+    const tempCanvas = document.createElement("canvas");
+    tempCanvas.width = photoW;
+    tempCanvas.height = photoH;
+    const tempCtx = tempCanvas.getContext("2d");
+    // 绘制带背景色的证件照
+    tempCtx.fillStyle = currentBgColor;
+    tempCtx.fillRect(0, 0, photoW, photoH);
+    const sourceImage = segmentedCanvas || originalImage;
+    // 按比例绘制
+    const imgRatio = sourceImage.width / sourceImage.height;
+    const canvasRatio = photoW / photoH;
+    let drawWidth, drawHeight, offsetX, offsetY;
+    if (imgRatio > canvasRatio) {
+      drawHeight = photoH;
+      drawWidth = drawHeight * imgRatio;
+      offsetX = (photoW - drawWidth) / 2;
+      offsetY = 0;
+    } else {
+      drawWidth = photoW;
+      drawHeight = drawWidth / imgRatio;
+      offsetX = 0;
+      offsetY = (photoH - drawHeight) / 2;
+    }
+    tempCtx.drawImage(sourceImage, 0, 0, sourceImage.width, sourceImage.height, offsetX, offsetY, drawWidth, drawHeight);
+
+    // 绘制所有证件照
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const x = startX + c * (photoW + marginPx);
+        const y = startY + r * (photoH + marginPx);
+        ctx.drawImage(tempCanvas, x, y, photoW, photoH);
+        // 可选：绘制细边框（方便裁剪）
+        ctx.strokeStyle = "#cccccc";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, y, photoW, photoH);
+      }
+    }
+
+    // 添加小字提示
+    ctx.fillStyle = "#999";
+    ctx.font = "20px 'Microsoft YaHei'";
+    ctx.fillText(`${currentSize.width}×${currentSize.height}px | 间距${marginPx}px | ${cols}列 × ${rows}行`, 20, paper.height - 20);
+
+    canvas.style.display = "block";
+    layoutPlaceholder.style.display = "none";
+    downloadLayoutBtn.style.display = "block";
+  }
+
+  // 样式动画
+  const style = document.createElement("style");
+  style.textContent = `
+    @keyframes slideDown { from { transform: translateX(-50%) translateY(-100px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
+    @keyframes slideUp { from { transform: translateX(-50%) translateY(0); opacity: 1; } to { transform: translateX(-50%) translateY(-100px); opacity: 0; } }
+  `;
+  document.head.appendChild(style);
+
+  // 页面加载后初始化一些状态
+  window.addEventListener("DOMContentLoaded", () => {
+    // 默认背景色白色
+    currentBgColor = "#ffffff";
+  });
+</script>
+</body>
 </html>
