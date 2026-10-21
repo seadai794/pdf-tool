@@ -4102,10 +4102,12 @@
       const seg = new window.SelfieSegmentation({
         locateFile: (f) => idphotoAiBasePath + f
       });
-      seg.setOptions({ modelSelection: 1, selfieMode: false });
-      seg.onResults(onAiSegmentationResults);
+     //seg.setOptions({ modelSelection: 1, selfieMode: false });
+      seg.setOptions({ modelSelection: 1, selfieMode: false, delegate: 'CPU' });
+     seg.onResults(onAiSegmentationResults);
       idphotoAiSegmentation = seg;
       return seg;
+      
     }
 
     function onAiSegmentationResults(results) {
