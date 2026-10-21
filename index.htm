@@ -4151,7 +4151,7 @@
       }
     }
 
-    /* ---- AI 抠图核心（纯净版：移除所有强制修改和拦截逻辑） ---- */
+    /* ---- AI 抠图核心（纯净版：修复内存越界） ---- */
     async function ensureAiSegmentation() {
       if (idphotoAiSegmentation) return idphotoAiSegmentation;
 
@@ -4259,13 +4259,19 @@
       try {
         const seg = await ensureAiSegmentation();
         st.textContent = '🔍 正在识别人像轮廓…';
-        await seg.send({ image: idphotoCropped });
+        // 【核心修复】：强制缩小图片，避免电脑端/手机端内存越界报错
+        const safeImage = document.createElement('canvas');
+        const maxSafe = 512;
+        const scale = Math.min(1, maxSafe / Math.max(idphotoCropped.width, idphotoCropped.height));
+        safeImage.width = Math.round(idphotoCropped.width * scale);
+        safeImage.height = Math.round(idphotoCropped.height * scale);
+        safeImage.getContext('2d').drawImage(idphotoCropped, 0, 0, safeImage.width, safeImage.height);
+        await seg.send({ image: safeImage });
       } catch (e) {
         console.error('[AI]', e);
         const errMsg = String(e.message || e);
         idphotoAiBusy = false;
 
-        // 仅在微信/QQ中，或者明确报 abort 且是移动端时，才做隐藏处理。电脑端保留界面让用户重试。
         const isDeviceMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent);
 
         if (isWeChatEnv) {
@@ -4283,7 +4289,6 @@
             $('#idphotoUseBordercutBtn').click();
           }, 1500);
         } else {
-          // 电脑端报错：保留界面，显示错误，让用户重试
           st.textContent = '❌ AI 抠图失败：' + errMsg + '（请点击「重新识别」重试，或改用涂抹模式）';
           st.className = 'status err';
         }
