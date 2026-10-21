@@ -4151,11 +4151,10 @@
       }
     }
 
-    /* ---- AI 抠图核心 ---- */
-        async function ensureAiSegmentation() {
+    /* ---- AI 抠图核心（纯净版：移除所有强制修改和拦截逻辑） ---- */
+    async function ensureAiSegmentation() {
       if (idphotoAiSegmentation) return idphotoAiSegmentation;
 
-      // 尝试本地加载 selfie_segmentation.js
       if (typeof window.SelfieSegmentation === 'undefined') {
         let loaded = false;
         for (const p of LOCAL.mediapipeJs) {
@@ -4165,7 +4164,7 @@
             idphotoAiBasePath = LOCAL.mediapipeBase;
             console.log('[AI] ✅ 本地 MediaPipe 加载成功');
             break;
-          } catch (e) { /* 继续尝试 CDN */ }
+          } catch (e) { }
         }
         if (!loaded) {
           for (const url of CDN.mediapipeJs) {
@@ -4175,7 +4174,7 @@
               idphotoAiBasePath = CDN.mediapipeBase;
               console.log('[AI] ✅ CDN MediaPipe 加载成功');
               break;
-            } catch (e) { /* 继续 */ }
+            } catch (e) { }
           }
         }
         if (!loaded || typeof window.SelfieSegmentation === 'undefined') {
@@ -4186,14 +4185,7 @@
       const seg = new window.SelfieSegmentation({
         locateFile: (f) => idphotoAiBasePath + f
       });
-      
-      // 【核心修复】：强制指定底层使用纯 CPU 模式，解决 Abort 崩溃
-      seg.setOptions({ 
-        modelSelection: 1, 
-        selfieMode: false,
-        delegate: 'CPU'
-      });
-      
+      seg.setOptions({ modelSelection: 1, selfieMode: false });
       seg.onResults(onAiSegmentationResults);
       idphotoAiSegmentation = seg;
       return seg;
@@ -4271,14 +4263,12 @@
       } catch (e) {
         console.error('[AI]', e);
         const errMsg = String(e.message || e);
-        idphotoAiBusy = false; // 确保错误后能重试
+        idphotoAiBusy = false;
 
-        // 【修复点】：严格区分微信环境、普通手机和电脑
-        const isWeChat = /MicroMessenger/i.test(ua);
-        const isQQ = /QQ/i.test(ua) && /Mobile/i.test(ua);
-        const isDeviceMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(ua);
+        // 仅在微信/QQ中，或者明确报 abort 且是移动端时，才做隐藏处理。电脑端保留界面让用户重试。
+        const isDeviceMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent);
 
-        if (isWeChat || isQQ) {
+        if (isWeChatEnv) {
           st.innerHTML = '❌ <b>微信/QQ内置浏览器无法运行 AI 模型。</b><br><br>请点击下方按钮改用「<b>涂抹擦除背景</b>」，或点击右上角「<b>在浏览器中打开</b>」。';
           st.className = 'status err';
           setTimeout(() => {
@@ -4293,8 +4283,8 @@
             $('#idphotoUseBordercutBtn').click();
           }, 1500);
         } else {
-          // 电脑端：不自动隐藏，让用户重试或者手动切换
-          st.innerHTML = '❌ AI 抠图引擎异常（可能是显卡加速限制）。<br><br>请重试，或点击上方「<b>涂抹擦除背景</b>」。';
+          // 电脑端报错：保留界面，显示错误，让用户重试
+          st.textContent = '❌ AI 抠图失败：' + errMsg + '（请点击「重新识别」重试，或改用涂抹模式）';
           st.className = 'status err';
         }
       }
