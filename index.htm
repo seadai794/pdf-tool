@@ -175,6 +175,7 @@
   .status:not(:empty) { background: #eff6ff; }
   .status.err { color: #dc2626; background: #fef2f2; }
   .status.ok { color: #059669; background: #f0fdf4; }
+  .status.warn { color: #d97706; background: #fffbeb; border: 1px solid #fde68a; }
   .hidden { display: none !important; }
 
   .pager { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
@@ -1513,7 +1514,7 @@
       +   'jszip.min.js ← https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js<br>'
       +   'mammoth.browser.min.js ← https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js<br>'
       +   'selfie_segmentation.js ← https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation@0.1.1675465747/selfie_segmentation.js<br>'
-      +   '（以及同目录下的 _wasm_bin.js / .wasm / .data 三个文件）'
+      +   '（以及同目录下的 _wasm_bin.js / .wasm 文件）'
       +   '</div>'
       +   '<b>2. 网络问题</b><br>如果是网络限制导致 CDN 加载失败，请切换网络后重试。<br><br>'
       +   '<b>3. 浏览器兼容</b><br>建议用最新版 Chrome / Safari / Edge 打开。'
@@ -1656,6 +1657,7 @@
       node.textContent = text || '';
       node.classList.toggle('err', !!isErr);
       node.classList.toggle('ok', !!isOk);
+      node.classList.toggle('warn', !isErr && !isOk && text && text.includes('⚠️'));
     }
     function fmtSize(n) {
       if (n < 1024) return n + ' B';
@@ -4102,12 +4104,10 @@
       const seg = new window.SelfieSegmentation({
         locateFile: (f) => idphotoAiBasePath + f
       });
-     //seg.setOptions({ modelSelection: 1, selfieMode: false });
-      seg.setOptions({ modelSelection: 1, selfieMode: false, delegate: 'CPU' });
-     seg.onResults(onAiSegmentationResults);
+      seg.setOptions({ modelSelection: 1, selfieMode: false });
+      seg.onResults(onAiSegmentationResults);
       idphotoAiSegmentation = seg;
       return seg;
-      
     }
 
     function onAiSegmentationResults(results) {
@@ -4181,9 +4181,23 @@
         await seg.send({ image: idphotoCropped });
       } catch (e) {
         console.error('[AI]', e);
-        st.textContent = '❌ AI 抠图失败：' + (e.message || e) + '（可改用涂抹模式）';
-        st.className = 'status err';
-        idphotoAiBusy = false;
+        const errMsg = String(e.message || e);
+        idphotoAiBusy = false; // 确保错误后能重试
+
+        // 针对移动端 abort 的深度检测
+        if (errMsg.includes('abort') || errMsg.includes('Aborted') || errMsg.includes('native code')) {
+          st.innerHTML = '❌ <b>您的手机浏览器内存或 GPU 受限，无法运行 AI 模型。</b><br><br>请点击下方按钮改用「<b>涂抹擦除背景</b>」，或使用电脑浏览器打开。';
+          st.className = 'status err';
+          
+          // 隐藏 AI 区域，自动显示涂抹区域引导用户
+          setTimeout(() => {
+            $('#idphotoAiArea').classList.add('hidden');
+            $('#idphotoUseBordercutBtn').click();
+          }, 1200);
+        } else {
+          st.textContent = '❌ AI 抠图失败：' + errMsg + '（请尝试涂抹模式）';
+          st.className = 'status err';
+        }
       }
     }
 
