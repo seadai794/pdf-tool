@@ -4266,18 +4266,21 @@
         const errMsg = String(e.message || e);
         idphotoAiBusy = false; // 确保错误后能重试
 
-        // 针对移动端 abort 的深度检测
-        if (errMsg.includes('abort') || errMsg.includes('Aborted') || errMsg.includes('native code')) {
+        // 【修复点】：严格区分电脑端和手机端
+        const isDeviceMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent);
+        
+        if (isDeviceMobile && (errMsg.includes('abort') || errMsg.includes('Aborted') || errMsg.includes('native code'))) {
+          // 仅在移动端因 GPU/内存受限崩溃时，才引导涂抹
           st.innerHTML = '❌ <b>您的手机浏览器内存或 GPU 受限，无法运行 AI 模型。</b><br><br>请点击下方按钮改用「<b>涂抹擦除背景</b>」，或使用电脑浏览器打开。';
           st.className = 'status err';
           
-          // 隐藏 AI 区域，自动显示涂抹区域引导用户
           setTimeout(() => {
             $('#idphotoAiArea').classList.add('hidden');
             $('#idphotoUseBordercutBtn').click();
           }, 1200);
         } else {
-          st.textContent = '❌ AI 抠图失败：' + errMsg + '（请尝试涂抹模式）';
+          // 电脑端或非 GPU 错误：保留 AI 区域，显示错误，让用户重试
+          st.textContent = '❌ AI 抠图失败：' + errMsg + '（请点击「重新识别」重试，或改用涂抹模式）';
           st.className = 'status err';
         }
       }
