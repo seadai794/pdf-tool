@@ -183,7 +183,7 @@
     font-weight: 600; background: #f8fafc; padding: 5px 10px; border-radius: 7px;
     border: 1px solid #e2e8f0; }
 
-  /* === 关键修复：stage 允许纵向滚动，画布默认 pan-y，仅拖拽时禁用 === */
+  /* === 关键修复：允许纵向滚动，画布默认 pan-y，仅拖拽时禁用 === */
   .stage { position: relative; width: 100%; overflow: hidden; border-radius: 10px;
     background: #f1f5f9; -webkit-user-select: none; user-select: none;
     line-height: 0; border: 1px solid #e2e8f0; touch-action: pan-y; overscroll-behavior: contain; }
@@ -907,7 +907,7 @@
       </div>
     </section>
 
-    <!-- 模块 3：页面调整（原 arrange，暂时隐藏入口，保留代码） -->
+    <!-- 模块 3：页面调整 -->
     <section class="panel" id="panel-arrange" data-theme="edit">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择 PDF</span></h2>
@@ -1017,7 +1017,7 @@
       </div>
     </section>
 
-    <!-- 模块 6：证件照制作（AI / 涂抹 / 跳过） -->
+    <!-- 模块 6：证件照制作 -->
     <section class="panel" id="panel-idphoto" data-theme="convert">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">上传人像照片</span></h2>
@@ -1081,7 +1081,7 @@
           <div class="status" id="idphotoAiStatus"></div>
         </div>
 
-        <!-- 涂抹区（保留原有） -->
+        <!-- 涂抹区 -->
         <div id="idphotoBordercutArea" class="hidden">
           <div class="idphoto-crop-stage" id="idphotoBordercutStage">
             <canvas id="idphotoBordercutCanvas"></canvas>
@@ -2749,7 +2749,7 @@
       say('#cropStatus2', '');
     }
 
-    /* ===== 模块 3：页面调整（保留功能，入口暂未在目录显示） ===== */
+    /* ===== 模块 3：页面调整 ===== */
     const arrange = {
       file: null, buf: null, doc: null,
       pages: [], idCounter: 0,
@@ -4110,7 +4110,7 @@
       }
     });
 
-    /* ===== 模块 6：证件照制作（AI / 涂抹 / 跳过） ===== */
+    /* ===== 模块 6：证件照制作 ===== */
     let idphotoImg = null;
     let idphotoCropped = null;
     let idphotoMatted = null;
@@ -4118,7 +4118,6 @@
     let idphotoCtx = null;
     let idphotoAiMaskCanvas = null;
     let idphotoAiSegmentation = null;
-    let idphotoAiBusy = false;
     let idphotoAiBgColor = '#ffffff';
     let idphotoAiBasePath = LOCAL.mediapipeBase;
 
@@ -4263,7 +4262,6 @@
       const st = $('#idphotoAiStatus');
       st.textContent = '✅ AI 抠图完成，可切换背景色或直接确认';
       st.className = 'status ok';
-      idphotoAiBusy = false;
     }
 
     function renderAiPreview(bgColor) {
@@ -4294,7 +4292,6 @@
         say('#idphotoBgStatus', '请先完成第 2 步的裁剪', true);
         return;
       }
-      if (idphotoAiBusy) return;
 
       const env2 = detectAiEnv();
       if (warnAiUnavailable(env2)) {
@@ -4305,7 +4302,6 @@
         return;
       }
 
-      idphotoAiBusy = true;
       idphotoAiMaskCanvas = null;
 
       $('#idphotoAiArea').classList.remove('hidden');
@@ -4317,10 +4313,8 @@
         const seg = await ensureAiSegmentation();
         st.textContent = '🔍 正在识别人像轮廓…';
         await seg.send({ image: idphotoCropped });
-        idphotoAiBusy = false;
       } catch (e) {
         console.error('[AI]', e);
-        idphotoAiBusy = false;
         const errMsg = String(e && e.message || e);
         if (/abort|Aborted|native code|out of memory|OOM/i.test(errMsg)) {
           handleAiAbort();
