@@ -183,11 +183,13 @@
     font-weight: 600; background: #f8fafc; padding: 5px 10px; border-radius: 7px;
     border: 1px solid #e2e8f0; }
 
+  /* === 关键修复：stage 允许纵向滚动，画布默认 pan-y，仅拖拽时禁用 === */
   .stage { position: relative; width: 100%; overflow: hidden; border-radius: 10px;
     background: #f1f5f9; -webkit-user-select: none; user-select: none;
-    line-height: 0; border: 1px solid #e2e8f0; touch-action: pan-y; }
-  .stage canvas { display: block; width: 100%; touch-action: none; }
+    line-height: 0; border: 1px solid #e2e8f0; touch-action: pan-y; overscroll-behavior: contain; }
+  .stage canvas { display: block; width: 100%; touch-action: pan-y; }
   .stage canvas.overlay { position: absolute; left: 0; top: 0; pointer-events: none; }
+  .stage.dragging { touch-action: none; }
 
   .btn-row { display: flex; flex-wrap: wrap; gap: 6px; }
 
@@ -1044,7 +1046,7 @@
         <h2><span class="step-label">第 3 步</span><span class="step-title">背景处理</span></h2>
         <p class="hint" style="margin-bottom:14px">
           若照片背景已是纯色或已去除背景，<b>可直接点击「直接生成证件照」跳过抠图</b>。<br>
-          若背景复杂，推荐用 <b>AI 智能抠图</b> 自动识别人像；也可用 <b>涂抹擦除</b> 手动处理。
+          <b>AI 智能抠图</b> 在电脑端效果最佳；<b>手机 / 微信内</b> 建议使用 <b>涂抹擦除</b>，或改用电脑打开。
         </p>
         <div class="btn-row" style="margin-bottom:12px">
           <button class="btn amber" id="idphotoSkipBgBtn" type="button" style="flex:1">
@@ -2262,23 +2264,27 @@
         const rect = stage.getBoundingClientRect();
         return { x: e.clientX - rect.left, y: e.clientY - rect.top, w: rect.width, h: rect.height };
       };
+      // === 关键修复：只在命中拆分线时才拦截手势，未命中直接放行滚动 ===
       stage.addEventListener('pointerdown', (e) => {
         if (!split.viewport) return;
         if (e.pointerType === 'mouse' && e.button !== 0) return;
         const p = getPos(e);
         const vertical = split.dir === 'vertical';
         const ratios = getSplitRatios(split.pageNum);
-        const hitR = isMobile ? 42 : 30;
+        const hitR = isMobile ? 48 : 30;
         let best = -1, bestD = hitR;
         ratios.forEach((r, i) => {
           const d = vertical ? Math.abs(p.x - r * p.w) : Math.abs(p.y - r * p.h);
           if (d < bestD) { bestD = d; best = i; }
         });
         if (best >= 0) {
-          split.dragging = true; split.activeLine = best;
+          split.dragging = true;
+          split.activeLine = best;
+          stage.classList.add('dragging');   // 拖拽期间禁用滚动
           try { stage.setPointerCapture(e.pointerId); } catch (_) {}
           e.preventDefault();
         }
+        // 未命中：不做任何事，让浏览器正常滚动
       }, { passive: false });
       stage.addEventListener('pointermove', (e) => {
         if (!split.dragging || split.activeLine < 0) return;
@@ -2296,6 +2302,7 @@
       function endDrag(e) {
         if (!split.dragging) return;
         split.dragging = false; split.activeLine = -1;
+        stage.classList.remove('dragging');
         markSplitDirty();
         if (e && e.pointerId !== undefined) { try { stage.releasePointerCapture(e.pointerId); } catch (_) {} }
       }
@@ -2559,15 +2566,17 @@
         const rect = stage.getBoundingClientRect();
         return { x: e.clientX - rect.left, y: e.clientY - rect.top, w: rect.width, h: rect.height };
       };
+      // === 关键修复：命中裁剪框才拦截，未命中放行滚动 ===
       stage.addEventListener('pointerdown', (e) => {
         if (!crop.viewport) return;
         if (e.pointerType === 'mouse' && e.button !== 0) return;
         const p = getPos(e);
         const mode = hitTestCrop(p.x, p.y);
-        if (!mode) return;
+        if (!mode) return;   // 未命中直接放行
         const c = getCrop(crop.pageNum);
         crop.dragMode = mode;
         crop.dragStart = { px: p.x, py: p.y, W: p.w, H: p.h, x: c.x, y: c.y, w: c.w, h: c.h };
+        stage.classList.add('dragging');
         try { stage.setPointerCapture(e.pointerId); } catch (_) {}
         e.preventDefault();
       }, { passive: false });
@@ -2602,6 +2611,7 @@
       function endDrag(e) {
         if (!crop.dragMode) return;
         crop.dragMode = null; crop.dragStart = null;
+        stage.classList.remove('dragging');
         markCropDirty();
         if (e && e.pointerId !== undefined) {
           try { stage.releasePointerCapture(e.pointerId); } catch (_) {}
@@ -4107,6 +4117,7 @@
     let idphotoMatteMode = 'skip';
     let idphotoCtx = null;
     let idphotoAiMaskCanvas = null;
+    let idphotoAiSafeSize = null;
     let idphotoAiSegmentation = null;
     let idphotoAiBusy = false;
     let idphotoAiBgColor = '#ffffff';
@@ -4151,7 +4162,52 @@
       }
     }
 
-    /* ---- AI 抠图核心（纯净版：修复内存越界） ---- */
+    /* ---- AI 抠图错误处理：按环境给出明确提示 ---- */
+    function handleAiError(errMsg, st) {
+      const ua = navigator.userAgent || '';
+      const isWeChat = /MicroMessenger/i.test(ua);
+      const isQQ = /QQ/i.test(ua) && /Mobile/i.test(ua);
+      const isMobileLocal = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(ua)
+                       || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+      const isAbort = /abort|Aborted|native code|out of memory|OOM/i.test(errMsg);
+
+      if (isWeChat || isQQ) {
+        st.innerHTML = '❌ <b>微信 / QQ 内置浏览器无法运行 AI 抠图模型。</b><br><br>'
+          + '✅ <b>推荐：</b>点击右上角 <b>···</b> → <b>「在浏览器中打开」</b>，<br>'
+          + '或直接在 <b>电脑浏览器</b> 中打开本页面使用 AI 抠图。<br>'
+          + '👉 也可改用 <b>「涂抹擦除背景」</b> 手动处理。';
+        st.className = 'status err';
+        setTimeout(() => {
+          $('#idphotoAiArea').classList.add('hidden');
+          $('#idphotoUseBordercutBtn').click();
+        }, 1800);
+        return;
+      }
+
+      if (isMobileLocal) {
+        st.innerHTML = '❌ <b>当前手机浏览器内存 / GPU 受限，无法稳定运行 AI 抠图。</b><br><br>'
+          + '✅ <b>建议：</b>使用 <b>电脑浏览器</b> 打开本页面进行 AI 智能抠图效果最佳；<br>'
+          + '👉 也可改用 <b>「涂抹擦除背景」</b> 手动处理。';
+        st.className = 'status err';
+        setTimeout(() => {
+          $('#idphotoAiArea').classList.add('hidden');
+          $('#idphotoUseBordercutBtn').click();
+        }, 1800);
+        return;
+      }
+
+      if (isAbort) {
+        st.innerHTML = '❌ AI 模型处理时内存不足（Aborted）。<br><br>'
+          + '✅ <b>建议：</b>关闭其他占用内存的标签页后点击「🔄 重新识别」重试；<br>'
+          + '👉 或改用 <b>「涂抹擦除背景」</b> 手动处理。';
+      } else {
+        st.innerHTML = '❌ AI 抠图失败：' + errMsg + '<br><br>'
+          + '✅ 可点击「🔄 重新识别」重试，或改用 <b>「涂抹擦除背景」</b>。';
+      }
+      st.className = 'status err';
+    }
+
+    /* ---- AI 抠图核心 ---- */
     async function ensureAiSegmentation() {
       if (idphotoAiSegmentation) return idphotoAiSegmentation;
 
@@ -4192,16 +4248,17 @@
     }
 
     function onAiSegmentationResults(results) {
-      if (!idphotoCropped) return;
-      const src = idphotoCropped;
-      const W = src.width, H = src.height;
+      if (!idphotoCropped || !idphotoAiSafeSize) return;
+      // 安全尺寸：mask canvas 与输入一致，避免内存越界
+      const W = idphotoAiSafeSize.w;
+      const H = idphotoAiSafeSize.h;
 
       const tmp = document.createElement('canvas');
       tmp.width = W; tmp.height = H;
       const tctx = tmp.getContext('2d');
       tctx.drawImage(results.segmentationMask, 0, 0, W, H);
       tctx.globalCompositeOperation = 'source-in';
-      tctx.drawImage(src, 0, 0, W, H);
+      tctx.drawImage(idphotoCropped, 0, 0, W, H);
 
       if (!idphotoAiMaskCanvas) idphotoAiMaskCanvas = document.createElement('canvas');
       idphotoAiMaskCanvas.width = W;
@@ -4250,6 +4307,7 @@
       if (idphotoAiBusy) return;
       idphotoAiBusy = true;
       idphotoAiMaskCanvas = null;
+      idphotoAiSafeSize = null;
 
       $('#idphotoAiArea').classList.remove('hidden');
       const st = $('#idphotoAiStatus');
@@ -4259,39 +4317,27 @@
       try {
         const seg = await ensureAiSegmentation();
         st.textContent = '🔍 正在识别人像轮廓…';
-        // 【核心修复】：强制缩小图片，避免电脑端/手机端内存越界报错
+
+        // 【核心修复】：压到 384px 以内，避免 WASM 内存越界
+        const MAX_SAFE = 384;
+        const scale = Math.min(1, MAX_SAFE / Math.max(idphotoCropped.width, idphotoCropped.height));
+        const safeW = Math.max(1, Math.round(idphotoCropped.width * scale));
+        const safeH = Math.max(1, Math.round(idphotoCropped.height * scale));
         const safeImage = document.createElement('canvas');
-        const maxSafe = 512;
-        const scale = Math.min(1, maxSafe / Math.max(idphotoCropped.width, idphotoCropped.height));
-        safeImage.width = Math.round(idphotoCropped.width * scale);
-        safeImage.height = Math.round(idphotoCropped.height * scale);
-        safeImage.getContext('2d').drawImage(idphotoCropped, 0, 0, safeImage.width, safeImage.height);
+        safeImage.width = safeW;
+        safeImage.height = safeH;
+        const sctx = safeImage.getContext('2d');
+        sctx.fillStyle = '#fff';
+        sctx.fillRect(0, 0, safeW, safeH);
+        sctx.drawImage(idphotoCropped, 0, 0, safeW, safeH);
+        idphotoAiSafeSize = { w: safeW, h: safeH };
+
         await seg.send({ image: safeImage });
       } catch (e) {
         console.error('[AI]', e);
-        const errMsg = String(e.message || e);
         idphotoAiBusy = false;
-
-        const isDeviceMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent);
-
-        if (isWeChatEnv) {
-          st.innerHTML = '❌ <b>微信/QQ内置浏览器无法运行 AI 模型。</b><br><br>请点击下方按钮改用「<b>涂抹擦除背景</b>」，或点击右上角「<b>在浏览器中打开</b>」。';
-          st.className = 'status err';
-          setTimeout(() => {
-            $('#idphotoAiArea').classList.add('hidden');
-            $('#idphotoUseBordercutBtn').click();
-          }, 1500);
-        } else if (isDeviceMobile && (errMsg.includes('abort') || errMsg.includes('Aborted') || errMsg.includes('native code'))) {
-          st.innerHTML = '❌ <b>您的手机浏览器内存或 GPU 受限，无法运行 AI 模型。</b><br><br>请点击下方按钮改用「<b>涂抹擦除背景</b>」，或使用电脑浏览器打开。';
-          st.className = 'status err';
-          setTimeout(() => {
-            $('#idphotoAiArea').classList.add('hidden');
-            $('#idphotoUseBordercutBtn').click();
-          }, 1500);
-        } else {
-          st.textContent = '❌ AI 抠图失败：' + errMsg + '（请点击「重新识别」重试，或改用涂抹模式）';
-          st.className = 'status err';
-        }
+        const errMsg = String(e && e.message || e);
+        handleAiError(errMsg, st);
       }
     }
 
@@ -4333,6 +4379,7 @@
         idphotoCropped = null;
         idphotoMatted = null;
         idphotoAiMaskCanvas = null;
+        idphotoAiSafeSize = null;
         idphotoState.x = 0; idphotoState.y = 0;
         idphotoCrop.crop = { x: 0.1, y: 0.05, w: 0.8, h: 0.9 };
         bordercutHistory = [];
@@ -4567,6 +4614,7 @@
       idphotoCropped = cv;
       idphotoMatted = null;
       idphotoAiMaskCanvas = null;
+      idphotoAiSafeSize = null;
       idphotoState.x = 0; idphotoState.y = 0;
       bordercutSrcCanvas = cv;
       bordercutStrokes = [];
@@ -4996,7 +5044,7 @@
       const ua = navigator.userAgent || '';
       const isWeChat = /MicroMessenger/i.test(ua);
       const isQQ = /QQ/i.test(ua) && /Mobile/i.test(ua);
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(ua);
+      const isMobileLocal = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(ua);
 
       if (isWeChat || isQQ) {
         // 微信环境：转换为 DataURL 显示在模态框中让用户长按保存
@@ -5015,7 +5063,7 @@
       }
 
       // 2. 现代浏览器环境（支持文件选择器）
-      if (window.isSecureContext && typeof window.showSaveFilePicker === 'function' && !isMobile) {
+      if (window.isSecureContext && typeof window.showSaveFilePicker === 'function' && !isMobileLocal) {
         try {
           const handle = await window.showSaveFilePicker({
             suggestedName: filename,
