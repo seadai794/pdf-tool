@@ -4204,32 +4204,38 @@
   if (idphotoAiSegmentation) return idphotoAiSegmentation;
 
   if (typeof window.SelfieSegmentation === 'undefined') {
-    let loaded = false;
-    for (const p of LOCAL.mediapipeJs) {
-      try {
-        await loadScript(p, 'SelfieSegmentation', 2000);
-        loaded = true;
-        idphotoAiBasePath = LOCAL.mediapipeBase;
-        break;
-      } catch (e) {}
+    let jsLoaded = false;
+    // 优先尝试加载本地 JS
+    try {
+      await loadScript(LOCAL.mediapipeJs[0], 'SelfieSegmentation', 2000);
+      jsLoaded = true;
+    } catch (e) {
+      // 本地 JS 失败，加载 CDN JS
+      await loadScript(CDN.mediapipeJs[0], 'SelfieSegmentation', 10000);
+      jsLoaded = true;
     }
-    if (!loaded) {
-      for (const url of CDN.mediapipeJs) {
-        try {
-          await loadScript(url, 'SelfieSegmentation', 10000);
-          loaded = true;
-          idphotoAiBasePath = CDN.mediapipeBase;
-          break;
-        } catch (e) {}
-      }
-    }
-    if (!loaded || typeof window.SelfieSegmentation === 'undefined') {
-      throw new Error('MediaPipe 加载失败');
+    
+    if (!jsLoaded || typeof window.SelfieSegmentation === 'undefined') {
+      throw new Error('MediaPipe 核心库加载失败');
     }
   }
 
+  // 【关键修复】：检查本地模型文件是否存在
+  let finalBasePath = CDN.mediapipeBase;
+  try {
+    const check = await fetch(LOCAL.mediapipeBase + 'selfie_segmentation_landscape.tflite', { method: 'HEAD' });
+    if (check.ok) {
+      finalBasePath = LOCAL.mediapipeBase; // 本地齐全，使用本地
+      console.log('[AI] ✅ 使用本地模型文件');
+    } else {
+      console.log('[AI] ⚠️ 本地缺少模型文件，自动降级使用 CDN');
+    }
+  } catch (e) {
+    console.log('[AI] ⚠️ 本地探测失败，自动降级使用 CDN');
+  }
+
   const seg = new window.SelfieSegmentation({
-    locateFile: (f) => idphotoAiBasePath + f
+    locateFile: (f) => finalBasePath + f
   });
   seg.setOptions({ modelSelection: 1, selfieMode: false });
   seg.onResults(onAiSegmentationResults);
