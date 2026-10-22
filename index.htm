@@ -26,6 +26,7 @@
 </script>
 
 <style>
+  /* 样式保持不变... */
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
@@ -183,7 +184,7 @@
     font-weight: 600; background: #f8fafc; padding: 5px 10px; border-radius: 7px;
     border: 1px solid #e2e8f0; }
 
-  /* === 关键修复：stage 允许纵向滚动，画布默认 pan-y，仅拖拽时禁用 === */
+  /* === 关键修复：stage 允许纵向滚动 === */
   .stage { position: relative; width: 100%; overflow: hidden; border-radius: 10px;
     background: #f1f5f9; -webkit-user-select: none; user-select: none;
     line-height: 0; border: 1px solid #e2e8f0; touch-action: pan-y; overscroll-behavior: contain; }
@@ -235,12 +236,6 @@
     font-size: 11px; padding: 10px; border: 1px solid #e2e8f0;
     border-radius: 8px; resize: vertical; word-break: break-all;
     background: #f8fafc; color: #334155; -webkit-user-select: text; user-select: text; }
-
-  .crop-tips { font-size: 11px; color: #334155; line-height: 1.65;
-    background: linear-gradient(135deg, #eff6ff, #f8fafc);
-    border: 1px solid #dbeafe; border-radius: 9px;
-    padding: 10px 12px; margin-top: 10px; }
-  .crop-tips b { color: #1e40af; }
 
   .arrange-toolbar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;
     padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; }
@@ -696,7 +691,6 @@
 </head>
 <body>
 
-<!-- 全局微信环境提示横幅 -->
 <div id="wechatGuide" class="hidden" style="background: #fffbeb; border-bottom: 1px solid #fcd34d; padding: 12px 16px; display: none; align-items: flex-start; gap: 10px; color: #92400e; font-size: 13px; line-height: 1.5; position: relative; z-index: 1000;">
   <div style="font-size: 20px; line-height: 1;">⚠️</div>
   <div style="flex: 1;">
@@ -830,7 +824,6 @@
   <div id="envBanner"></div>
 
   <main>
-    <!-- 模块 1：试卷拆分 -->
     <section class="panel active" id="panel-split" data-theme="edit">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择试卷 PDF</span></h2>
@@ -871,7 +864,6 @@
       </div>
     </section>
 
-    <!-- 模块 2：PDF 裁剪 -->
     <section class="panel" id="panel-crop" data-theme="edit">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择 PDF</span></h2>
@@ -907,7 +899,6 @@
       </div>
     </section>
 
-    <!-- 模块 3：页面调整 -->
     <section class="panel" id="panel-arrange" data-theme="edit">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择 PDF</span></h2>
@@ -935,7 +926,6 @@
       </div>
     </section>
 
-    <!-- 模块 4：扫描文档 -->
     <section class="panel" id="panel-scan" data-theme="edit">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">打开全屏相机</span></h2>
@@ -975,7 +965,6 @@
       </div>
     </section>
 
-    <!-- 模块 5：身份证复印件 -->
     <section class="panel" id="panel-idcard" data-theme="organize">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择/拍摄身份证</span></h2>
@@ -1017,7 +1006,6 @@
       </div>
     </section>
 
-    <!-- 模块 6：证件照制作 -->
     <section class="panel" id="panel-idphoto" data-theme="convert">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">上传人像照片</span></h2>
@@ -1041,7 +1029,6 @@
         <div class="status" id="idphotoCropStatus"></div>
       </div>
 
-      <!-- 第 3 步：背景处理 -->
       <div class="card hidden" id="idphotoBgCard">
         <h2><span class="step-label">第 3 步</span><span class="step-title">背景处理</span></h2>
         <p class="hint" style="margin-bottom:14px">
@@ -1062,7 +1049,6 @@
           </button>
         </div>
 
-        <!-- AI 抠图预览区 -->
         <div id="idphotoAiArea" class="hidden">
           <div class="idphoto-crop-stage" id="idphotoAiStage">
             <canvas id="idphotoAiPreviewCanvas"></canvas>
@@ -1081,7 +1067,6 @@
           <div class="status" id="idphotoAiStatus"></div>
         </div>
 
-        <!-- 涂抹区 -->
         <div id="idphotoBordercutArea" class="hidden">
           <div class="idphoto-crop-stage" id="idphotoBordercutStage">
             <canvas id="idphotoBordercutCanvas"></canvas>
@@ -1090,9 +1075,9 @@
             <canvas id="idphotoBordercutPreviewCanvas"></canvas>
           </div>
           <div class="btn-row" style="margin-top:10px">
-            <button class="btn gray hidden" id="idphotoBordercutClear" type="button">继续涂抹</button>
             <button class="btn red hidden" id="idphotoBordercutUndo" type="button">撤销</button>
             <button class="btn gray hidden" id="idphotoBordercutReset" type="button">重置</button>
+            <button class="btn gray" id="idphotoBordercutCancel" type="button">❌ 放弃涂抹</button>
             <button class="btn green" id="idphotoBordercutApply" type="button" style="flex:1">应用涂抹</button>
           </div>
           <button class="btn big purple hidden" id="idphotoBordercutConfirm" type="button" style="margin-top:12px">✅ 满意，继续</button>
@@ -1102,7 +1087,6 @@
         <div class="status" id="idphotoBgStatus"></div>
       </div>
 
-      <!-- 第 4 步：尺寸与排版 -->
       <div class="card hidden" id="idphotoOptCard">
         <h2><span class="step-label">第 4 步</span><span class="step-title">尺寸与排版</span></h2>
         <div class="field">
@@ -1131,8 +1115,8 @@
           </select>
         </div>
         <div class="preview-wrap hidden" id="idphotoPreviewWrap" style="text-align:center; background: #1e293b; margin-bottom: 12px;">
-          <p class="hint" style="text-align:left;margin-top:0;color:#94a3b8;">提示：单张模式下可拖动照片调整位置。</p>
-          <canvas id="idphotoCanvas" style="box-shadow: 0 4px 12px rgba(0,0,0,0.5); max-width: 100%; touch-action:none; cursor:grab;"></canvas>
+          <p class="hint" style="text-align:left;margin-top:0;color:#94a3b8;">提示：单张模式下可用鼠标（或触控笔）拖动照片调整位置。</p>
+          <canvas id="idphotoCanvas" style="box-shadow: 0 4px 12px rgba(0,0,0,0.5); max-width: 100%; touch-action: pan-y; cursor:grab;"></canvas>
         </div>
         <div class="btn-row hidden" id="idphotoDownloadRow">
           <button class="btn green big" id="idphotoDownloadBtn" type="button">💾 保存图片</button>
@@ -1140,7 +1124,6 @@
       </div>
     </section>
 
-    <!-- 模块 7：图片转 PDF -->
     <section class="panel" id="panel-img2pdf" data-theme="convert">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择图片</span></h2>
@@ -1161,7 +1144,6 @@
       </div>
     </section>
 
-    <!-- 模块 8：PDF 转图片 -->
     <section class="panel" id="panel-pdf2img" data-theme="convert">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择 PDF</span></h2>
@@ -1184,7 +1166,6 @@
       </div>
     </section>
 
-    <!-- 模块 9：Word 转 PDF -->
     <section class="panel" id="panel-word2pdf" data-theme="convert">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择 Word 文档</span></h2>
@@ -1197,7 +1178,6 @@
       </div>
     </section>
 
-    <!-- 模块 10：PDF 合并 -->
     <section class="panel" id="panel-merge" data-theme="organize">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择要合并的 PDF</span></h2>
@@ -1218,7 +1198,6 @@
       </div>
     </section>
 
-    <!-- 模块 11：PDF 拆分 -->
     <section class="panel" id="panel-extract" data-theme="organize">
       <div class="card">
         <h2><span class="step-label">第 1 步</span><span class="step-title">选择 PDF</span></h2>
@@ -1241,7 +1220,6 @@
   </main>
 </div>
 
-<!-- 全屏相机 -->
 <div class="scan-fullscreen" id="scanFullscreen">
   <div class="scan-fs-topbar">
     <button class="scan-fs-close" id="scanFsClose" type="button">✕</button>
@@ -1299,7 +1277,6 @@
   <span>✓</span><span id="scanToastText">已添加</span>
 </div>
 
-<!-- 扫描图片编辑器 -->
 <div class="scan-img-editor" id="scanImgEditor">
   <div class="scan-ie-header">
     <button class="close-btn" id="scanIeClose" type="button">✕</button>
@@ -1330,7 +1307,6 @@
   </div>
 </div>
 
-<!-- 微信内保存 PDF 提示弹窗 -->
 <div id="wechatSaveModal" class="modal hidden">
   <div class="modal-content" style="text-align: center; max-width: 400px;">
     <div style="font-size: 48px; margin-bottom: 10px;">📱</div>
@@ -1346,7 +1322,6 @@
   </div>
 </div>
 
-<!-- 微信长按保存图片的弹窗 -->
 <div id="saveImgModal" class="modal hidden">
   <div class="modal-content" style="text-align: center;">
     <h3>📱 长按图片保存</h3>
@@ -1645,7 +1620,6 @@
     }
     renderEnvBanner();
 
-    // 检测微信/QQ环境
     const ua = navigator.userAgent || '';
     const isWeChat = /MicroMessenger/i.test(ua);
     const isQQ = /QQ/i.test(ua) && /Mobile/i.test(ua);
@@ -1656,7 +1630,6 @@
       if (guideEl) guideEl.style.display = 'flex';
     }
 
-    // 绑定微信保存提示弹窗的关闭按钮
     const wechatSaveCloseBtn = $('#wechatSaveCloseBtn');
     if (wechatSaveCloseBtn) {
       wechatSaveCloseBtn.addEventListener('click', () => {
@@ -1823,7 +1796,6 @@
 
     const sharedSave = {
       async saveAsPdf(bytes, filename, sayFn) {
-        // 1. 如果在微信/QQ内，直接弹窗拦截，不触发下载
         if (isWeChatEnv) {
           sayFn('⚠️ 微信内无法直接保存，请按提示操作', false, false);
           const modal = $('#wechatSaveModal');
@@ -1833,7 +1805,6 @@
 
         const blob = new Blob([bytes], { type: 'application/pdf' });
         
-        // 2. 支持系统另存为（电脑端 Chrome/Edge）
         if (hasSavePicker) {
           try {
             const handle = await window.showSaveFilePicker({
@@ -1850,7 +1821,6 @@
           }
         }
 
-        // 3. 普通手机浏览器/电脑浏览器触发下载
         let url = null;
         try {
           url = URL.createObjectURL(blob);
@@ -1879,7 +1849,6 @@
           if (url) { try { URL.revokeObjectURL(url); } catch (_) {} }
         }
 
-        // 4. 极端降级：显示 DataURL 让用户手动复制
         try {
           const dataUrl = await bytesToDataUrl(bytes);
           showDataModalDirect(dataUrl);
@@ -2264,7 +2233,6 @@
         const rect = stage.getBoundingClientRect();
         return { x: e.clientX - rect.left, y: e.clientY - rect.top, w: rect.width, h: rect.height };
       };
-      // === 关键修复：只在命中拆分线时才拦截手势，未命中直接放行滚动 ===
       stage.addEventListener('pointerdown', (e) => {
         if (!split.viewport) return;
         if (e.pointerType === 'mouse' && e.button !== 0) return;
@@ -2280,11 +2248,10 @@
         if (best >= 0) {
           split.dragging = true;
           split.activeLine = best;
-          stage.classList.add('dragging');   // 拖拽期间禁用滚动
+          stage.classList.add('dragging');
           try { stage.setPointerCapture(e.pointerId); } catch (_) {}
           e.preventDefault();
         }
-        // 未命中：不做任何事，让浏览器正常滚动
       }, { passive: false });
       stage.addEventListener('pointermove', (e) => {
         if (!split.dragging || split.activeLine < 0) return;
@@ -2566,13 +2533,12 @@
         const rect = stage.getBoundingClientRect();
         return { x: e.clientX - rect.left, y: e.clientY - rect.top, w: rect.width, h: rect.height };
       };
-      // === 关键修复：命中裁剪框才拦截，未命中放行滚动 ===
       stage.addEventListener('pointerdown', (e) => {
         if (!crop.viewport) return;
         if (e.pointerType === 'mouse' && e.button !== 0) return;
         const p = getPos(e);
         const mode = hitTestCrop(p.x, p.y);
-        if (!mode) return;   // 未命中直接放行
+        if (!mode) return;
         const c = getCrop(crop.pageNum);
         crop.dragMode = mode;
         crop.dragStart = { px: p.x, py: p.y, W: p.w, H: p.h, x: c.x, y: c.y, w: c.w, h: c.h };
@@ -4201,68 +4167,67 @@
     }
 
     async function ensureAiSegmentation() {
-  if (idphotoAiSegmentation) return idphotoAiSegmentation;
+      if (idphotoAiSegmentation) return idphotoAiSegmentation;
 
-  if (typeof window.SelfieSegmentation === 'undefined') {
-    let loaded = false;
-    for (const p of LOCAL.mediapipeJs) {
-      try {
-        await loadScript(p, 'SelfieSegmentation', 2000);
-        loaded = true;
-        idphotoAiBasePath = LOCAL.mediapipeBase;
-        break;
-      } catch (e) {}
-    }
-    if (!loaded) {
-      for (const url of CDN.mediapipeJs) {
-        try {
-          await loadScript(url, 'SelfieSegmentation', 10000);
-          loaded = true;
-          idphotoAiBasePath = CDN.mediapipeBase;
-          break;
-        } catch (e) {}
+      if (typeof window.SelfieSegmentation === 'undefined') {
+        let loaded = false;
+        for (const p of LOCAL.mediapipeJs) {
+          try {
+            await loadScript(p, 'SelfieSegmentation', 2000);
+            loaded = true;
+            idphotoAiBasePath = LOCAL.mediapipeBase;
+            break;
+          } catch (e) {}
+        }
+        if (!loaded) {
+          for (const url of CDN.mediapipeJs) {
+            try {
+              await loadScript(url, 'SelfieSegmentation', 10000);
+              loaded = true;
+              idphotoAiBasePath = CDN.mediapipeBase;
+              break;
+            } catch (e) {}
+          }
+        }
+        if (!loaded || typeof window.SelfieSegmentation === 'undefined') {
+          throw new Error('MediaPipe 加载失败');
+        }
       }
-    }
-    if (!loaded || typeof window.SelfieSegmentation === 'undefined') {
-      throw new Error('MediaPipe 加载失败');
-    }
-  }
 
-  // 完全照搬独立版，不要加 useCpu
-  const seg = new window.SelfieSegmentation({
-    locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation@0.1.1675465747/${f}`
-  });
-  seg.setOptions({ modelSelection: 1, selfieMode: false });
-  seg.onResults(onAiSegmentationResults);
-  idphotoAiSegmentation = seg;
-  return seg;
-}
+      const seg = new window.SelfieSegmentation({
+        locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation@0.1.1675465747/${f}`
+      });
+      seg.setOptions({ modelSelection: 1, selfieMode: false });
+      seg.onResults(onAiSegmentationResults);
+      idphotoAiSegmentation = seg;
+      return seg;
+    }
 
     function onAiSegmentationResults(results) {
-  if (!idphotoCropped) return;
+      if (!idphotoCropped) return;
 
-  // 完全照搬独立版，使用原始尺寸 W 和 H，绝对不缩放！
-  const W = idphotoCropped.width;
-  const H = idphotoCropped.height;
+      const W = idphotoCropped.width;
+      const H = idphotoCropped.height;
 
-  const canvas = document.createElement('canvas');
-  canvas.width = W;
-  canvas.height = H;
-  const ctx = canvas.getContext('2d');
+      const canvas = document.createElement('canvas');
+      canvas.width = W;
+      canvas.height = H;
+      const ctx = canvas.getContext('2d');
 
-  ctx.clearRect(0, 0, W, H);
-  ctx.drawImage(results.segmentationMask, 0, 0, W, H);
-  ctx.globalCompositeOperation = 'source-in';
-  ctx.drawImage(idphotoCropped, 0, 0, W, H);
-  ctx.globalCompositeOperation = 'source-over';
+      ctx.clearRect(0, 0, W, H);
+      ctx.drawImage(results.segmentationMask, 0, 0, W, H);
+      ctx.globalCompositeOperation = 'source-in';
+      ctx.drawImage(idphotoCropped, 0, 0, W, H);
+      ctx.globalCompositeOperation = 'source-over';
 
-  idphotoAiMaskCanvas = canvas;
+      idphotoAiMaskCanvas = canvas;
 
-  renderAiPreview(idphotoAiBgColor);
-  const st = $('#idphotoAiStatus');
-  st.textContent = '✅ AI 抠图完成，可切换背景色或直接确认';
-  st.className = 'status ok';
-}
+      renderAiPreview(idphotoAiBgColor);
+      const st = $('#idphotoAiStatus');
+      st.textContent = '✅ AI 抠图完成，可切换背景色或直接确认';
+      st.className = 'status ok';
+    }
+
     function renderAiPreview(bgColor) {
       if (!idphotoAiMaskCanvas) return;
       const cv = $('#idphotoAiPreviewCanvas');
@@ -4287,46 +4252,43 @@
     }
 
     async function runAiSegmentation() {
-  if (!idphotoCropped) {
-    say('#idphotoBgStatus', '请先完成第 2 步的裁剪', true);
-    return;
-  }
+      if (!idphotoCropped) {
+        say('#idphotoBgStatus', '请先完成第 2 步的裁剪', true);
+        return;
+      }
 
-  const env2 = detectAiEnv();
-  if (warnAiUnavailable(env2)) {
-    setTimeout(() => {
-      $('#idphotoAiArea').classList.add('hidden');
-      $('#idphotoUseBordercutBtn').click();
-    }, 1800);
-    return;
-  }
+      const env2 = detectAiEnv();
+      if (warnAiUnavailable(env2)) {
+        setTimeout(() => {
+          $('#idphotoAiArea').classList.add('hidden');
+          $('#idphotoUseBordercutBtn').click();
+        }, 1800);
+        return;
+      }
 
-  idphotoAiMaskCanvas = null;
+      idphotoAiMaskCanvas = null;
 
-  $('#idphotoAiArea').classList.remove('hidden');
-  const st = $('#idphotoAiStatus');
-  st.textContent = '⏳ 首次使用需加载约 2MB AI 模型，请耐心等待…';
-  st.className = 'status';
+      $('#idphotoAiArea').classList.remove('hidden');
+      const st = $('#idphotoAiStatus');
+      st.textContent = '⏳ 首次使用需加载约 2MB AI 模型，请耐心等待…';
+      st.className = 'status';
 
-  try {
-    const seg = await ensureAiSegmentation();
-    st.textContent = '🔍 正在识别人像轮廓…';
-    
-    // 【真相大白】：完全照搬独立版，直接传入 idphotoCropped
-    await seg.send({ image: idphotoCropped });
-    
-  } catch (e) {
-    console.error('[AI]', e);
-    const errMsg = String(e && e.message || e);
-    if (/abort|Aborted|native code|out of memory|OOM/i.test(errMsg)) {
-      handleAiAbort();
-    } else {
-      st.innerHTML = '❌ AI 抠图失败：' + errMsg + '<br><br>'
-        + '✅ 可点击「🔄 重新识别」重试，或改用 <b>「涂抹擦除背景」</b>。';
-      st.className = 'status err';
+      try {
+        const seg = await ensureAiSegmentation();
+        st.textContent = '🔍 正在识别人像轮廓…';
+        await seg.send({ image: idphotoCropped });
+      } catch (e) {
+        console.error('[AI]', e);
+        const errMsg = String(e && e.message || e);
+        if (/abort|Aborted|native code|out of memory|OOM/i.test(errMsg)) {
+          handleAiAbort();
+        } else {
+          st.innerHTML = '❌ AI 抠图失败：' + errMsg + '<br><br>'
+            + '✅ 可点击「🔄 重新识别」重试，或改用 <b>「涂抹擦除背景」</b>。';
+          st.className = 'status err';
+        }
+      }
     }
-  }
-}
 
     bind('#idphotoUseAiBtn', 'click', () => {
       if (!idphotoCropped) {
@@ -4355,6 +4317,30 @@
       idphotoMatted = { canvas: idphotoAiMaskCanvas, mode: 'ai' };
       idphotoMatteMode = 'ai';
       await goToOptions();
+    });
+
+    bind('#idphotoUseBordercutBtn', 'click', () => {
+      if (!idphotoCropped) {
+        say('#idphotoBgStatus', '请先完成第 2 步的裁剪', true);
+        return;
+      }
+      idphotoMatteMode = 'bordercut';
+      $('#idphotoAiArea').classList.add('hidden');
+      $('#idphotoBordercutArea').classList.remove('hidden');
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          renderBordercutCanvas(idphotoCropped);
+        });
+      });
+      say('#idphotoBordercutStatus', '用手指在图上涂抹要去掉的背景，涂完点「应用涂抹」');
+    });
+
+    bind('#idphotoBordercutCancel', 'click', () => {
+      $('#idphotoBordercutArea').classList.add('hidden');
+      $('#idphotoAiArea').classList.add('hidden');
+      $('#idphotoBgStatus').textContent = '已返回，可重新选择「直接生成」「涂抹擦除」或「AI 智能抠图」。';
+      idphotoMatteMode = 'skip';
+      idphotoMatted = null;
     });
 
     /* ---- 文件上传 ---- */
@@ -4629,22 +4615,6 @@
       $('#idphotoBgStatus').textContent = '';
       await goToOptions();
       say('#idphotoBgStatus', '✅ 已跳过抠图，直接使用裁剪图生成证件照', false, true);
-    });
-
-    bind('#idphotoUseBordercutBtn', 'click', () => {
-      if (!idphotoCropped) {
-        say('#idphotoBgStatus', '请先完成第 2 步的裁剪', true);
-        return;
-      }
-      idphotoMatteMode = 'bordercut';
-      $('#idphotoAiArea').classList.add('hidden');
-      $('#idphotoBordercutArea').classList.remove('hidden');
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          renderBordercutCanvas(idphotoCropped);
-        });
-      });
-      say('#idphotoBordercutStatus', '用手指在图上涂抹要去掉的背景，涂完点「应用涂抹」');
     });
 
     function renderBordercutCanvas(srcCanvas) {
@@ -4973,14 +4943,19 @@
     (function bindIdPhotoDrag() {
       const canvas = $('#idphotoCanvas');
       if (!canvas) return;
+      
       canvas.addEventListener('pointerdown', (e) => {
         if (!idphotoImg || $('#idphotoLayout').value !== 'single') return;
+        // 【修复】：手机端禁止拖动图片，方便滑动页面
+        if (e.pointerType === 'touch') return;
+        
         idphotoState.dragging = true;
         idphotoState.startX = e.clientX;
         idphotoState.startY = e.clientY;
         try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
         e.preventDefault();
       }, { passive: false });
+      
       canvas.addEventListener('pointermove', (e) => {
         if (!idphotoState.dragging) return;
         const rect = canvas.getBoundingClientRect();
@@ -5083,7 +5058,15 @@
         try { document.body.removeChild(a); } catch (_) {}
         setTimeout(() => { try { URL.revokeObjectURL(url); } catch (_) {} }, 60000);
       }, 5000);
-      say('#idphotoStatus', '已触发下载：' + filename, false, true);
+      
+      // 加上明显的提示和文件路径指引
+      say('#idphotoStatus', '✅ 已触发下载，请在手机的「相册/图库」或「下载」目录中查找文件。', false, true);
+      
+      const toast = document.createElement("div");
+      toast.style.cssText = "position:fixed;bottom:50px;left:50%;transform:translateX(-50%);background:#059669;color:#fff;padding:12px 24px;border-radius:30px;font-size:14px;font-weight:bold;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.2);";
+      toast.textContent = "✅ 图片已保存，请前往相册查看";
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
     }
 
     /* ===== 模块 7：图片转 PDF ===== */
