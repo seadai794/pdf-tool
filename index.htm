@@ -4203,33 +4203,36 @@
     async function ensureAiSegmentation() {
   if (idphotoAiSegmentation) return idphotoAiSegmentation;
 
-  // 强制现场加载，不依赖任何其他库的加载状态
+  // 【关键修复】：使用完全独立版的加载方式，不给超时，确保底层 Wasm 加载完成
   if (typeof window.SelfieSegmentation === 'undefined') {
-    let loaded = false;
-    for (const p of LOCAL.mediapipeJs) {
+    if (!window.__mpLoaded) {
+      // 优先尝试本地路径
       try {
-        await loadScript(p, 'SelfieSegmentation', 2000);
-        loaded = true;
+        await new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = LOCAL.mediapipeJs[0];
+          s.onload = resolve;
+          s.onerror = reject;
+          document.head.appendChild(s);
+        });
+        window.__mpLoaded = true;
         idphotoAiBasePath = LOCAL.mediapipeBase;
-        break;
-      } catch (e) {}
-    }
-    if (!loaded) {
-      for (const url of CDN.mediapipeJs) {
-        try {
-          await loadScript(url, 'SelfieSegmentation', 10000);
-          loaded = true;
-          idphotoAiBasePath = CDN.mediapipeBase;
-          break;
-        } catch (e) {}
+      } catch (e) {
+        // 本地失败则尝试 CDN
+        await new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = CDN.mediapipeJs[0];
+          s.onload = resolve;
+          s.onerror = reject;
+          document.head.appendChild(s);
+        });
+        window.__mpLoaded = true;
+        idphotoAiBasePath = CDN.mediapipeBase;
       }
-    }
-    if (!loaded || typeof window.SelfieSegmentation === 'undefined') {
-      throw new Error('MediaPipe 加载失败');
     }
   }
 
-  // 完全照搬独立工具的初始化参数
+  // 100% 还原独立版实例化
   const seg = new window.SelfieSegmentation({
     locateFile: (f) => idphotoAiBasePath + f
   });
