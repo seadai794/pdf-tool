@@ -4201,73 +4201,68 @@
     }
 
     async function ensureAiSegmentation() {
-      if (idphotoAiSegmentation) return idphotoAiSegmentation;
+  if (idphotoAiSegmentation) return idphotoAiSegmentation;
 
-      if (typeof window.SelfieSegmentation === 'undefined') {
-        let jsLoaded = false;
-        // 优先尝试加载本地 JS
-        try {
-          await loadScript(LOCAL.mediapipeJs[0], 'SelfieSegmentation', 2000);
-          jsLoaded = true;
-        } catch (e) {
-          // 本地 JS 失败，加载 CDN JS
-          await loadScript(CDN.mediapipeJs[0], 'SelfieSegmentation', 10000);
-          jsLoaded = true;
-        }
-        
-        if (!jsLoaded || typeof window.SelfieSegmentation === 'undefined') {
-          throw new Error('MediaPipe 核心库加载失败');
-        }
-      }
-
-      // 【关键修复】：自动探测本地模型文件是否存在。如果本地有 .tflite 就纯离线，没有就自动走 CDN
-      let finalBasePath = CDN.mediapipeBase;
+  if (typeof window.SelfieSegmentation === 'undefined') {
+    let loaded = false;
+    for (const p of LOCAL.mediapipeJs) {
       try {
-        const check = await fetch(LOCAL.mediapipeBase + 'selfie_segmentation_landscape.tflite', { method: 'HEAD' });
-        if (check.ok) {
-          finalBasePath = LOCAL.mediapipeBase;
-          console.log('[AI] ✅ 检测到本地模型，启用纯离线模式');
-        } else {
-          console.log('[AI] ⚠️ 本地缺少模型文件（404），已自动降级为 CDN 加载');
-        }
-      } catch (e) {
-        console.log('[AI] ⚠️ 本地探测失败，已自动降级为 CDN 加载');
-      }
-
-      const seg = new window.SelfieSegmentation({
-        locateFile: (f) => finalBasePath + f
-      });
-      seg.setOptions({ modelSelection: 1, selfieMode: false, useCpu: true });
-      seg.onResults(onAiSegmentationResults);
-      idphotoAiSegmentation = seg;
-      return seg;
+        await loadScript(p, 'SelfieSegmentation', 2000);
+        loaded = true;
+        idphotoAiBasePath = LOCAL.mediapipeBase;
+        break;
+      } catch (e) {}
     }
+    if (!loaded) {
+      for (const url of CDN.mediapipeJs) {
+        try {
+          await loadScript(url, 'SelfieSegmentation', 10000);
+          loaded = true;
+          idphotoAiBasePath = CDN.mediapipeBase;
+          break;
+        } catch (e) {}
+      }
+    }
+    if (!loaded || typeof window.SelfieSegmentation === 'undefined') {
+      throw new Error('MediaPipe 加载失败');
+    }
+  }
+
+  // 完全照搬独立版，不要加 useCpu
+  const seg = new window.SelfieSegmentation({
+    locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation@0.1.1675465747/${f}`
+  });
+  seg.setOptions({ modelSelection: 1, selfieMode: false });
+  seg.onResults(onAiSegmentationResults);
+  idphotoAiSegmentation = seg;
+  return seg;
+}
 
     function onAiSegmentationResults(results) {
-      if (!idphotoCropped) return;
+  if (!idphotoCropped) return;
 
-      const W = idphotoCropped.width;
-      const H = idphotoCropped.height;
+  // 完全照搬独立版，使用原始尺寸 W 和 H，绝对不缩放！
+  const W = idphotoCropped.width;
+  const H = idphotoCropped.height;
 
-      const canvas = document.createElement('canvas');
-      canvas.width = W;
-      canvas.height = H;
-      const ctx = canvas.getContext('2d');
+  const canvas = document.createElement('canvas');
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
 
-      ctx.clearRect(0, 0, W, H);
-      ctx.drawImage(results.segmentationMask, 0, 0, W, H);
-      ctx.globalCompositeOperation = 'source-in';
-      ctx.drawImage(idphotoCropped, 0, 0, W, H);
-      ctx.globalCompositeOperation = 'source-over';
+  ctx.clearRect(0, 0, W, H);
+  ctx.drawImage(results.segmentationMask, 0, 0, W, H);
+  ctx.globalCompositeOperation = 'source-in';
+  ctx.drawImage(idphotoCropped, 0, 0, W, H);
+  ctx.globalCompositeOperation = 'source-over';
 
-      idphotoAiMaskCanvas = canvas;
+  idphotoAiMaskCanvas = canvas;
 
-      renderAiPreview(idphotoAiBgColor);
-      const st = $('#idphotoAiStatus');
-      st.textContent = '✅ AI 抠图完成，可切换背景色或直接确认';
-      st.className = 'status ok';
-    }
-
+  renderAiPreview(idphotoAiBgColor);
+  const st = $('#idphotoAiStatus');
+  st.textContent = '✅ AI 抠图完成，可切换背景色或直接确认';
+  st.className = 'status ok';
+}
     function renderAiPreview(bgColor) {
       if (!idphotoAiMaskCanvas) return;
       const cv = $('#idphotoAiPreviewCanvas');
@@ -4292,43 +4287,46 @@
     }
 
     async function runAiSegmentation() {
-      if (!idphotoCropped) {
-        say('#idphotoBgStatus', '请先完成第 2 步的裁剪', true);
-        return;
-      }
+  if (!idphotoCropped) {
+    say('#idphotoBgStatus', '请先完成第 2 步的裁剪', true);
+    return;
+  }
 
-      const env2 = detectAiEnv();
-      if (warnAiUnavailable(env2)) {
-        setTimeout(() => {
-          $('#idphotoAiArea').classList.add('hidden');
-          $('#idphotoUseBordercutBtn').click();
-        }, 1800);
-        return;
-      }
+  const env2 = detectAiEnv();
+  if (warnAiUnavailable(env2)) {
+    setTimeout(() => {
+      $('#idphotoAiArea').classList.add('hidden');
+      $('#idphotoUseBordercutBtn').click();
+    }, 1800);
+    return;
+  }
 
-      idphotoAiMaskCanvas = null;
+  idphotoAiMaskCanvas = null;
 
-      $('#idphotoAiArea').classList.remove('hidden');
-      const st = $('#idphotoAiStatus');
-      st.textContent = '⏳ 首次使用需加载约 2MB AI 模型，请耐心等待…';
-      st.className = 'status';
+  $('#idphotoAiArea').classList.remove('hidden');
+  const st = $('#idphotoAiStatus');
+  st.textContent = '⏳ 首次使用需加载约 2MB AI 模型，请耐心等待…';
+  st.className = 'status';
 
-      try {
-        const seg = await ensureAiSegmentation();
-        st.textContent = '🔍 正在识别人像轮廓…';
-        await seg.send({ image: idphotoCropped });
-      } catch (e) {
-        console.error('[AI]', e);
-        const errMsg = String(e && e.message || e);
-        if (/abort|Aborted|native code|out of memory|OOM/i.test(errMsg)) {
-          handleAiAbort();
-        } else {
-          st.innerHTML = '❌ AI 抠图失败：' + errMsg + '<br><br>'
-            + '✅ 可点击「🔄 重新识别」重试，或改用 <b>「涂抹擦除背景」</b>。';
-          st.className = 'status err';
-        }
-      }
+  try {
+    const seg = await ensureAiSegmentation();
+    st.textContent = '🔍 正在识别人像轮廓…';
+    
+    // 【真相大白】：完全照搬独立版，直接传入 idphotoCropped
+    await seg.send({ image: idphotoCropped });
+    
+  } catch (e) {
+    console.error('[AI]', e);
+    const errMsg = String(e && e.message || e);
+    if (/abort|Aborted|native code|out of memory|OOM/i.test(errMsg)) {
+      handleAiAbort();
+    } else {
+      st.innerHTML = '❌ AI 抠图失败：' + errMsg + '<br><br>'
+        + '✅ 可点击「🔄 重新识别」重试，或改用 <b>「涂抹擦除背景」</b>。';
+      st.className = 'status err';
     }
+  }
+}
 
     bind('#idphotoUseAiBtn', 'click', () => {
       if (!idphotoCropped) {
