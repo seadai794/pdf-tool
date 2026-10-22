@@ -4117,7 +4117,6 @@
     let idphotoMatteMode = 'skip';
     let idphotoCtx = null;
     let idphotoAiMaskCanvas = null;
-    let idphotoAiSafeSize = null;
     let idphotoAiSegmentation = null;
     let idphotoAiBusy = false;
     let idphotoAiBgColor = '#ffffff';
@@ -4162,52 +4161,46 @@
       }
     }
 
-    /* ---- AI 抠图错误处理：按环境给出明确提示 ---- */
-    function handleAiError(errMsg, st) {
-      const ua = navigator.userAgent || '';
-      const isWeChat = /MicroMessenger/i.test(ua);
-      const isQQ = /QQ/i.test(ua) && /Mobile/i.test(ua);
-      const isMobileLocal = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(ua)
-                       || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
-      const isAbort = /abort|Aborted|native code|out of memory|OOM/i.test(errMsg);
+    /* ---- 环境检测 ---- */
+    function detectAiEnv() {
+      const u = navigator.userAgent || '';
+      const wc = /MicroMessenger/i.test(u);
+      const qq = /QQ/i.test(u) && /Mobile/i.test(u);
+      const mob = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(u)
+               || (/Macintosh/.test(u) && navigator.maxTouchPoints > 1);
+      return { isWeChat: wc, isQQ: qq, isMobileLocal: mob };
+    }
 
-      if (isWeChat || isQQ) {
+    function warnAiUnavailable(env) {
+      const st = $('#idphotoAiStatus');
+      if (env.isWeChat || env.isQQ) {
         st.innerHTML = '❌ <b>微信 / QQ 内置浏览器无法运行 AI 抠图模型。</b><br><br>'
           + '✅ <b>推荐：</b>点击右上角 <b>···</b> → <b>「在浏览器中打开」</b>，<br>'
           + '或直接在 <b>电脑浏览器</b> 中打开本页面使用 AI 抠图。<br>'
           + '👉 也可改用 <b>「涂抹擦除背景」</b> 手动处理。';
         st.className = 'status err';
-        setTimeout(() => {
-          $('#idphotoAiArea').classList.add('hidden');
-          $('#idphotoUseBordercutBtn').click();
-        }, 1800);
-        return;
+        return true;
       }
-
-      if (isMobileLocal) {
-        st.innerHTML = '❌ <b>当前手机浏览器内存 / GPU 受限，无法稳定运行 AI 抠图。</b><br><br>'
+      if (env.isMobileLocal) {
+        st.innerHTML = '❌ <b>手机浏览器内存 / GPU 受限，无法稳定运行 AI 抠图。</b><br><br>'
           + '✅ <b>建议：</b>使用 <b>电脑浏览器</b> 打开本页面进行 AI 智能抠图效果最佳；<br>'
           + '👉 也可改用 <b>「涂抹擦除背景」</b> 手动处理。';
         st.className = 'status err';
-        setTimeout(() => {
-          $('#idphotoAiArea').classList.add('hidden');
-          $('#idphotoUseBordercutBtn').click();
-        }, 1800);
-        return;
+        return true;
       }
+      return false;
+    }
 
-      if (isAbort) {
-        st.innerHTML = '❌ AI 模型处理时内存不足（Aborted）。<br><br>'
-          + '✅ <b>建议：</b>关闭其他占用内存的标签页后点击「🔄 重新识别」重试；<br>'
-          + '👉 或改用 <b>「涂抹擦除背景」</b> 手动处理。';
-      } else {
-        st.innerHTML = '❌ AI 抠图失败：' + errMsg + '<br><br>'
-          + '✅ 可点击「🔄 重新识别」重试，或改用 <b>「涂抹擦除背景」</b>。';
-      }
+    function handleAiAbort() {
+      const st = $('#idphotoAiStatus');
+      st.innerHTML = '❌ AI 模型处理时内存不足（Aborted）。<br><br>'
+        + '✅ <b>建议：</b><br>'
+        + '1. 关闭其他占用内存的标签页 / 程序，再点「🔄 重新识别」；<br>'
+        + '2. 或改用 <b>「涂抹擦除背景」</b> 手动处理；<br>'
+        + '3. 也可换用 <b>Chrome / Edge 最新版</b> 打开。';
       st.className = 'status err';
     }
 
-    /* ---- AI 抠图核心 ---- */
     async function ensureAiSegmentation() {
       if (idphotoAiSegmentation) return idphotoAiSegmentation;
 
@@ -4220,7 +4213,7 @@
             idphotoAiBasePath = LOCAL.mediapipeBase;
             console.log('[AI] ✅ 本地 MediaPipe 加载成功');
             break;
-          } catch (e) { }
+          } catch (e) {}
         }
         if (!loaded) {
           for (const url of CDN.mediapipeJs) {
@@ -4230,7 +4223,7 @@
               idphotoAiBasePath = CDN.mediapipeBase;
               console.log('[AI] ✅ CDN MediaPipe 加载成功');
               break;
-            } catch (e) { }
+            } catch (e) {}
           }
         }
         if (!loaded || typeof window.SelfieSegmentation === 'undefined') {
@@ -4248,26 +4241,23 @@
     }
 
     function onAiSegmentationResults(results) {
-      if (!idphotoCropped || !idphotoAiSafeSize) return;
-      // 安全尺寸：mask canvas 与输入一致，避免内存越界
-      const W = idphotoAiSafeSize.w;
-      const H = idphotoAiSafeSize.h;
+      if (!idphotoCropped) return;
 
-      const tmp = document.createElement('canvas');
-      tmp.width = W; tmp.height = H;
-      const tctx = tmp.getContext('2d');
-      tctx.drawImage(results.segmentationMask, 0, 0, W, H);
-      tctx.globalCompositeOperation = 'source-in';
-      tctx.drawImage(idphotoCropped, 0, 0, W, H);
+      const W = idphotoCropped.width;
+      const H = idphotoCropped.height;
 
-      if (!idphotoAiMaskCanvas) idphotoAiMaskCanvas = document.createElement('canvas');
-      idphotoAiMaskCanvas.width = W;
-      idphotoAiMaskCanvas.height = H;
-      const mctx = idphotoAiMaskCanvas.getContext('2d');
-      mctx.clearRect(0, 0, W, H);
-      mctx.filter = 'blur(0.6px)';
-      mctx.drawImage(tmp, 0, 0);
-      mctx.filter = 'none';
+      const canvas = document.createElement('canvas');
+      canvas.width = W;
+      canvas.height = H;
+      const ctx = canvas.getContext('2d');
+
+      ctx.clearRect(0, 0, W, H);
+      ctx.drawImage(results.segmentationMask, 0, 0, W, H);
+      ctx.globalCompositeOperation = 'source-in';
+      ctx.drawImage(idphotoCropped, 0, 0, W, H);
+      ctx.globalCompositeOperation = 'source-over';
+
+      idphotoAiMaskCanvas = canvas;
 
       renderAiPreview(idphotoAiBgColor);
       const st = $('#idphotoAiStatus');
@@ -4305,9 +4295,18 @@
         return;
       }
       if (idphotoAiBusy) return;
+
+      const env2 = detectAiEnv();
+      if (warnAiUnavailable(env2)) {
+        setTimeout(() => {
+          $('#idphotoAiArea').classList.add('hidden');
+          $('#idphotoUseBordercutBtn').click();
+        }, 1800);
+        return;
+      }
+
       idphotoAiBusy = true;
       idphotoAiMaskCanvas = null;
-      idphotoAiSafeSize = null;
 
       $('#idphotoAiArea').classList.remove('hidden');
       const st = $('#idphotoAiStatus');
@@ -4317,27 +4316,19 @@
       try {
         const seg = await ensureAiSegmentation();
         st.textContent = '🔍 正在识别人像轮廓…';
-
-        // 【核心修复】：压到 384px 以内，避免 WASM 内存越界
-        const MAX_SAFE = 384;
-        const scale = Math.min(1, MAX_SAFE / Math.max(idphotoCropped.width, idphotoCropped.height));
-        const safeW = Math.max(1, Math.round(idphotoCropped.width * scale));
-        const safeH = Math.max(1, Math.round(idphotoCropped.height * scale));
-        const safeImage = document.createElement('canvas');
-        safeImage.width = safeW;
-        safeImage.height = safeH;
-        const sctx = safeImage.getContext('2d');
-        sctx.fillStyle = '#fff';
-        sctx.fillRect(0, 0, safeW, safeH);
-        sctx.drawImage(idphotoCropped, 0, 0, safeW, safeH);
-        idphotoAiSafeSize = { w: safeW, h: safeH };
-
-        await seg.send({ image: safeImage });
+        await seg.send({ image: idphotoCropped });
+        idphotoAiBusy = false;
       } catch (e) {
         console.error('[AI]', e);
         idphotoAiBusy = false;
         const errMsg = String(e && e.message || e);
-        handleAiError(errMsg, st);
+        if (/abort|Aborted|native code|out of memory|OOM/i.test(errMsg)) {
+          handleAiAbort();
+        } else {
+          st.innerHTML = '❌ AI 抠图失败：' + errMsg + '<br><br>'
+            + '✅ 可点击「🔄 重新识别」重试，或改用 <b>「涂抹擦除背景」</b>。';
+          st.className = 'status err';
+        }
       }
     }
 
@@ -4379,7 +4370,6 @@
         idphotoCropped = null;
         idphotoMatted = null;
         idphotoAiMaskCanvas = null;
-        idphotoAiSafeSize = null;
         idphotoState.x = 0; idphotoState.y = 0;
         idphotoCrop.crop = { x: 0.1, y: 0.05, w: 0.8, h: 0.9 };
         bordercutHistory = [];
@@ -4614,7 +4604,6 @@
       idphotoCropped = cv;
       idphotoMatted = null;
       idphotoAiMaskCanvas = null;
-      idphotoAiSafeSize = null;
       idphotoState.x = 0; idphotoState.y = 0;
       bordercutSrcCanvas = cv;
       bordercutStrokes = [];
@@ -5040,14 +5029,12 @@
     });
 
     async function saveIdPhotoWithPath(blob, filename) {
-      // 1. 检测是否为微信/QQ内置浏览器
-      const ua = navigator.userAgent || '';
-      const isWeChat = /MicroMessenger/i.test(ua);
-      const isQQ = /QQ/i.test(ua) && /Mobile/i.test(ua);
-      const isMobileLocal = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(ua);
+      const u2 = navigator.userAgent || '';
+      const wc2 = /MicroMessenger/i.test(u2);
+      const qq2 = /QQ/i.test(u2) && /Mobile/i.test(u2);
+      const mob2 = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(u2);
 
-      if (isWeChat || isQQ) {
-        // 微信环境：转换为 DataURL 显示在模态框中让用户长按保存
+      if (wc2 || qq2) {
         const reader = new FileReader();
         reader.onload = function(e) {
           const modal = $('#saveImgModal');
@@ -5062,8 +5049,7 @@
         return;
       }
 
-      // 2. 现代浏览器环境（支持文件选择器）
-      if (window.isSecureContext && typeof window.showSaveFilePicker === 'function' && !isMobileLocal) {
+      if (window.isSecureContext && typeof window.showSaveFilePicker === 'function' && !mob2) {
         try {
           const handle = await window.showSaveFilePicker({
             suggestedName: filename,
@@ -5082,7 +5068,6 @@
         }
       }
 
-      // 3. 普通手机浏览器直接下载
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
