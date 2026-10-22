@@ -4237,7 +4237,7 @@
       const seg = new window.SelfieSegmentation({
         locateFile: (f) => finalBasePath + f
       });
-      seg.setOptions({ modelSelection: 1, selfieMode: false });
+      seg.setOptions({ modelSelection: 1, selfieMode: false, useCpu: true });
       seg.onResults(onAiSegmentationResults);
       idphotoAiSegmentation = seg;
       return seg;
