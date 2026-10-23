@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>午饭转盘 · 今天吃什么</title>
   <style>
     * {
       box-sizing: border-box;
       font-family: system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      -webkit-tap-highlight-color: transparent;
     }
     body {
       background: linear-gradient(145deg, #fef9e8 0%, #fff4db 100%);
@@ -16,48 +17,51 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 16px;
+      padding: 12px;
+      /* 移动端友好 */
+      touch-action: manipulation;
     }
     .game-container {
       max-width: 1100px;
       width: 100%;
       background: rgba(255, 245, 225, 0.8);
       backdrop-filter: blur(6px);
-      border-radius: 48px;
-      padding: 30px 30px 40px;
+      border-radius: 40px;
+      padding: 24px 20px 32px;
       box-shadow: 0 25px 40px -10px rgba(100, 70, 20, 0.35),
                   inset 0 1px 4px rgba(255, 255, 240, 0.8);
       border: 1px solid #ffddb0;
     }
     h1 {
       text-align: center;
-      font-size: 2.4rem;
+      font-size: 2rem;
       font-weight: 700;
       color: #4d2e1b;
-      margin: 0 0 12px 0;
-      letter-spacing: 2px;
+      margin: 0 0 8px 0;
+      letter-spacing: 1px;
       text-shadow: 2px 2px 0 #ffeec9, 4px 4px 0 rgba(180, 120, 50, 0.2);
     }
     .sub {
       text-align: center;
       color: #9b6e4a;
       font-weight: 500;
-      margin-top: -8px;
-      margin-bottom: 24px;
+      margin-top: -4px;
+      margin-bottom: 20px;
       font-style: italic;
+      font-size: 0.95rem;
     }
     .main-panel {
       display: flex;
       flex-wrap: wrap;
-      gap: 30px;
+      gap: 24px;
       justify-content: center;
       align-items: center;
     }
     /* 转盘区域 */
     .wheel-wrapper {
       position: relative;
-      width: 380px;
-      height: 380px;
+      width: 340px;
+      height: 340px;
       flex-shrink: 0;
       display: flex;
       justify-content: center;
@@ -68,7 +72,7 @@
       height: 100%;
       display: block;
       border-radius: 50%;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2), 0 0 0 8px #fff8e7, 0 0 0 12px #d9b382;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2), 0 0 0 6px #fff8e7, 0 0 0 10px #d9b382;
       transition: box-shadow 0.2s;
       background: #fcf3e0;
     }
@@ -80,7 +84,7 @@
       transform: translate(-50%, -50%);
       width: 0;
       height: 0;
-      z-index: 50; /* 最高层，确保不被遮挡 */
+      z-index: 50;
       pointer-events: none;
       display: flex;
       justify-content: center;
@@ -89,33 +93,33 @@
     .center-pointer::before {
       content: "▲";
       display: block;
-      font-size: 48px;
+      font-size: 42px;
       line-height: 1;
-      color: #ff2200; /* 亮红色，非常醒目 */
+      color: #ff2200;
       text-shadow: 
         0 0 8px #ff0000,
         0 0 16px #ff4400,
         0 0 24px #ff6600,
         0 3px 6px rgba(0,0,0,0.5);
-      transform: translateY(-40px); /* 向上偏移，指向转盘顶部区域 */
+      transform: translateY(-36px);
       font-weight: bold;
-      -webkit-text-stroke: 1px #fff8e7; /* 白色描边，增强对比 */
+      -webkit-text-stroke: 1px #fff8e7;
     }
     /* 中央按钮（开始按钮）下移，避免被指针遮挡 */
     .spin-btn {
       position: absolute;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%) translateY(16px); /* 下移16px，让出指针空间 */
-      width: 100px;
-      height: 100px;
+      transform: translate(-50%, -50%) translateY(14px);
+      width: 88px;
+      height: 88px;
       border-radius: 50%;
       background: radial-gradient(circle at 30% 30%, #ffbb77, #cc7b2e);
       border: 4px solid #fff2d0;
       box-shadow: 0 8px 0 #8a4f1a, 0 12px 20px rgba(0, 0, 0, 0.4), inset 0 -3px 8px rgba(0,0,0,0.2);
       color: #ffffff;
       font-weight: 800;
-      font-size: 1.5rem;
+      font-size: 1.35rem;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -128,7 +132,7 @@
       animation: none;
     }
     .spin-btn:active {
-      transform: translate(-50%, -50%) translateY(16px) scale(0.94);
+      transform: translate(-50%, -50%) translateY(14px) scale(0.94);
       box-shadow: 0 4px 0 #8a4f1a, 0 8px 15px rgba(0, 0, 0, 0.4);
     }
     .spin-btn.disabled {
@@ -139,9 +143,9 @@
     /* 右侧菜单管理 */
     .menu-panel {
       background: #fffbf0;
-      border-radius: 36px;
-      padding: 24px 22px;
-      width: 340px;
+      border-radius: 32px;
+      padding: 20px 18px;
+      width: 320px;
       box-shadow: inset 0 2px 12px #ffeedd, 0 10px 20px rgba(140, 90, 40, 0.15);
       border: 2px solid #f5d9b3;
       flex-shrink: 0;
@@ -150,10 +154,10 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
     .menu-header h2 {
-      font-size: 1.4rem;
+      font-size: 1.25rem;
       margin: 0;
       color: #5c3b1f;
       display: flex;
@@ -164,10 +168,10 @@
       background: #f7e3c2;
       border: 2px solid #c9a87c;
       border-radius: 60px;
-      padding: 10px 18px;
+      padding: 8px 16px;
       font-weight: 700;
       color: #4d2e1b;
-      font-size: 1rem;
+      font-size: 0.9rem;
       display: flex;
       align-items: center;
       gap: 6px;
@@ -185,16 +189,16 @@
     .food-list {
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      max-height: 360px;
+      gap: 8px;
+      max-height: 340px;
       overflow-y: auto;
-      padding-right: 6px;
-      margin-bottom: 18px;
+      padding-right: 4px;
+      margin-bottom: 14px;
       scrollbar-width: thin;
       scrollbar-color: #ddb583 #f7ecdc;
     }
     .food-list::-webkit-scrollbar {
-      width: 8px;
+      width: 6px;
     }
     .food-list::-webkit-scrollbar-track {
       background: #f7ecdc;
@@ -207,9 +211,9 @@
     .food-item {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       background: #ffffffd9;
-      padding: 8px 12px;
+      padding: 6px 10px;
       border-radius: 40px;
       border: 1px solid #edd8ba;
       box-shadow: 0 2px 4px rgba(0,0,0,0.02);
@@ -223,7 +227,7 @@
       flex: 1;
       border: none;
       background: transparent;
-      font-size: 1rem;
+      font-size: 0.95rem;
       padding: 6px 4px;
       font-weight: 500;
       color: #3b2a18;
@@ -238,11 +242,11 @@
     .delete-btn {
       background: none;
       border: none;
-      font-size: 1.5rem;
+      font-size: 1.4rem;
       line-height: 1;
       color: #bb7a4b;
       cursor: pointer;
-      padding: 0 6px;
+      padding: 0 4px;
       border-radius: 30px;
       transition: 0.1s;
       font-weight: 400;
@@ -253,16 +257,16 @@
     }
     .add-area {
       display: flex;
-      gap: 10px;
-      margin-top: 10px;
+      gap: 8px;
+      margin-top: 8px;
     }
     .add-input {
       flex: 1;
-      padding: 14px 16px;
+      padding: 12px 14px;
       border-radius: 60px;
       border: 2px solid #e7cfae;
       background: white;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       outline: none;
       transition: 0.1s;
     }
@@ -274,8 +278,8 @@
       background: #b48b5a;
       border: none;
       border-radius: 60px;
-      padding: 0 22px;
-      font-size: 1.4rem;
+      padding: 0 18px;
+      font-size: 1.3rem;
       font-weight: bold;
       color: white;
       cursor: pointer;
@@ -302,15 +306,15 @@
       transform: translate(-50%, -50%) scale(0.9);
       background: linear-gradient(145deg, #fff9ed, #ffefd6);
       border: 4px solid #d9a66b;
-      border-radius: 60px;
-      padding: 28px 48px;
+      border-radius: 50px;
+      padding: 24px 36px;
       box-shadow: 0 30px 50px rgba(80, 40, 10, 0.5), inset 0 2px 10px #fff5e6;
       z-index: 1000;
       text-align: center;
       opacity: 0;
       pointer-events: none;
       transition: all 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2);
-      min-width: 280px;
+      min-width: 260px;
       max-width: 90vw;
     }
     .result-popup.show {
@@ -319,7 +323,7 @@
       transform: translate(-50%, -50%) scale(1);
     }
     .result-popup .popup-label {
-      font-size: 1rem;
+      font-size: 0.95rem;
       letter-spacing: 2px;
       color: #9b6e4a;
       font-weight: 600;
@@ -328,10 +332,10 @@
       justify-content: center;
       align-items: center;
       gap: 8px;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     .result-popup .popup-food {
-      font-size: 2.8rem;
+      font-size: 2.4rem;
       font-weight: 900;
       color: #b4491b;
       line-height: 1.2;
@@ -340,12 +344,12 @@
       letter-spacing: 1px;
     }
     .result-popup .popup-close {
-      margin-top: 18px;
+      margin-top: 16px;
       background: #b48b5a;
       border: none;
       border-radius: 60px;
-      padding: 12px 32px;
-      font-size: 1.1rem;
+      padding: 10px 28px;
+      font-size: 1rem;
       font-weight: bold;
       color: white;
       cursor: pointer;
@@ -375,8 +379,162 @@
       opacity: 1;
       pointer-events: auto;
     }
-    .today-tip {
-      display: none;
+
+    /* ========== 移动端适配 ========== */
+    @media (max-width: 820px) {
+      .game-container {
+        padding: 18px 14px 24px;
+        border-radius: 32px;
+      }
+      h1 {
+        font-size: 1.7rem;
+      }
+      .sub {
+        font-size: 0.85rem;
+        margin-bottom: 16px;
+      }
+      .main-panel {
+        gap: 18px;
+      }
+      .wheel-wrapper {
+        width: 300px;
+        height: 300px;
+      }
+      .center-pointer::before {
+        font-size: 36px;
+        transform: translateY(-30px);
+      }
+      .spin-btn {
+        width: 76px;
+        height: 76px;
+        font-size: 1.2rem;
+        transform: translate(-50%, -50%) translateY(12px);
+      }
+      .spin-btn:active {
+        transform: translate(-50%, -50%) translateY(12px) scale(0.94);
+      }
+      .menu-panel {
+        width: 300px;
+        padding: 16px 14px;
+      }
+      .menu-header h2 {
+        font-size: 1.1rem;
+      }
+      .shuffle-btn {
+        padding: 7px 14px;
+        font-size: 0.82rem;
+      }
+      .food-list {
+        max-height: 280px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 8px;
+      }
+      .game-container {
+        padding: 14px 10px 20px;
+        border-radius: 28px;
+      }
+      h1 {
+        font-size: 1.45rem;
+        letter-spacing: 0.5px;
+      }
+      .sub {
+        font-size: 0.78rem;
+        margin-bottom: 12px;
+      }
+      .main-panel {
+        gap: 16px;
+      }
+      .wheel-wrapper {
+        width: 280px;
+        height: 280px;
+      }
+      canvas {
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2), 0 0 0 5px #fff8e7, 0 0 0 8px #d9b382;
+      }
+      .center-pointer::before {
+        font-size: 32px;
+        transform: translateY(-26px);
+      }
+      .spin-btn {
+        width: 70px;
+        height: 70px;
+        font-size: 1.1rem;
+        transform: translate(-50%, -50%) translateY(10px);
+        letter-spacing: 1px;
+      }
+      .spin-btn:active {
+        transform: translate(-50%, -50%) translateY(10px) scale(0.94);
+      }
+      .menu-panel {
+        width: 100%;
+        max-width: 320px;
+        padding: 14px 12px;
+        border-radius: 24px;
+      }
+      .menu-header {
+        margin-bottom: 10px;
+      }
+      .menu-header h2 {
+        font-size: 1rem;
+      }
+      .shuffle-btn {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+        gap: 4px;
+      }
+      .food-item {
+        padding: 5px 8px;
+      }
+      .food-input {
+        font-size: 0.85rem;
+      }
+      .delete-btn {
+        font-size: 1.2rem;
+      }
+      .add-input {
+        padding: 10px 12px;
+        font-size: 0.85rem;
+      }
+      .add-btn {
+        padding: 0 16px;
+        font-size: 1.2rem;
+      }
+      .result-popup {
+        padding: 20px 24px;
+        border-radius: 40px;
+      }
+      .result-popup .popup-food {
+        font-size: 2rem;
+      }
+      .result-popup .popup-close {
+        padding: 8px 24px;
+        font-size: 0.9rem;
+      }
+    }
+
+    /* 超小屏（iPhone SE等） */
+    @media (max-width: 360px) {
+      .wheel-wrapper {
+        width: 260px;
+        height: 260px;
+      }
+      .center-pointer::before {
+        font-size: 28px;
+        transform: translateY(-24px);
+      }
+      .spin-btn {
+        width: 64px;
+        height: 64px;
+        font-size: 1rem;
+        transform: translate(-50%, -50%) translateY(8px);
+      }
+      .spin-btn:active {
+        transform: translate(-50%, -50%) translateY(8px) scale(0.94);
+      }
     }
   </style>
 </head>
@@ -451,14 +609,27 @@
     const popupFood = document.getElementById('popupFood');
     const popupClose = document.getElementById('popupClose');
 
-    // 配色
-    const COLORS = [
+    // 扇区背景色（柔和）
+    const SECTOR_COLORS = [
       '#FADFA1', '#F8C8A0', '#E8B4A0', '#D9A88C',
       '#E6C8A0', '#F2D7B3', '#DCB99C', '#C9A585',
       '#EBCBAE', '#F5D8B5', '#E0B791', '#D4A87C'
     ];
 
+    // 文字颜色：每个扇区不同，加深、高对比度
+    const TEXT_COLORS = [
+      '#8B1A1A', '#5C3A1E', '#1B4D3E', '#2E1A47',
+      '#7A3B1B', '#1F3A5F', '#6B2D3A', '#2C5A2A',
+      '#8B4513', '#0D3B4F', '#5A2E1A', '#2E4A3B'
+    ];
+
     // ---------- 工具函数 ----------
+    // 根据转盘实际尺寸调整字体（移动端适配）
+    function getMealFontSize(radius) {
+      // 根据半径动态计算字体大小，移动端更大
+      return Math.max(18, Math.min(34, radius * 0.14));
+    }
+
     function drawWheel() {
       const count = meals.length;
       const width = canvas.width;
@@ -475,7 +646,7 @@
         ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
         ctx.fill();
         ctx.fillStyle = '#b38b6d';
-        ctx.font = 'bold 30px system-ui, sans-serif';
+        ctx.font = 'bold 28px system-ui, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText('请添加菜品', centerX, centerY);
@@ -483,6 +654,7 @@
       }
 
       const angleStep = (Math.PI * 2) / count;
+      const fontSize = getMealFontSize(radius);
 
       for (let i = 0; i < count; i++) {
         const startAngle = i * angleStep + currentAngle;
@@ -493,7 +665,7 @@
         ctx.arc(centerX, centerY, radius, startAngle, endAngle);
         ctx.closePath();
 
-        ctx.fillStyle = COLORS[i % COLORS.length];
+        ctx.fillStyle = SECTOR_COLORS[i % SECTOR_COLORS.length];
         ctx.fill();
         ctx.strokeStyle = '#fff7e8';
         ctx.lineWidth = 3;
@@ -503,14 +675,14 @@
         ctx.save();
         ctx.translate(centerX, centerY);
         ctx.rotate(startAngle + angleStep / 2);
-        ctx.fillStyle = '#4a2e1a';
-        ctx.font = 'bold 24px "Segoe UI", system-ui, sans-serif';
+        ctx.fillStyle = TEXT_COLORS[i % TEXT_COLORS.length];
+        ctx.font = `bold ${fontSize}px "Segoe UI", system-ui, sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.shadowColor = 'rgba(255,255,240,0.7)';
-        ctx.shadowOffsetX = 2;
-        ctx.shadowOffsetY = 2;
-        ctx.shadowBlur = 4;
+        ctx.shadowColor = 'rgba(255,255,240,0.9)';
+        ctx.shadowOffsetX = 1;
+        ctx.shadowOffsetY = 1;
+        ctx.shadowBlur = 3;
 
         const mealText = meals[i] || '';
         const maxLength = 8;
