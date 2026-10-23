@@ -383,12 +383,20 @@
             text-shadow: 1px 1px 0 #dde6f5;
         }
 
+        /* 题目给定的固定数字：深色 */
         .cell.fixed {
             background: #d5e0f2;
             color: #1a2b4a;
             font-weight: 800;
             cursor: default;
             text-shadow: 1px 1px 0 #eef3fc;
+        }
+
+        /* 玩家自己填入的数字：蓝色，方便识别和修改 */
+        .cell.user-filled {
+            color: #1a6ab0;
+            font-weight: 700;
+            text-shadow: none;
         }
 
         .cell.highlight-row,
@@ -410,7 +418,11 @@
             box-shadow: inset 0 0 0 3px #b8862c !important;
             z-index: 2;
             position: relative;
-            color: #1e2b4a;
+            color: #1a6ab0;
+        }
+
+        .cell.fixed.selected {
+            color: #1a2b4a;
         }
 
         .cell.error {
@@ -420,6 +432,10 @@
 
         .cell.error.selected {
             background: #f7d98a !important;
+            color: #a11;
+        }
+
+        .cell.error.user-filled {
             color: #a11;
         }
 
@@ -956,7 +972,7 @@
             </div>
 
             <div class="footer-note">
-                💡 点击空格子，再点击下方数字填入 | 双击格子清空
+                💡 蓝色数字是您填入的 | 点击格子后点击数字修改 | 双击清空
             </div>
         </div>
     </div>
@@ -1047,7 +1063,7 @@
     <script>
         (function() {
             // ============================================================
-            // 全局：老板键开关 & 主题切换
+            // 全局：老板键开关
             // ============================================================
             const bossMode = document.getElementById('bossMode');
             const gameUI = document.getElementById('gameUI');
@@ -1065,7 +1081,6 @@
                 }
             }
 
-            // 快捷键 Ctrl+Q 切换老板键
             document.addEventListener('keydown', function(e) {
                 if ((e.ctrlKey || e.metaKey) && (e.key === 'q' || e.key === 'Q')) {
                     e.preventDefault();
@@ -1374,7 +1389,6 @@
                     const scaleX = canvas.width / rect.width;
                     const scaleY = canvas.height / rect.height;
 
-                    // 支持触摸事件
                     let clientX, clientY;
                     if (e.touches) {
                         clientX = e.touches[0].clientX;
@@ -1561,7 +1575,7 @@
             })();
 
             // ============================================================
-            // 数独游戏逻辑
+            // 数独游戏逻辑 (玩家填入数字为蓝色)
             // ============================================================
             (function() {
                 let boardSize = 9;
@@ -1720,7 +1734,12 @@
                             cell.dataset.col = c;
                             cell.textContent = board[r][c] === 0 ? '' : board[r][c];
 
-                            if (fixedCells[r][c]) cell.classList.add('fixed');
+                            if (fixedCells[r][c]) {
+                                cell.classList.add('fixed');
+                            } else if (board[r][c] !== 0) {
+                                // 玩家自己填入的数字：添加 user-filled 类（蓝色）
+                                cell.classList.add('user-filled');
+                            }
 
                             if (selectedRow >= 0 && selectedCol >= 0) {
                                 if (r === selectedRow && c === selectedCol) {
@@ -1785,7 +1804,8 @@
                         const colDisplay = selectedCol + 1;
                         const val = board[selectedRow][selectedCol];
                         if (val !== 0) {
-                            sudokuMessage.textContent = `第${rowDisplay}行第${colDisplay}列 当前:${val}`;
+                            const isFixed = fixedCells[selectedRow][selectedCol];
+                            sudokuMessage.textContent = `第${rowDisplay}行第${colDisplay}列 当前:${val}${isFixed ? ' (固定)' : ' (可改)'}`;
                         } else {
                             sudokuMessage.textContent = `第${rowDisplay}行第${colDisplay}列 点击数字填入`;
                         }
