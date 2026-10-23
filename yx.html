@@ -1,0 +1,1896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>游戏合集 · 五子棋 & 数独</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #2b5a4c 0%, #1e3a31 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            transition: background 0.2s;
+        }
+
+        /* ========== 游戏主界面 ========== */
+        .main-container {
+            background: #e8d5b5;
+            background-image: radial-gradient(circle at 30% 20%, #f3e7d0, #cfb991);
+            border-radius: 48px;
+            box-shadow: 0 25px 40px rgba(0, 0, 0, 0.6), inset 0 0 0 2px #f9f0db, inset 0 0 20px #a58e6d;
+            padding: 20px 20px 16px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 760px;
+            width: 100%;
+            transition: background 0.3s, background-image 0.3s, box-shadow 0.3s;
+        }
+
+        .main-container.theme-gomoku {
+            background: #e8d5b5;
+            background-image: radial-gradient(circle at 30% 20%, #f3e7d0, #cfb991);
+            box-shadow: 0 25px 40px rgba(0, 0, 0, 0.6), inset 0 0 0 2px #f9f0db, inset 0 0 20px #a58e6d;
+        }
+
+        .main-container.theme-sudoku {
+            background: #cdd8ec;
+            background-image: radial-gradient(circle at 30% 20%, #e4ebf7, #b3c2dd);
+            box-shadow: 0 25px 40px rgba(0, 0, 0, 0.6), inset 0 0 0 2px #eef3fc, inset 0 0 20px #8a9cc0;
+        }
+
+        h1 {
+            margin: 0 0 12px 0;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #3d2e1b;
+            text-shadow: 2px 2px 0 #ebd9b8, 0 4px 8px rgba(0, 0, 0, 0.15);
+            letter-spacing: 2px;
+            transition: color 0.3s, text-shadow 0.3s;
+            text-align: center;
+        }
+
+        .main-container.theme-sudoku h1 {
+            color: #1e2b4a;
+            text-shadow: 2px 2px 0 #d4dff2, 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* 游戏切换标签 */
+        .game-tabs {
+            display: flex;
+            gap: 6px;
+            background: #c9ae88;
+            padding: 5px;
+            border-radius: 60px;
+            box-shadow: inset 0 3px 8px #9a7d5a, 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin-bottom: 16px;
+            transition: background 0.3s, box-shadow 0.3s;
+        }
+
+        .game-tabs.sudoku-active {
+            background: #a9b8d6;
+            box-shadow: inset 0 3px 8px #7486ad, 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .game-tabs button {
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 0.95rem;
+            padding: 10px 24px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            background: transparent;
+            color: #4a3620;
+            transition: all 0.2s;
+            letter-spacing: 0.5px;
+            box-shadow: none;
+        }
+
+        .game-tabs.sudoku-active button {
+            color: #1e2b4a;
+        }
+
+        .game-tabs button.active {
+            background: #f3e7d3;
+            color: #2d2a1e;
+            box-shadow: 0 3px 0 #a98a62, 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .game-tabs.sudoku-active button.active {
+            background: #f0f5ff;
+            color: #1e2b4a;
+            box-shadow: 0 3px 0 #7182a8, 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .game-tabs button:not(.active):hover {
+            background: rgba(243, 231, 211, 0.5);
+        }
+
+        .game-tabs.sudoku-active button:not(.active):hover {
+            background: rgba(240, 245, 255, 0.5);
+        }
+
+        /* 游戏面板 */
+        .game-panel {
+            display: none;
+            width: 100%;
+            flex-direction: column;
+            align-items: center;
+        }
+        .game-panel.active {
+            display: flex;
+        }
+
+        /* ========== 五子棋样式 ========== */
+        .board-wrapper {
+            background: #b58d5c;
+            background: linear-gradient(135deg, #c9a77b, #b58d5c);
+            padding: 14px;
+            border-radius: 32px;
+            box-shadow: inset 0 0 15px #7a5e3f, 0 10px 20px rgba(0, 0, 0, 0.4);
+            border: 3px solid #6b4f31;
+            width: 100%;
+            max-width: 560px;
+        }
+
+        #gobanCanvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 1 / 1;
+            border-radius: 20px;
+            box-shadow: 0 0 0 2px #4a3620, 0 15px 25px rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+            transition: filter 0.2s;
+            background: #f0e0c0;
+        }
+
+        #gobanCanvas:active {
+            filter: brightness(0.98);
+        }
+
+        .info-panel {
+            display: flex;
+            width: 100%;
+            margin-top: 14px;
+            justify-content: space-between;
+            align-items: center;
+            color: #2d2a1e;
+            font-weight: 600;
+            text-shadow: 1px 1px 0 #ebd9b8;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .turn-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #dac29b;
+            padding: 6px 16px 6px 12px;
+            border-radius: 60px;
+            box-shadow: inset 0 3px 8px #aa8b64, 0 5px 10px rgba(0, 0, 0, 0.3);
+            border: 1px solid #f3e5cd;
+        }
+
+        .stone-preview {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #1a1a1a;
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.5);
+            transition: background 0.2s, box-shadow 0.2s;
+            flex-shrink: 0;
+        }
+
+        .stone-preview.white {
+            background: #f5f5f5;
+            box-shadow: 0 0 0 1px #aaa, 0 3px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .turn-text {
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+        }
+
+        .message {
+            font-size: 0.9rem;
+            background: #f3e7d3;
+            padding: 8px 18px;
+            border-radius: 50px;
+            box-shadow: inset 0 2px 6px #bb9f7e, 0 5px 10px rgba(0, 0, 0, 0.2);
+            color: #2d2a1e;
+            font-weight: 600;
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .btn-reset {
+            background: #6b4f31;
+            border: none;
+            color: #f0e0c0;
+            font-size: 0.95rem;
+            font-weight: bold;
+            padding: 9px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            box-shadow: 0 8px 0 #3f2e1b, 0 8px 15px rgba(0, 0, 0, 0.4);
+            transition: all 0.1s ease;
+            letter-spacing: 1px;
+            border: 1px solid #b3936b;
+        }
+
+        .btn-reset:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #3f2e1b, 0 8px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn-reset:hover {
+            background: #7f5f3d;
+        }
+
+        .mode-tag {
+            font-size: 0.72rem;
+            background: #5f4e36;
+            color: #ebd9b8;
+            padding: 3px 9px;
+            border-radius: 40px;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+            margin-left: 4px;
+            box-shadow: inset 0 1px 3px #2d1f0e;
+        }
+
+        /* ========== 数独样式 (蓝紫色系) ========== */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 10px 12px;
+            margin-bottom: 14px;
+            background: #b6c4de;
+            padding: 10px 16px;
+            border-radius: 60px;
+            box-shadow: inset 0 3px 8px #8496b8, 0 5px 10px rgba(0, 0, 0, 0.3);
+            border: 1px solid #e0e8f5;
+            width: 100%;
+            max-width: 560px;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            color: #1e2b4a;
+            text-shadow: 1px 1px 0 #d4dff2;
+            font-size: 0.85rem;
+        }
+
+        select, .sudoku-btn {
+            font-family: inherit;
+            font-weight: 600;
+            border: none;
+            border-radius: 40px;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            box-shadow: 0 4px 0 #5f6f8f, 0 4px 10px rgba(0, 0, 0, 0.2);
+            background: #eef3fc;
+            color: #1e2b4a;
+            border: 1px solid #f5f8ff;
+        }
+
+        select {
+            padding: 6px 12px;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%231e2b4a' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            padding-right: 26px;
+            cursor: pointer;
+        }
+
+        .sudoku-btn {
+            background: #3f5680;
+            color: #eef3fc;
+            border: 1px solid #8298c0;
+            box-shadow: 0 6px 0 #2a3b5c, 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .sudoku-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #2a3b5c, 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .sudoku-btn:hover {
+            background: #526a99;
+        }
+
+        .sudoku-btn.secondary {
+            background: #5f7a8a;
+            border-color: #8fb0c0;
+            box-shadow: 0 6px 0 #3b4e5a, 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .sudoku-btn.secondary:hover {
+            background: #7593a5;
+        }
+
+        .sudoku-btn.secondary:active {
+            box-shadow: 0 2px 0 #3b4e5a, 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .sudoku-board-wrapper {
+            background: #9fb0d0;
+            background: linear-gradient(135deg, #b5c5e2, #9fb0d0);
+            padding: 12px;
+            border-radius: 28px;
+            box-shadow: inset 0 0 15px #6f82a8, 0 10px 20px rgba(0, 0, 0, 0.4);
+            border: 3px solid #4a5f8a;
+            margin-bottom: 12px;
+            width: 100%;
+            max-width: 560px;
+            overflow-x: auto;
+        }
+
+        #sudokuBoard {
+            display: grid;
+            gap: 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 0 3px #2c3b5c, 0 10px 20px rgba(0, 0, 0, 0.5);
+            background: #2c3b5c;
+            margin: 0 auto;
+            width: fit-content;
+        }
+
+        .cell {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: #f2f6fc;
+            color: #1e2b4a;
+            transition: background 0.15s, color 0.15s;
+            cursor: pointer;
+            border: 1px solid #9aabcc;
+            box-sizing: border-box;
+            text-shadow: 1px 1px 0 #dde6f5;
+        }
+
+        .cell.fixed {
+            background: #d5e0f2;
+            color: #1a2b4a;
+            font-weight: 800;
+            cursor: default;
+            text-shadow: 1px 1px 0 #eef3fc;
+        }
+
+        .cell.highlight-row,
+        .cell.highlight-col,
+        .cell.highlight-box {
+            background: #e3ebf7;
+        }
+        .cell.highlight-row.highlight-col,
+        .cell.highlight-row.highlight-box,
+        .cell.highlight-col.highlight-box {
+            background: #d8e3f5;
+        }
+        .cell.highlight-row.highlight-col.highlight-box {
+            background: #cfdcf2;
+        }
+
+        .cell.selected {
+            background: #f7d98a !important;
+            box-shadow: inset 0 0 0 3px #b8862c !important;
+            z-index: 2;
+            position: relative;
+            color: #1e2b4a;
+        }
+
+        .cell.error {
+            background: #f5b5b5;
+            color: #a11;
+        }
+
+        .cell.error.selected {
+            background: #f7d98a !important;
+            color: #a11;
+        }
+
+        .board-6 .cell {
+            width: 52px;
+            height: 52px;
+            font-size: 1.6rem;
+        }
+
+        .board-9 .cell {
+            width: 44px;
+            height: 44px;
+            font-size: 1.3rem;
+        }
+
+        .board-9 .cell[data-row="2"], .board-9 .cell[data-row="5"] {
+            border-bottom: 3px solid #2c3b5c;
+        }
+        .board-9 .cell[data-col="2"], .board-9 .cell[data-col="5"] {
+            border-right: 3px solid #2c3b5c;
+        }
+        .board-6 .cell[data-row="1"], .board-6 .cell[data-row="3"] {
+            border-bottom: 3px solid #2c3b5c;
+        }
+        .board-6 .cell[data-col="2"] {
+            border-right: 3px solid #2c3b5c;
+        }
+
+        .numbers-pad {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 6px;
+        }
+
+        .num-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #c2d0e8;
+            border: 2px solid #8496b8;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1e2b4a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #5f6f8f, 0 5px 10px rgba(0, 0, 0, 0.3);
+            transition: all 0.08s ease;
+            user-select: none;
+        }
+
+        .num-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #5f6f8f, 0 5px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .num-btn:hover {
+            background: #d5e0f2;
+        }
+
+        .status-bar {
+            display: flex;
+            width: 100%;
+            justify-content: center;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        .sudoku-message-box {
+            font-size: 0.9rem;
+            background: #eef3fc;
+            padding: 8px 20px;
+            border-radius: 50px;
+            box-shadow: inset 0 2px 6px #9aabcc, 0 5px 10px rgba(0, 0, 0, 0.2);
+            color: #1e2b4a;
+            font-weight: 600;
+            min-width: 120px;
+            text-align: center;
+            max-width: 100%;
+            word-break: break-word;
+        }
+
+        .footer-note {
+            margin-top: 10px;
+            font-size: 0.75rem;
+            color: #3a4a6b;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-shadow: 1px 1px 0 #d4dff2;
+            text-align: center;
+        }
+
+        /* ========== 老板键 · Word 伪装界面 ========== */
+        .boss-mode {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #f3f3f3;
+            z-index: 9999;
+            flex-direction: column;
+            font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
+            overflow: auto;
+        }
+
+        .boss-mode.active {
+            display: flex;
+        }
+
+        .word-titlebar {
+            background: #2b579a;
+            color: #fff;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            font-size: 12px;
+            font-weight: 400;
+            flex-shrink: 0;
+            justify-content: space-between;
+        }
+
+        .word-titlebar .title-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .word-titlebar .word-icon {
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2b579a;
+            font-weight: bold;
+            font-size: 11px;
+            font-family: 'Calibri', sans-serif;
+            flex-shrink: 0;
+        }
+
+        .word-titlebar .window-controls {
+            display: flex;
+            gap: 12px;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .word-ribbon {
+            background: #f3f2f1;
+            border-bottom: 1px solid #d4d4d4;
+            padding: 5px 12px;
+            display: flex;
+            gap: 16px;
+            font-size: 11px;
+            color: #333;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+
+        .word-ribbon .ribbon-item {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            cursor: default;
+            white-space: nowrap;
+        }
+
+        .word-ribbon .ribbon-item:hover {
+            background: #e6e6e6;
+        }
+
+        .word-ribbon .separator {
+            width: 1px;
+            background: #d4d4d4;
+            margin: 0 2px;
+        }
+
+        .word-document {
+            flex: 1;
+            background: #e6e6e6;
+            padding: 16px 10px;
+            display: flex;
+            justify-content: center;
+            overflow: auto;
+        }
+
+        .word-page {
+            background: #fff;
+            width: 794px;
+            max-width: 100%;
+            min-height: 1050px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            padding: 40px 32px;
+            font-family: 'Calibri', '宋体', 'SimSun', Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.65;
+            color: #222;
+        }
+
+        .word-page h2 {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0 0 6px 0;
+            color: #2b579a;
+        }
+
+        .word-page .subtitle {
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 22px;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+
+        .word-page p {
+            margin: 0 0 10px 0;
+            text-indent: 2em;
+        }
+
+        .word-page .qa-title {
+            font-weight: 700;
+            color: #1a3a6a;
+            margin-top: 16px;
+            margin-bottom: 6px;
+            text-indent: 0;
+        }
+
+        .word-page .qa-answer {
+            margin: 0 0 10px 0;
+            padding-left: 2em;
+            text-indent: 0;
+        }
+
+        .word-page .highlight-text {
+            background: #fff9c4;
+            padding: 1px 3px;
+            border-radius: 2px;
+        }
+
+        .word-page .cursor-blink {
+            display: inline-block;
+            width: 2px;
+            height: 15px;
+            background: #222;
+            vertical-align: middle;
+            animation: blink 1s step-end infinite;
+            margin-left: 1px;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .word-statusbar {
+            background: #2b579a;
+            color: #fff;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            font-size: 11px;
+            flex-shrink: 0;
+        }
+
+        .word-statusbar .status-left {
+            display: flex;
+            gap: 14px;
+        }
+
+        .word-statusbar .status-right {
+            display: flex;
+            gap: 14px;
+        }
+
+        .boss-hint {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.55);
+            color: #fff;
+            padding: 7px 14px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 10000;
+        }
+
+        .boss-hint.show {
+            opacity: 1;
+        }
+
+        /* ========== 手机适配 ========== */
+        @media (max-width: 600px) {
+            body {
+                padding: 8px;
+                align-items: flex-start;
+            }
+            .main-container {
+                padding: 14px 12px 12px 12px;
+                border-radius: 32px;
+            }
+            h1 {
+                font-size: 1.25rem;
+                margin-bottom: 10px;
+            }
+            .game-tabs button {
+                font-size: 0.85rem;
+                padding: 8px 16px;
+            }
+            .board-wrapper {
+                padding: 10px;
+                border-radius: 24px;
+            }
+            .info-panel {
+                gap: 6px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .turn-indicator {
+                padding: 4px 12px 4px 10px;
+                gap: 6px;
+            }
+            .stone-preview {
+                width: 24px;
+                height: 24px;
+            }
+            .turn-text {
+                font-size: 0.8rem;
+            }
+            .mode-tag {
+                font-size: 0.65rem;
+                padding: 2px 7px;
+            }
+            .message {
+                font-size: 0.8rem;
+                padding: 6px 12px;
+                min-width: 90px;
+            }
+            .btn-reset {
+                font-size: 0.8rem;
+                padding: 7px 14px;
+            }
+            .controls {
+                padding: 8px 10px;
+                gap: 8px;
+            }
+            .control-group label {
+                font-size: 0.78rem;
+            }
+            select, .sudoku-btn {
+                font-size: 0.78rem;
+                padding: 5px 10px;
+            }
+            select {
+                padding-right: 22px;
+                background-position: right 6px center;
+            }
+            .sudoku-board-wrapper {
+                padding: 8px;
+                border-radius: 20px;
+            }
+            .cell {
+                width: 34px !important;
+                height: 34px !important;
+                font-size: 1rem !important;
+            }
+            .board-6 .cell {
+                width: 40px !important;
+                height: 40px !important;
+                font-size: 1.2rem !important;
+            }
+            .board-9 .cell {
+                width: 34px !important;
+                height: 34px !important;
+                font-size: 1rem !important;
+            }
+            .num-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+            }
+            .numbers-pad {
+                gap: 6px;
+            }
+            .sudoku-message-box {
+                font-size: 0.78rem;
+                padding: 6px 14px;
+            }
+            .footer-note {
+                font-size: 0.68rem;
+            }
+            .word-page {
+                padding: 20px 14px;
+                font-size: 12px;
+                min-height: 800px;
+            }
+            .word-page h2 {
+                font-size: 17px;
+            }
+            .word-ribbon {
+                gap: 10px;
+                font-size: 10px;
+                padding: 4px 8px;
+            }
+            .word-statusbar {
+                font-size: 10px;
+                gap: 8px;
+            }
+            .word-titlebar {
+                font-size: 11px;
+                height: 28px;
+                padding: 0 8px;
+            }
+            .boss-hint {
+                bottom: 14px;
+                right: 14px;
+                font-size: 0.65rem;
+                padding: 5px 10px;
+            }
+        }
+
+        /* 超小屏幕 */
+        @media (max-width: 380px) {
+            .cell {
+                width: 30px !important;
+                height: 30px !important;
+                font-size: 0.9rem !important;
+            }
+            .board-6 .cell {
+                width: 34px !important;
+                height: 34px !important;
+                font-size: 1rem !important;
+            }
+            .board-9 .cell {
+                width: 30px !important;
+                height: 30px !important;
+                font-size: 0.9rem !important;
+            }
+            .num-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 0.9rem;
+            }
+            h1 {
+                font-size: 1.05rem;
+            }
+            .turn-indicator {
+                padding: 3px 10px 3px 8px;
+            }
+            .stone-preview {
+                width: 20px;
+                height: 20px;
+            }
+            .turn-text {
+                font-size: 0.72rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ================= 主游戏界面 ================= -->
+    <div class="main-container theme-gomoku" id="gameUI">
+        <h1>🎮 游戏合集</h1>
+
+        <!-- 游戏切换标签 -->
+        <div class="game-tabs" id="gameTabs">
+            <button id="tabGomoku" class="active">♟️ 五子棋</button>
+            <button id="tabSudoku">🧩 数独</button>
+        </div>
+
+        <!-- ===== 五子棋面板 ===== -->
+        <div class="game-panel active" id="gomokuPanel">
+            <div class="board-wrapper">
+                <canvas id="gobanCanvas" width="540" height="540"></canvas>
+            </div>
+            <div class="info-panel">
+                <div class="turn-indicator">
+                    <div class="stone-preview" id="stonePreview"></div>
+                    <span class="turn-text" id="turnText">黑棋落子</span>
+                    <span class="mode-tag">vs 电脑</span>
+                </div>
+                <div class="message" id="gomokuMessage">⚫ 你的回合</div>
+                <button class="btn-reset" id="resetGomokuBtn">↻ 新一局</button>
+            </div>
+        </div>
+
+        <!-- ===== 数独面板 ===== -->
+        <div class="game-panel" id="sudokuPanel">
+            <div class="controls">
+                <div class="control-group">
+                    <label for="sizeSelect">类型</label>
+                    <select id="sizeSelect">
+                        <option value="9">9宫格 (1-9)</option>
+                        <option value="6">6宫格 (1-6)</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="difficultySelect">难度</label>
+                    <select id="difficultySelect">
+                        <option value="easy">简单</option>
+                        <option value="medium" selected>中等</option>
+                        <option value="hard">困难</option>
+                    </select>
+                </div>
+                <button id="newSudokuBtn" class="sudoku-btn">✨ 新游戏</button>
+                <button id="checkSudokuBtn" class="sudoku-btn secondary">✅ 检查</button>
+            </div>
+
+            <div class="sudoku-board-wrapper">
+                <div id="sudokuBoard" class="board-9"></div>
+            </div>
+
+            <div class="numbers-pad" id="numbersPad"></div>
+
+            <div class="status-bar">
+                <div class="sudoku-message-box" id="sudokuMessage">选择数字填入</div>
+            </div>
+
+            <div class="footer-note">
+                💡 点击空格子，再点击下方数字填入 | 双击格子清空
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 老板键 · Word 伪装界面 ================= -->
+    <div class="boss-mode" id="bossMode">
+        <div class="word-titlebar">
+            <div class="title-left">
+                <div class="word-icon">W</div>
+                <span>V法造型工艺技术问答.docx - Word</span>
+            </div>
+            <div class="window-controls">
+                <span>—</span>
+                <span>□</span>
+                <span>✕</span>
+            </div>
+        </div>
+
+        <div class="word-ribbon">
+            <span class="ribbon-item">📄 文件</span>
+            <span class="ribbon-item">🏠 开始</span>
+            <span class="ribbon-item">📎 插入</span>
+            <span class="ribbon-item">📐 布局</span>
+            <span class="ribbon-item">🔗 引用</span>
+            <span class="ribbon-item">📧 邮件</span>
+            <span class="ribbon-item">🔍 审阅</span>
+            <span class="ribbon-item">👁️ 视图</span>
+            <span class="ribbon-item">🛠️ 帮助</span>
+            <span class="separator"></span>
+            <span class="ribbon-item">📝 批注</span>
+            <span class="ribbon-item">🔤 字体</span>
+            <span class="ribbon-item">📏 段落</span>
+        </div>
+
+        <div class="word-document">
+            <div class="word-page">
+                <h2>V法造型工艺技术问答</h2>
+                <div class="subtitle">整理：技术部 &nbsp;|&nbsp; 分类：铸造工艺 &nbsp;|&nbsp; 版本：V1.0</div>
+
+                <p class="qa-title">1、V法造型的工艺，什么样的件适合于V法造型工艺？</p>
+                <p class="qa-answer">答：只要能覆膜和能下芯，就能用V法干。但有些活同上它就不能用V法工艺。因为V法工艺不是万能工艺，看它的技术要求和铸件的几何形状来决定。</p>
+
+                <p class="qa-title">2、V法用模型如何打抽气孔，抽气孔的孔径多大？</p>
+                <p class="qa-answer">答：1、用￠8-10毫米的气塞，孔距不超过100毫米。<br>
+                2、用1.2--1.5毫米的钢针打孔，孔距不超过50毫米。<br>
+                3、凹进去的打，凸出来的不打，根部打孔。<br>
+                4、打孔要根据具体几何形状来定。注：冻天还复天。<br>
+                5、抽气孔的孔径多大那要看型板的大小几何形状来定。吸气管直径：0.75"、1"、2"。<br>
+                小型板抽气管外径32—38安1—2棵管；中大型外径38--50安2棵管；大型外径50也可放4棵抽气管。主要看是生产线还是简艺造型，是木型板还是铝型板还是钢木结合钢铝型板。还有玻璃钢型。<br>
+                6、覆膜实抽负压，要求低压大流量，覆膜时间在4—5秒钟内覆完最好。真空应用：<br>
+                ①、模具在抽真空的状态下覆膜。<br>
+                ②、薄膜边缘密封以保证模膜之间不漏气。<br>
+                ③、压力没有严格要求，从20mmHg到400mmHg均可。<br>
+                ④、保证真空度很重要，但是要在薄膜冷却之前将其落下。这个间隔的最佳时间为5S。</p>
+
+                <p class="qa-title">3、V法造型如何根据工件尺寸定砂箱的尺寸，砂箱的高度与长、宽有无关系，如果高度不合适会出现塌箱的现象吗？</p>
+                <p class="qa-answer">答：要看铸件大小薄厚和几何形状定砂箱大小，上下砂箱的高度吃砂量大于四周的吃砂量。上箱比下箱吃砂量要大些才好，但是必须看铸件大小，是每箱一件、还是两件，宽是多少来定。加箱带还是不加箱带：1、看宽度；2、看深度；3、有抽气箱带；4、还要加固箱带，解决抬箱（涨箱跑火等等可能要出的问题）。注：是做通用箱，还是专用箱。<br>
+                如果高度不合适会出现塌砂的现象。关键是设计要如法。砂塌、箱不塌的。你将会看到金属中的热量并不会破坏塑料膜，但是，薄膜一接触金属液便会蒸发，这使铸型不能继续保持真空。也就是说，型内压力等于型腔内压力，由于重力作用——铸型会坍塌或移动。<br>
+                但是，当金属液接触薄膜并停留在那儿时，一件有趣的事情发生了。薄膜蒸发，然后渗入砂中在金属周围形成一个壳状痂皮。不同的是芯盒造型中砂里含热调节树脂，而V法薄膜中含热塑成分。<br>
+                这就是V法造型的秘密所在。当薄膜蒸发时，真空流失——薄膜的密封柱能立即被金属自身取代。于是金属凝固真空度不变。</p>
+
+                <p class="qa-title">4、砂箱的尺寸定下后如何选择真空泵？</p>
+                <p class="qa-answer">答：1、砂箱的体积是多少，有多大立方。<br>
+                2、一个立方砂箱体积要有4个立方气体来保压，这是指造型。还没加覆膜时用气，覆膜最好单用一台真空泵，单独跑管道和工位器。但是浇注时每一个立方砂箱要有6到9个立方的气体流量来保护，浇注时维持浇注时气体的流失不出现塌砂和保证砂型的硬度（刚度）不塌砂。那您的生产节拍是怎么定的？每小时造几型（箱）？每包浇几箱？每炉（电炉）出几包？想带几付砂箱浇注后砂箱又出现漏气那怎么办？怎么处理？注：真空泵应按80％来计算。还要考虑稳压除尘罐的大小，体积是浇注时的砂箱三到五倍。最关键是浇注时的稳压保证。现在只有变频起动能保证稳压在选定的数值上不塌砂，要不就是大马拉小车。<span class="cursor-blink"></span></p>
+
+                <div style="margin-top: 30px; border-top: 1px solid #e0e0e0; padding-top: 12px; font-size: 11px; color: #999;">
+                    文档编号：TECH-V-2026-001 &nbsp;|&nbsp; 密级：内部 &nbsp;|&nbsp; 最后编辑：技术部
+                </div>
+            </div>
+        </div>
+
+        <div class="word-statusbar">
+            <div class="status-left">
+                <span>第 1 页，共 1 页</span>
+                <span>2,156 个字</span>
+                <span>中文(简体)</span>
+            </div>
+            <div class="status-right">
+                <span>🔍 100%</span>
+                <span>📝 编辑模式</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 老板键提示 -->
+    <div class="boss-hint" id="bossHint">按 Ctrl+Q 快速切换</div>
+
+    <script>
+        (function() {
+            // ============================================================
+            // 全局：老板键开关 & 主题切换
+            // ============================================================
+            const bossMode = document.getElementById('bossMode');
+            const gameUI = document.getElementById('gameUI');
+            const bossHint = document.getElementById('bossHint');
+            let isBossMode = false;
+
+            function toggleBossMode() {
+                isBossMode = !isBossMode;
+                if (isBossMode) {
+                    bossMode.classList.add('active');
+                    gameUI.style.display = 'none';
+                } else {
+                    bossMode.classList.remove('active');
+                    gameUI.style.display = 'flex';
+                }
+            }
+
+            // 快捷键 Ctrl+Q 切换老板键
+            document.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && (e.key === 'q' || e.key === 'Q')) {
+                    e.preventDefault();
+                    toggleBossMode();
+                }
+                if (isBossMode && e.key === 'Escape') {
+                    toggleBossMode();
+                }
+            });
+
+            let hintTimer = null;
+            function showBossHint() {
+                bossHint.classList.add('show');
+                if (hintTimer) clearTimeout(hintTimer);
+                hintTimer = setTimeout(() => {
+                    bossHint.classList.remove('show');
+                }, 2500);
+            }
+            setTimeout(showBossHint, 1000);
+
+            // ============================================================
+            // 主题切换 & 游戏标签
+            // ============================================================
+            const mainContainer = document.getElementById('gameUI');
+            const gameTabs = document.getElementById('gameTabs');
+            const tabGomoku = document.getElementById('tabGomoku');
+            const tabSudoku = document.getElementById('tabSudoku');
+            const gomokuPanel = document.getElementById('gomokuPanel');
+            const sudokuPanel = document.getElementById('sudokuPanel');
+
+            function switchToGomoku() {
+                mainContainer.classList.remove('theme-sudoku');
+                mainContainer.classList.add('theme-gomoku');
+                gameTabs.classList.remove('sudoku-active');
+                tabGomoku.classList.add('active');
+                tabSudoku.classList.remove('active');
+                gomokuPanel.classList.add('active');
+                sudokuPanel.classList.remove('active');
+            }
+
+            function switchToSudoku() {
+                mainContainer.classList.remove('theme-gomoku');
+                mainContainer.classList.add('theme-sudoku');
+                gameTabs.classList.add('sudoku-active');
+                tabSudoku.classList.add('active');
+                tabGomoku.classList.remove('active');
+                sudokuPanel.classList.add('active');
+                gomokuPanel.classList.remove('active');
+            }
+
+            tabGomoku.addEventListener('click', switchToGomoku);
+            tabSudoku.addEventListener('click', switchToSudoku);
+
+            // ============================================================
+            // 五子棋游戏逻辑 (人机对战)
+            // ============================================================
+            (function() {
+                const BOARD_SIZE = 15;
+                const CELL_SIZE = 540 / BOARD_SIZE;
+                const RADIUS = CELL_SIZE * 0.42;
+                const LINE_COLOR = '#4a3620';
+                const BOARD_COLOR = '#f0e0c0';
+
+                const PLAYER = 1;
+                const COMPUTER = 2;
+
+                const canvas = document.getElementById('gobanCanvas');
+                const ctx = canvas.getContext('2d');
+                const stonePreview = document.getElementById('stonePreview');
+                const turnText = document.getElementById('turnText');
+                const gomokuMessage = document.getElementById('gomokuMessage');
+                const resetGomokuBtn = document.getElementById('resetGomokuBtn');
+
+                let board = [];
+                let currentPlayer = PLAYER;
+                let gameOver = false;
+                let winner = null;
+                let winningLine = [];
+                let isComputerThinking = false;
+
+                function initBoardData() {
+                    board = Array.from({ length: BOARD_SIZE }, () => Array(BOARD_SIZE).fill(0));
+                    currentPlayer = PLAYER;
+                    gameOver = false;
+                    winner = null;
+                    winningLine = [];
+                    isComputerThinking = false;
+                }
+
+                function renderBoard() {
+                    ctx.fillStyle = BOARD_COLOR;
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                    ctx.lineWidth = 1.8;
+                    ctx.strokeStyle = LINE_COLOR;
+
+                    for (let i = 0; i < BOARD_SIZE; i++) {
+                        const pos = i * CELL_SIZE + CELL_SIZE / 2;
+                        ctx.beginPath();
+                        ctx.moveTo(pos, CELL_SIZE / 2);
+                        ctx.lineTo(pos, canvas.height - CELL_SIZE / 2);
+                        ctx.stroke();
+                    }
+                    for (let i = 0; i < BOARD_SIZE; i++) {
+                        const pos = i * CELL_SIZE + CELL_SIZE / 2;
+                        ctx.beginPath();
+                        ctx.moveTo(CELL_SIZE / 2, pos);
+                        ctx.lineTo(canvas.width - CELL_SIZE / 2, pos);
+                        ctx.stroke();
+                    }
+
+                    const starPoints = [3, 7, 11];
+                    ctx.fillStyle = LINE_COLOR;
+                    for (let r of starPoints) {
+                        for (let c of starPoints) {
+                            if ((r === 7 && c === 7) || (r === 3 && c === 3) || (r === 3 && c === 11) || (r === 11 && c === 3) || (r === 11 && c === 11)) {
+                                const x = c * CELL_SIZE + CELL_SIZE / 2;
+                                const y = r * CELL_SIZE + CELL_SIZE / 2;
+                                ctx.beginPath();
+                                ctx.arc(x, y, CELL_SIZE * 0.12, 0, 2 * Math.PI);
+                                ctx.fillStyle = '#4a3620';
+                                ctx.fill();
+                            }
+                        }
+                    }
+
+                    for (let row = 0; row < BOARD_SIZE; row++) {
+                        for (let col = 0; col < BOARD_SIZE; col++) {
+                            const stone = board[row][col];
+                            if (stone === 0) continue;
+
+                            const x = col * CELL_SIZE + CELL_SIZE / 2;
+                            const y = row * CELL_SIZE + CELL_SIZE / 2;
+
+                            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+                            ctx.shadowBlur = 8;
+                            ctx.shadowOffsetX = 2;
+                            ctx.shadowOffsetY = 2;
+
+                            const gradient = ctx.createRadialGradient(
+                                x - RADIUS * 0.3, y - RADIUS * 0.3, RADIUS * 0.2,
+                                x, y, RADIUS
+                            );
+
+                            if (stone === 1) {
+                                gradient.addColorStop(0, '#2b2b2b');
+                                gradient.addColorStop(0.7, '#111111');
+                                gradient.addColorStop(1, '#000000');
+                            } else {
+                                gradient.addColorStop(0, '#ffffff');
+                                gradient.addColorStop(0.6, '#f0f0f0');
+                                gradient.addColorStop(1, '#c0c0c0');
+                            }
+
+                            ctx.beginPath();
+                            ctx.arc(x, y, RADIUS, 0, 2 * Math.PI);
+                            ctx.fillStyle = gradient;
+                            ctx.fill();
+
+                            ctx.shadowBlur = 0;
+                            ctx.shadowOffsetX = 0;
+                            ctx.shadowOffsetY = 0;
+                            ctx.strokeStyle = stone === 1 ? '#444' : '#aaa';
+                            ctx.lineWidth = 0.8;
+                            ctx.stroke();
+
+                            ctx.beginPath();
+                            ctx.arc(x - RADIUS * 0.25, y - RADIUS * 0.25, RADIUS * 0.15, 0, 2 * Math.PI);
+                            ctx.fillStyle = stone === 1 ? '#777' : '#ffffff';
+                            ctx.fill();
+                        }
+                    }
+
+                    if (winningLine.length > 0) {
+                        ctx.shadowColor = '#f7d44a';
+                        ctx.shadowBlur = 16;
+                        ctx.shadowOffsetX = 0;
+                        ctx.shadowOffsetY = 0;
+                        for (const [r, c] of winningLine) {
+                            const x = c * CELL_SIZE + CELL_SIZE / 2;
+                            const y = r * CELL_SIZE + CELL_SIZE / 2;
+                            ctx.beginPath();
+                            ctx.arc(x, y, RADIUS + 3, 0, 2 * Math.PI);
+                            ctx.strokeStyle = '#ffbb2e';
+                            ctx.lineWidth = 3.5;
+                            ctx.stroke();
+                            ctx.beginPath();
+                            ctx.arc(x, y, RADIUS + 6, 0, 2 * Math.PI);
+                            ctx.strokeStyle = '#ffe28a';
+                            ctx.lineWidth = 2;
+                            ctx.stroke();
+                        }
+                        ctx.shadowBlur = 0;
+                    }
+
+                    updateGomokuUI();
+                }
+
+                function updateGomokuUI() {
+                    if (gameOver) {
+                        if (winner === PLAYER) {
+                            turnText.textContent = '你赢了！';
+                            gomokuMessage.textContent = '🎉 黑棋胜利';
+                        } else if (winner === COMPUTER) {
+                            turnText.textContent = '电脑赢了';
+                            gomokuMessage.textContent = '🤖 白棋胜利';
+                        } else {
+                            turnText.textContent = '平局';
+                            gomokuMessage.textContent = '🤝 棋盘已满';
+                        }
+                        if (winner === PLAYER) {
+                            stonePreview.style.background = '#1a1a1a';
+                            stonePreview.style.boxShadow = '0 3px 5px rgba(0,0,0,0.5)';
+                            stonePreview.classList.remove('white');
+                        } else if (winner === COMPUTER) {
+                            stonePreview.style.background = '#f5f5f5';
+                            stonePreview.style.boxShadow = '0 0 0 1px #aaa, 0 3px 5px rgba(0,0,0,0.3)';
+                            stonePreview.classList.add('white');
+                        }
+                        return;
+                    }
+
+                    if (currentPlayer === PLAYER) {
+                        turnText.textContent = '黑棋落子 (你)';
+                        gomokuMessage.textContent = '⚫ 你的回合';
+                        stonePreview.style.background = '#1a1a1a';
+                        stonePreview.style.boxShadow = '0 3px 5px rgba(0,0,0,0.5)';
+                        stonePreview.classList.remove('white');
+                    } else {
+                        turnText.textContent = '白棋落子 (电脑)';
+                        gomokuMessage.textContent = '⚪ 电脑思考中...';
+                        stonePreview.style.background = '#f5f5f5';
+                        stonePreview.style.boxShadow = '0 0 0 1px #aaa, 0 3px 5px rgba(0,0,0,0.3)';
+                        stonePreview.classList.add('white');
+                    }
+                }
+
+                function checkWin(row, col, player) {
+                    const directions = [[1, 0], [0, 1], [1, 1], [1, -1]];
+                    for (const [dx, dy] of directions) {
+                        let count = 1;
+                        const line = [[row, col]];
+                        for (let step = 1; step < 5; step++) {
+                            const nr = row + dx * step;
+                            const nc = col + dy * step;
+                            if (nr < 0 || nr >= BOARD_SIZE || nc < 0 || nc >= BOARD_SIZE) break;
+                            if (board[nr][nc] !== player) break;
+                            count++;
+                            line.push([nr, nc]);
+                        }
+                        for (let step = 1; step < 5; step++) {
+                            const nr = row - dx * step;
+                            const nc = col - dy * step;
+                            if (nr < 0 || nr >= BOARD_SIZE || nc < 0 || nc >= BOARD_SIZE) break;
+                            if (board[nr][nc] !== player) break;
+                            count++;
+                            line.push([nr, nc]);
+                        }
+                        if (count >= 5) return line;
+                    }
+                    return null;
+                }
+
+                function isBoardFull() {
+                    for (let r = 0; r < BOARD_SIZE; r++)
+                        for (let c = 0; c < BOARD_SIZE; c++)
+                            if (board[r][c] === 0) return false;
+                    return true;
+                }
+
+                function placeStone(row, col, player) {
+                    if (gameOver) return false;
+                    if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) return false;
+                    if (board[row][col] !== 0) return false;
+
+                    board[row][col] = player;
+
+                    const winLine = checkWin(row, col, player);
+                    if (winLine) {
+                        gameOver = true;
+                        winner = player;
+                        winningLine = winLine;
+                        renderBoard();
+                        return true;
+                    }
+
+                    if (isBoardFull()) {
+                        gameOver = true;
+                        winner = null;
+                        winningLine = [];
+                        renderBoard();
+                        return true;
+                    }
+
+                    currentPlayer = (player === PLAYER) ? COMPUTER : PLAYER;
+                    renderBoard();
+                    return true;
+                }
+
+                function handleCanvasClick(e) {
+                    if (gameOver) return;
+                    if (currentPlayer !== PLAYER) return;
+                    if (isComputerThinking) return;
+
+                    const rect = canvas.getBoundingClientRect();
+                    const scaleX = canvas.width / rect.width;
+                    const scaleY = canvas.height / rect.height;
+
+                    // 支持触摸事件
+                    let clientX, clientY;
+                    if (e.touches) {
+                        clientX = e.touches[0].clientX;
+                        clientY = e.touches[0].clientY;
+                        e.preventDefault();
+                    } else {
+                        clientX = e.clientX;
+                        clientY = e.clientY;
+                    }
+
+                    const mouseX = (clientX - rect.left) * scaleX;
+                    const mouseY = (clientY - rect.top) * scaleY;
+
+                    const col = Math.floor(mouseX / CELL_SIZE);
+                    const row = Math.floor(mouseY / CELL_SIZE);
+
+                    if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) return;
+
+                    const centerX = col * CELL_SIZE + CELL_SIZE / 2;
+                    const centerY = row * CELL_SIZE + CELL_SIZE / 2;
+                    const dist = Math.hypot(mouseX - centerX, mouseY - centerY);
+                    if (dist > CELL_SIZE * 0.7) return;
+
+                    const success = placeStone(row, col, PLAYER);
+                    if (success && !gameOver && currentPlayer === COMPUTER) {
+                        scheduleComputerMove();
+                    }
+                }
+
+                function scheduleComputerMove() {
+                    if (gameOver) return;
+                    if (currentPlayer !== COMPUTER) return;
+                    if (isComputerThinking) return;
+
+                    isComputerThinking = true;
+                    gomokuMessage.textContent = '⚪ 电脑思考中...';
+                    turnText.textContent = '白棋落子 (电脑)';
+
+                    setTimeout(() => {
+                        if (gameOver || currentPlayer !== COMPUTER) {
+                            isComputerThinking = false;
+                            return;
+                        }
+
+                        const move = findBestMove();
+                        if (move) {
+                            const { row, col } = move;
+                            if (board[row][col] === 0) {
+                                placeStone(row, col, COMPUTER);
+                            }
+                        }
+
+                        isComputerThinking = false;
+
+                        if (!gameOver && currentPlayer === PLAYER) {
+                            renderBoard();
+                        }
+                    }, 120);
+                }
+
+                function findBestMove() {
+                    let hasStone = false;
+                    for (let r = 0; r < BOARD_SIZE; r++) {
+                        for (let c = 0; c < BOARD_SIZE; c++) {
+                            if (board[r][c] !== 0) {
+                                hasStone = true;
+                                break;
+                            }
+                        }
+                        if (hasStone) break;
+                    }
+                    if (!hasStone) return { row: 7, col: 7 };
+
+                    let bestScore = -1;
+                    let candidates = [];
+
+                    for (let r = 0; r < BOARD_SIZE; r++) {
+                        for (let c = 0; c < BOARD_SIZE; c++) {
+                            if (board[r][c] !== 0) continue;
+
+                            const compScore = evaluatePosition(r, c, COMPUTER);
+                            const playerScore = evaluatePosition(r, c, PLAYER);
+                            const total = compScore * 1.5 + playerScore * 1.2;
+                            const randomFactor = Math.random() * 0.01;
+                            const finalScore = total + randomFactor;
+
+                            if (finalScore > bestScore) {
+                                bestScore = finalScore;
+                                candidates = [{ row: r, col: c }];
+                            } else if (Math.abs(finalScore - bestScore) < 0.001) {
+                                candidates.push({ row: r, col: c });
+                            }
+                        }
+                    }
+
+                    if (candidates.length > 0) {
+                        const randomIndex = Math.floor(Math.random() * candidates.length);
+                        return candidates[randomIndex];
+                    }
+                    return null;
+                }
+
+                function evaluatePosition(row, col, player) {
+                    const dirs = [[1, 0], [0, 1], [1, 1], [1, -1]];
+                    let totalScore = 0;
+
+                    for (const [dx, dy] of dirs) {
+                        let count = 1;
+                        let block = 0;
+
+                        for (let step = 1; step < 5; step++) {
+                            const nr = row + dx * step;
+                            const nc = col + dy * step;
+                            if (nr < 0 || nr >= BOARD_SIZE || nc < 0 || nc >= BOARD_SIZE) {
+                                block++;
+                                break;
+                            }
+                            const stone = board[nr][nc];
+                            if (stone === player) {
+                                count++;
+                            } else if (stone === 0) {
+                                break;
+                            } else {
+                                block++;
+                                break;
+                            }
+                        }
+
+                        for (let step = 1; step < 5; step++) {
+                            const nr = row - dx * step;
+                            const nc = col - dy * step;
+                            if (nr < 0 || nr >= BOARD_SIZE || nc < 0 || nc >= BOARD_SIZE) {
+                                block++;
+                                break;
+                            }
+                            const stone = board[nr][nc];
+                            if (stone === player) {
+                                count++;
+                            } else if (stone === 0) {
+                                break;
+                            } else {
+                                block++;
+                                break;
+                            }
+                        }
+
+                        if (count >= 5) {
+                            totalScore += 100000;
+                        } else if (count === 4) {
+                            if (block === 0) totalScore += 10000;
+                            else if (block === 1) totalScore += 5000;
+                            else totalScore += 1000;
+                        } else if (count === 3) {
+                            if (block === 0) totalScore += 1000;
+                            else if (block === 1) totalScore += 500;
+                            else totalScore += 100;
+                        } else if (count === 2) {
+                            if (block === 0) totalScore += 100;
+                            else if (block === 1) totalScore += 50;
+                            else totalScore += 10;
+                        } else if (count === 1) {
+                            totalScore += 1;
+                        }
+                    }
+
+                    return totalScore;
+                }
+
+                function resetGomokuGame() {
+                    isComputerThinking = false;
+                    initBoardData();
+                    renderBoard();
+                }
+
+                function initGomoku() {
+                    initBoardData();
+                    renderBoard();
+                    canvas.addEventListener('click', handleCanvasClick);
+                    canvas.addEventListener('touchstart', handleCanvasClick, { passive: false });
+                    resetGomokuBtn.addEventListener('click', resetGomokuGame);
+                }
+
+                initGomoku();
+            })();
+
+            // ============================================================
+            // 数独游戏逻辑
+            // ============================================================
+            (function() {
+                let boardSize = 9;
+                let difficulty = 'medium';
+                let board = [];
+                let fixedCells = [];
+                let selectedRow = -1, selectedCol = -1;
+                let gameOver = false;
+
+                const CONFIG = {
+                    9: { boxRows: 3, boxCols: 3, numCount: 9, class: 'board-9' },
+                    6: { boxRows: 2, boxCols: 3, numCount: 6, class: 'board-6' }
+                };
+
+                const boardEl = document.getElementById('sudokuBoard');
+                const sizeSelect = document.getElementById('sizeSelect');
+                const difficultySelect = document.getElementById('difficultySelect');
+                const newSudokuBtn = document.getElementById('newSudokuBtn');
+                const checkSudokuBtn = document.getElementById('checkSudokuBtn');
+                const sudokuMessage = document.getElementById('sudokuMessage');
+                const numbersPad = document.getElementById('numbersPad');
+
+                function getConfig() {
+                    return CONFIG[boardSize];
+                }
+
+                function getBoxDims() {
+                    return boardSize === 9 ? { rows: 3, cols: 3 } : { rows: 2, cols: 3 };
+                }
+
+                function emptyBoard(n) {
+                    return Array.from({ length: n }, () => Array(n).fill(0));
+                }
+
+                function cloneBoard(b) {
+                    return b.map(row => [...row]);
+                }
+
+                function generateFullSolution(n) {
+                    const b = emptyBoard(n);
+                    const { rows: br, cols: bc } = n === 9 ? { rows: 3, cols: 3 } : { rows: 2, cols: 3 };
+
+                    function isValid(r, c, num) {
+                        for (let j = 0; j < n; j++) if (b[r][j] === num) return false;
+                        for (let i = 0; i < n; i++) if (b[i][c] === num) return false;
+                        const sr = Math.floor(r / br) * br;
+                        const sc = Math.floor(c / bc) * bc;
+                        for (let i = sr; i < sr + br; i++)
+                            for (let j = sc; j < sc + bc; j++)
+                                if (b[i][j] === num) return false;
+                        return true;
+                    }
+
+                    function solve(pos = 0) {
+                        if (pos === n * n) return true;
+                        const row = Math.floor(pos / n);
+                        const col = pos % n;
+                        if (b[row][col] !== 0) return solve(pos + 1);
+                        const nums = Array.from({ length: n }, (_, i) => i + 1);
+                        for (let i = nums.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [nums[i], nums[j]] = [nums[j], nums[i]];
+                        }
+                        for (const num of nums) {
+                            if (isValid(row, col, num)) {
+                                b[row][col] = num;
+                                if (solve(pos + 1)) return true;
+                                b[row][col] = 0;
+                            }
+                        }
+                        return false;
+                    }
+                    solve(0);
+                    return b;
+                }
+
+                function generatePuzzle(fullBoard, size, diff) {
+                    const n = size;
+                    const puzzle = cloneBoard(fullBoard);
+                    const totalCells = n * n;
+                    let removeCount;
+                    if (diff === 'easy') removeCount = Math.floor(totalCells * 0.45);
+                    else if (diff === 'medium') removeCount = Math.floor(totalCells * 0.60);
+                    else removeCount = Math.floor(totalCells * 0.72);
+                    removeCount = Math.min(removeCount, totalCells - 10);
+
+                    const positions = [];
+                    for (let r = 0; r < n; r++)
+                        for (let c = 0; c < n; c++)
+                            positions.push([r, c]);
+                    for (let i = positions.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [positions[i], positions[j]] = [positions[j], positions[i]];
+                    }
+
+                    let removed = 0;
+                    for (const [r, c] of positions) {
+                        if (removed >= removeCount) break;
+                        if (puzzle[r][c] !== 0) {
+                            puzzle[r][c] = 0;
+                            removed++;
+                        }
+                    }
+                    return puzzle;
+                }
+
+                function isBoardComplete() {
+                    for (let r = 0; r < boardSize; r++)
+                        for (let c = 0; c < boardSize; c++)
+                            if (board[r][c] === 0) return false;
+                    return true;
+                }
+
+                function isValidPlacement(r, c, num) {
+                    for (let j = 0; j < boardSize; j++)
+                        if (j !== c && board[r][j] === num) return false;
+                    for (let i = 0; i < boardSize; i++)
+                        if (i !== r && board[i][c] === num) return false;
+                    const { rows: br, cols: bc } = getBoxDims();
+                    const sr = Math.floor(r / br) * br;
+                    const sc = Math.floor(c / bc) * bc;
+                    for (let i = sr; i < sr + br; i++)
+                        for (let j = sc; j < sc + bc; j++) {
+                            if (i === r && j === c) continue;
+                            if (board[i][j] === num) return false;
+                        }
+                    return true;
+                }
+
+                function validateFullBoard() {
+                    for (let r = 0; r < boardSize; r++)
+                        for (let c = 0; c < boardSize; c++) {
+                            if (board[r][c] === 0) return false;
+                            if (!isValidPlacement(r, c, board[r][c])) return false;
+                        }
+                    return true;
+                }
+
+                function renderSudokuBoard() {
+                    const n = boardSize;
+                    const cfg = getConfig();
+
+                    boardEl.style.gridTemplateColumns = `repeat(${n}, minmax(0, 1fr))`;
+                    boardEl.className = cfg.class;
+                    boardEl.innerHTML = '';
+
+                    const { rows: br, cols: bc } = getBoxDims();
+                    const selBoxR = selectedRow >= 0 ? Math.floor(selectedRow / br) : -1;
+                    const selBoxC = selectedCol >= 0 ? Math.floor(selectedCol / bc) : -1;
+
+                    for (let r = 0; r < n; r++) {
+                        for (let c = 0; c < n; c++) {
+                            const cell = document.createElement('div');
+                            cell.className = 'cell';
+                            cell.dataset.row = r;
+                            cell.dataset.col = c;
+                            cell.textContent = board[r][c] === 0 ? '' : board[r][c];
+
+                            if (fixedCells[r][c]) cell.classList.add('fixed');
+
+                            if (selectedRow >= 0 && selectedCol >= 0) {
+                                if (r === selectedRow && c === selectedCol) {
+                                    // 选中格子
+                                } else {
+                                    if (r === selectedRow) cell.classList.add('highlight-row');
+                                    if (c === selectedCol) cell.classList.add('highlight-col');
+                                    const curBoxR = Math.floor(r / br);
+                                    const curBoxC = Math.floor(c / bc);
+                                    if (curBoxR === selBoxR && curBoxC === selBoxC) {
+                                        cell.classList.add('highlight-box');
+                                    }
+                                }
+                            }
+
+                            if (r === selectedRow && c === selectedCol) {
+                                cell.classList.add('selected');
+                            }
+
+                            if (board[r][c] !== 0 && !fixedCells[r][c] && !isValidPlacement(r, c, board[r][c])) {
+                                cell.classList.add('error');
+                            }
+
+                            cell.addEventListener('click', () => onSudokuCellClick(r, c));
+                            cell.addEventListener('dblclick', (e) => {
+                                e.preventDefault();
+                                if (fixedCells[r][c] || gameOver) return;
+                                board[r][c] = 0;
+                                selectedRow = r;
+                                selectedCol = c;
+                                renderSudokuBoard();
+                            });
+
+                            boardEl.appendChild(cell);
+                        }
+                    }
+
+                    renderNumbersPad();
+                    updateSudokuMessage();
+                }
+
+                function renderNumbersPad() {
+                    const n = boardSize;
+                    const nums = Array.from({ length: n }, (_, i) => i + 1);
+                    numbersPad.innerHTML = '';
+                    nums.forEach(num => {
+                        const btn = document.createElement('div');
+                        btn.className = 'num-btn';
+                        btn.textContent = num;
+                        btn.addEventListener('click', () => onSudokuNumberClick(num));
+                        numbersPad.appendChild(btn);
+                    });
+                }
+
+                function updateSudokuMessage() {
+                    if (gameOver) {
+                        sudokuMessage.textContent = '🎉 恭喜！数独完成！';
+                        return;
+                    }
+                    if (selectedRow >= 0 && selectedCol >= 0) {
+                        const rowDisplay = selectedRow + 1;
+                        const colDisplay = selectedCol + 1;
+                        const val = board[selectedRow][selectedCol];
+                        if (val !== 0) {
+                            sudokuMessage.textContent = `第${rowDisplay}行第${colDisplay}列 当前:${val}`;
+                        } else {
+                            sudokuMessage.textContent = `第${rowDisplay}行第${colDisplay}列 点击数字填入`;
+                        }
+                    } else {
+                        sudokuMessage.textContent = '点击格子选择，再点击数字填入';
+                    }
+                }
+
+                function onSudokuCellClick(r, c) {
+                    if (gameOver) return;
+                    selectedRow = r;
+                    selectedCol = c;
+                    renderSudokuBoard();
+                }
+
+                function onSudokuNumberClick(num) {
+                    if (gameOver) return;
+                    if (selectedRow < 0 || selectedCol < 0) {
+                        sudokuMessage.textContent = '请先点击一个空格子！';
+                        return;
+                    }
+                    if (fixedCells[selectedRow][selectedCol]) {
+                        sudokuMessage.textContent = '这个格子是题目给定的，不能修改';
+                        return;
+                    }
+
+                    board[selectedRow][selectedCol] = num;
+
+                    if (isBoardComplete() && validateFullBoard()) {
+                        gameOver = true;
+                        sudokuMessage.textContent = '🎉 恭喜！数独完成！';
+                        renderSudokuBoard();
+                        return;
+                    }
+
+                    if (!isValidPlacement(selectedRow, selectedCol, num)) {
+                        sudokuMessage.textContent = `❌ 数字 ${num} 在行、列或宫中重复`;
+                    } else {
+                        sudokuMessage.textContent = `已填入 ${num}`;
+                    }
+
+                    renderSudokuBoard();
+                }
+
+                function newSudokuGame() {
+                    boardSize = parseInt(sizeSelect.value, 10);
+                    difficulty = difficultySelect.value;
+
+                    const full = generateFullSolution(boardSize);
+                    board = generatePuzzle(full, boardSize, difficulty);
+                    fixedCells = board.map(row => row.map(v => v !== 0));
+
+                    selectedRow = -1;
+                    selectedCol = -1;
+                    gameOver = false;
+
+                    renderSudokuBoard();
+                    sudokuMessage.textContent = `${boardSize}宫格 · ${difficulty === 'easy' ? '简单' : difficulty === 'medium' ? '中等' : '困难'}`;
+                }
+
+                function checkSudokuBoard() {
+                    if (gameOver) {
+                        sudokuMessage.textContent = '🎉 已经完成啦！';
+                        return;
+                    }
+                    if (isBoardComplete()) {
+                        if (validateFullBoard()) {
+                            gameOver = true;
+                            sudokuMessage.textContent = '🎉 恭喜！数独完成！';
+                            renderSudokuBoard();
+                        } else {
+                            sudokuMessage.textContent = '❌ 有错误，请检查红色格子';
+                        }
+                    } else {
+                        let hasError = false;
+                        for (let r = 0; r < boardSize; r++) {
+                            for (let c = 0; c < boardSize; c++) {
+                                if (board[r][c] !== 0 && !isValidPlacement(r, c, board[r][c])) {
+                                    hasError = true;
+                                    break;
+                                }
+                            }
+                            if (hasError) break;
+                        }
+                        if (hasError) {
+                            sudokuMessage.textContent = '❌ 有冲突，红色格子需要修改';
+                        } else {
+                            sudokuMessage.textContent = '✅ 目前没有错误，继续填写吧';
+                        }
+                        renderSudokuBoard();
+                    }
+                }
+
+                function initSudoku() {
+                    newSudokuBtn.addEventListener('click', newSudokuGame);
+                    checkSudokuBtn.addEventListener('click', checkSudokuBoard);
+                    sizeSelect.addEventListener('change', newSudokuGame);
+                    difficultySelect.addEventListener('change', newSudokuGame);
+                    newSudokuGame();
+                }
+
+                initSudoku();
+            })();
+
+        })();
+    </script>
+</body>
+</html>
