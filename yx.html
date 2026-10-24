@@ -2,18 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>游戏合集 · 五子棋 & 数独</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>游戏合集 · 五子棋 · 数独 · 象棋</title>
     <style>
         * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
 
         html, body {
-            margin: 0;
-            padding: 0;
             min-height: 100vh;
             font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
         }
@@ -37,7 +37,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            max-width: 760px;
+            max-width: 800px;
             width: 100%;
             transition: background 0.3s, background-image 0.3s, box-shadow 0.3s;
         }
@@ -54,9 +54,15 @@
             box-shadow: 0 25px 40px rgba(0, 0, 0, 0.6), inset 0 0 0 2px #eef3fc, inset 0 0 20px #8a9cc0;
         }
 
+        .main-container.theme-xiangqi {
+            background: #e8d5b5;
+            background-image: radial-gradient(circle at 30% 20%, #f3e7d0, #cfb991);
+            box-shadow: 0 25px 40px rgba(0, 0, 0, 0.6), inset 0 0 0 2px #f9f0db, inset 0 0 20px #a58e6d;
+        }
+
         h1 {
             margin: 0 0 12px 0;
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             font-weight: 700;
             color: #3d2e1b;
             text-shadow: 2px 2px 0 #ebd9b8, 0 4px 8px rgba(0, 0, 0, 0.15);
@@ -70,22 +76,22 @@
             text-shadow: 2px 2px 0 #d4dff2, 0 4px 8px rgba(0, 0, 0, 0.15);
         }
 
-        /* 顶部操作栏：标签 + 全屏按钮 */
+        /* 顶部操作栏 */
         .top-bar {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
             flex-wrap: wrap;
             justify-content: center;
+            width: 100%;
         }
 
-        /* 游戏切换标签 */
         .game-tabs {
             display: flex;
-            gap: 6px;
+            gap: 4px;
             background: #c9ae88;
-            padding: 5px;
+            padding: 4px;
             border-radius: 60px;
             box-shadow: inset 0 3px 8px #9a7d5a, 0 4px 8px rgba(0, 0, 0, 0.2);
             transition: background 0.3s, box-shadow 0.3s;
@@ -96,19 +102,25 @@
             box-shadow: inset 0 3px 8px #7486ad, 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
+        .game-tabs.xiangqi-active {
+            background: #c9ae88;
+            box-shadow: inset 0 3px 8px #9a7d5a, 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
         .game-tabs button {
             font-family: inherit;
             font-weight: 700;
-            font-size: 0.95rem;
-            padding: 10px 24px;
+            font-size: 0.88rem;
+            padding: 9px 18px;
             border: none;
             border-radius: 50px;
             cursor: pointer;
             background: transparent;
             color: #4a3620;
             transition: all 0.2s;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
             box-shadow: none;
+            white-space: nowrap;
         }
 
         .game-tabs.sudoku-active button {
@@ -127,22 +139,13 @@
             box-shadow: 0 3px 0 #7182a8, 0 4px 10px rgba(0, 0, 0, 0.2);
         }
 
-        .game-tabs button:not(.active):hover {
-            background: rgba(243, 231, 211, 0.5);
-        }
-
-        .game-tabs.sudoku-active button:not(.active):hover {
-            background: rgba(240, 245, 255, 0.5);
-        }
-
-        /* 全屏按钮 */
         .fullscreen-btn {
             background: #5a4a36;
             color: #f0e0c0;
             border: 2px solid #b3936b;
             border-radius: 50px;
-            padding: 8px 18px;
-            font-size: 0.85rem;
+            padding: 8px 16px;
+            font-size: 0.82rem;
             font-weight: 700;
             cursor: pointer;
             box-shadow: 0 4px 0 #2d1f0e, 0 4px 10px rgba(0, 0, 0, 0.3);
@@ -423,7 +426,6 @@
             text-shadow: 1px 1px 0 #dde6f5;
         }
 
-        /* 题目给定的固定数字：深色 */
         .cell.fixed {
             background: #d5e0f2;
             color: #1a2b4a;
@@ -432,7 +434,6 @@
             text-shadow: 1px 1px 0 #eef3fc;
         }
 
-        /* 玩家自己填入的数字：醒目的蓝色，加粗放大 */
         .cell.user-filled {
             color: #0d5ec7;
             font-weight: 800;
@@ -582,6 +583,203 @@
             letter-spacing: 0.5px;
             text-shadow: 1px 1px 0 #d4dff2;
             text-align: center;
+        }
+
+        /* ========== 象棋样式 ========== */
+        .xiangqi-app {
+            width: 100%;
+            max-width: 560px;
+        }
+
+        .xiangqi-mode-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 12px;
+            padding: 0 4px;
+        }
+
+        .xiangqi-mode-buttons {
+            display: flex;
+            gap: 8px;
+            background: #b49a7a;
+            padding: 4px;
+            border-radius: 40px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .xiangqi-mode-btn {
+            border: none;
+            background: transparent;
+            color: #2e1e0f;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 7px 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.5px;
+            flex: 1;
+            text-align: center;
+        }
+
+        .xiangqi-mode-btn.active {
+            background: #f5e6d3;
+            color: #2b1b0e;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25), inset 0 1px 2px white;
+        }
+
+        .xiangqi-board-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background: #d9b382;
+            border-radius: 20px;
+            padding: 10px;
+            box-shadow: inset 0 0 0 3px #f5e6d3, 0 12px 20px rgba(0,0,0,0.5);
+            margin-bottom: 10px;
+        }
+
+        #xiangqiCanvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+            border-radius: 12px;
+            cursor: pointer;
+            touch-action: none;
+            background: #ecceaa;
+            box-shadow: inset 0 0 0 1px #b48b5a;
+        }
+
+        .capture-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 10px;
+            margin-bottom: 10px;
+            padding: 6px 10px;
+            background: #d4bc9a;
+            border-radius: 16px;
+            min-height: 40px;
+            align-items: center;
+            font-size: 0.8rem;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .capture-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 3px 8px;
+            border-radius: 20px;
+            background: #f5e6d3;
+            font-weight: 500;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+            animation: popIn 0.3s ease;
+        }
+
+        .capture-item.red-captured { border-left: 4px solid #b22222; }
+        .capture-item.black-captured { border-left: 4px solid #1a1a1a; }
+
+        .capture-char {
+            font-family: "KaiTi", "楷体", serif;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .capture-char.red { color: #b22222; }
+        .capture-char.black { color: #1a1a1a; }
+
+        .capture-arrow {
+            font-size: 0.7rem;
+            color: #6b4e2e;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.6); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .empty-capture {
+            color: #7a623e;
+            font-style: italic;
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .xiangqi-tip-panel {
+            min-height: 56px;
+            background: #cbb08b;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: #2e1e0f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.15);
+            margin-bottom: 8px;
+            letter-spacing: 0.3px;
+            transition: background 0.2s;
+            line-height: 1.45;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .xiangqi-tip-panel .rule-text {
+            font-size: 0.78rem;
+            color: #4a2e1a;
+            width: 100%;
+            margin-top: 2px;
+            font-weight: 400;
+        }
+
+        .xiangqi-status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 0 6px;
+        }
+
+        .xiangqi-turn-indicator {
+            background: #2b1b0e;
+            color: #f0e2c5;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+            text-align: center;
+        }
+
+        .xiangqi-reset-btn {
+            background: #5a3e2a;
+            border: none;
+            color: #f0e2c5;
+            padding: 8px 22px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: 0.1s;
+            white-space: nowrap;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .xiangqi-reset-btn:active {
+            transform: scale(0.95);
+            background: #3e2c1a;
         }
 
         /* ========== 胜利弹窗 ========== */
@@ -890,8 +1088,7 @@
             opacity: 1;
         }
 
-        /* ========== 全屏模式下的布局优化 ========== */
-        /* 全屏时 body 背景保持深色 */
+        /* ========== 全屏模式 ========== */
         .fullscreen-active body {
             background: #1a1a1a;
             padding: 0;
@@ -914,11 +1111,13 @@
             background: #b8c6e0;
         }
 
-        .fullscreen-active .board-wrapper {
-            max-width: 100%;
+        .fullscreen-active .main-container.theme-xiangqi {
+            background: #d4c0a0;
         }
 
-        .fullscreen-active .sudoku-board-wrapper {
+        .fullscreen-active .board-wrapper,
+        .fullscreen-active .sudoku-board-wrapper,
+        .fullscreen-active .xiangqi-board-wrapper {
             max-width: 100%;
         }
 
@@ -935,245 +1134,77 @@
             margin-bottom: 8px;
         }
 
-        /* 手机全屏时五子棋棋盘尽可能大 */
         @media (max-width: 600px) {
-            .fullscreen-active #gobanCanvas {
-                border-radius: 12px;
-            }
-            .fullscreen-active .board-wrapper {
-                padding: 6px;
-                border-radius: 20px;
-            }
-            .fullscreen-active .sudoku-board-wrapper {
-                padding: 6px;
-                border-radius: 16px;
-            }
-            .fullscreen-active .cell {
-                width: 36px !important;
-                height: 36px !important;
-                font-size: 1.05rem !important;
-            }
-            .fullscreen-active .board-6 .cell {
-                width: 44px !important;
-                height: 44px !important;
-                font-size: 1.3rem !important;
-            }
-            .fullscreen-active .board-9 .cell {
-                width: 36px !important;
-                height: 36px !important;
-                font-size: 1.05rem !important;
-            }
-            .fullscreen-active .board-9 .cell.user-filled {
-                font-size: 1.2rem !important;
-            }
-            .fullscreen-active .board-6 .cell.user-filled {
-                font-size: 1.45rem !important;
-            }
-            .fullscreen-active .num-btn {
-                width: 38px;
-                height: 38px;
-                font-size: 1.05rem;
-            }
+            .fullscreen-active #gobanCanvas { border-radius: 12px; }
+            .fullscreen-active .board-wrapper { padding: 6px; border-radius: 20px; }
+            .fullscreen-active .sudoku-board-wrapper { padding: 6px; border-radius: 16px; }
+            .fullscreen-active .xiangqi-board-wrapper { padding: 6px; border-radius: 16px; }
+            .fullscreen-active .cell { width: 36px !important; height: 36px !important; font-size: 1.05rem !important; }
+            .fullscreen-active .board-6 .cell { width: 44px !important; height: 44px !important; font-size: 1.3rem !important; }
+            .fullscreen-active .board-9 .cell { width: 36px !important; height: 36px !important; font-size: 1.05rem !important; }
+            .fullscreen-active .board-9 .cell.user-filled { font-size: 1.2rem !important; }
+            .fullscreen-active .board-6 .cell.user-filled { font-size: 1.45rem !important; }
+            .fullscreen-active .num-btn { width: 38px; height: 38px; font-size: 1.05rem; }
         }
 
         /* ========== 手机适配 ========== */
         @media (max-width: 600px) {
-            body {
-                padding: 8px;
-                align-items: flex-start;
-            }
-            .main-container {
-                padding: 14px 12px 12px 12px;
-                border-radius: 32px;
-            }
-            h1 {
-                font-size: 1.25rem;
-                margin-bottom: 10px;
-            }
-            .game-tabs button {
-                font-size: 0.85rem;
-                padding: 8px 16px;
-            }
-            .fullscreen-btn {
-                font-size: 0.78rem;
-                padding: 6px 14px;
-            }
-            .board-wrapper {
-                padding: 10px;
-                border-radius: 24px;
-            }
-            .info-panel {
-                gap: 6px;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            .turn-indicator {
-                padding: 4px 12px 4px 10px;
-                gap: 6px;
-            }
-            .stone-preview {
-                width: 24px;
-                height: 24px;
-            }
-            .turn-text {
-                font-size: 0.8rem;
-            }
-            .mode-tag {
-                font-size: 0.65rem;
-                padding: 2px 7px;
-            }
-            .message {
-                font-size: 0.8rem;
-                padding: 6px 12px;
-                min-width: 90px;
-            }
-            .btn-reset {
-                font-size: 0.8rem;
-                padding: 7px 14px;
-            }
-            .controls {
-                padding: 8px 10px;
-                gap: 8px;
-            }
-            .control-group label {
-                font-size: 0.78rem;
-            }
-            select, .sudoku-btn {
-                font-size: 0.78rem;
-                padding: 5px 10px;
-            }
-            select {
-                padding-right: 22px;
-                background-position: right 6px center;
-            }
-            .sudoku-board-wrapper {
-                padding: 8px;
-                border-radius: 20px;
-            }
-            .cell {
-                width: 34px !important;
-                height: 34px !important;
-                font-size: 1rem !important;
-            }
-            .board-6 .cell {
-                width: 40px !important;
-                height: 40px !important;
-                font-size: 1.2rem !important;
-            }
-            .board-9 .cell {
-                width: 34px !important;
-                height: 34px !important;
-                font-size: 1rem !important;
-            }
-            .board-9 .cell.user-filled {
-                font-size: 1.15rem !important;
-            }
-            .board-6 .cell.user-filled {
-                font-size: 1.35rem !important;
-            }
-            .num-btn {
-                width: 36px;
-                height: 36px;
-                font-size: 1rem;
-            }
-            .numbers-pad {
-                gap: 6px;
-            }
-            .sudoku-message-box {
-                font-size: 0.78rem;
-                padding: 6px 14px;
-            }
-            .footer-note {
-                font-size: 0.68rem;
-            }
-            .word-page {
-                padding: 20px 14px;
-                font-size: 12px;
-                min-height: 800px;
-            }
-            .word-page h2 {
-                font-size: 17px;
-            }
-            .word-ribbon {
-                gap: 10px;
-                font-size: 10px;
-                padding: 4px 8px;
-            }
-            .word-statusbar {
-                font-size: 10px;
-                gap: 8px;
-            }
-            .word-titlebar {
-                font-size: 11px;
-                height: 28px;
-                padding: 0 8px;
-            }
-            .boss-hint {
-                bottom: 14px;
-                right: 14px;
-                font-size: 0.65rem;
-                padding: 5px 10px;
-            }
-            .win-modal {
-                padding: 24px 20px 20px 20px;
-                border-radius: 24px;
-            }
-            .win-emoji {
-                font-size: 3rem;
-            }
-            .win-title {
-                font-size: 1.2rem;
-            }
-            .win-subtitle {
-                font-size: 0.85rem;
-            }
-            .win-btn {
-                padding: 10px 28px;
-                font-size: 0.95rem;
-            }
+            body { padding: 8px; align-items: flex-start; }
+            .main-container { padding: 14px 12px 12px 12px; border-radius: 32px; }
+            h1 { font-size: 1.15rem; margin-bottom: 10px; }
+            .game-tabs button { font-size: 0.78rem; padding: 7px 12px; }
+            .fullscreen-btn { font-size: 0.75rem; padding: 6px 12px; }
+            .board-wrapper { padding: 10px; border-radius: 24px; }
+            .info-panel { gap: 6px; flex-wrap: wrap; justify-content: center; }
+            .turn-indicator { padding: 4px 12px 4px 10px; gap: 6px; }
+            .stone-preview { width: 24px; height: 24px; }
+            .turn-text { font-size: 0.8rem; }
+            .mode-tag { font-size: 0.65rem; padding: 2px 7px; }
+            .message { font-size: 0.8rem; padding: 6px 12px; min-width: 90px; }
+            .btn-reset { font-size: 0.8rem; padding: 7px 14px; }
+            .controls { padding: 8px 10px; gap: 8px; }
+            .control-group label { font-size: 0.78rem; }
+            select, .sudoku-btn { font-size: 0.78rem; padding: 5px 10px; }
+            select { padding-right: 22px; background-position: right 6px center; }
+            .sudoku-board-wrapper { padding: 8px; border-radius: 20px; }
+            .cell { width: 34px !important; height: 34px !important; font-size: 1rem !important; }
+            .board-6 .cell { width: 40px !important; height: 40px !important; font-size: 1.2rem !important; }
+            .board-9 .cell { width: 34px !important; height: 34px !important; font-size: 1rem !important; }
+            .board-9 .cell.user-filled { font-size: 1.15rem !important; }
+            .board-6 .cell.user-filled { font-size: 1.35rem !important; }
+            .num-btn { width: 36px; height: 36px; font-size: 1rem; }
+            .numbers-pad { gap: 6px; }
+            .sudoku-message-box { font-size: 0.78rem; padding: 6px 14px; }
+            .footer-note { font-size: 0.68rem; }
+            .word-page { padding: 20px 14px; font-size: 12px; min-height: 800px; }
+            .word-page h2 { font-size: 17px; }
+            .word-ribbon { gap: 10px; font-size: 10px; padding: 4px 8px; }
+            .word-statusbar { font-size: 10px; gap: 8px; }
+            .word-titlebar { font-size: 11px; height: 28px; padding: 0 8px; }
+            .boss-hint { bottom: 14px; right: 14px; font-size: 0.65rem; padding: 5px 10px; }
+            .win-modal { padding: 24px 20px 20px 20px; border-radius: 24px; }
+            .win-emoji { font-size: 3rem; }
+            .win-title { font-size: 1.2rem; }
+            .win-subtitle { font-size: 0.85rem; }
+            .win-btn { padding: 10px 28px; font-size: 0.95rem; }
+            .xiangqi-mode-btn { font-size: 0.8rem; padding: 6px 12px; }
+            .xiangqi-tip-panel { font-size: 0.8rem; min-height: 48px; padding: 6px 10px; }
+            .xiangqi-turn-indicator { font-size: 0.85rem; padding: 6px 12px; }
+            .xiangqi-reset-btn { font-size: 0.85rem; padding: 6px 14px; }
         }
 
-        /* 超小屏幕 */
         @media (max-width: 380px) {
-            .cell {
-                width: 30px !important;
-                height: 30px !important;
-                font-size: 0.9rem !important;
-            }
-            .board-6 .cell {
-                width: 34px !important;
-                height: 34px !important;
-                font-size: 1rem !important;
-            }
-            .board-9 .cell {
-                width: 30px !important;
-                height: 30px !important;
-                font-size: 0.9rem !important;
-            }
-            .board-9 .cell.user-filled {
-                font-size: 1rem !important;
-            }
-            .board-6 .cell.user-filled {
-                font-size: 1.1rem !important;
-            }
-            .num-btn {
-                width: 32px;
-                height: 32px;
-                font-size: 0.9rem;
-            }
-            h1 {
-                font-size: 1.05rem;
-            }
-            .turn-indicator {
-                padding: 3px 10px 3px 8px;
-            }
-            .stone-preview {
-                width: 20px;
-                height: 20px;
-            }
-            .turn-text {
-                font-size: 0.72rem;
-            }
+            .cell { width: 30px !important; height: 30px !important; font-size: 0.9rem !important; }
+            .board-6 .cell { width: 34px !important; height: 34px !important; font-size: 1rem !important; }
+            .board-9 .cell { width: 30px !important; height: 30px !important; font-size: 0.9rem !important; }
+            .board-9 .cell.user-filled { font-size: 1rem !important; }
+            .board-6 .cell.user-filled { font-size: 1.1rem !important; }
+            .num-btn { width: 32px; height: 32px; font-size: 0.9rem; }
+            h1 { font-size: 1.05rem; }
+            .turn-indicator { padding: 3px 10px 3px 8px; }
+            .stone-preview { width: 20px; height: 20px; }
+            .turn-text { font-size: 0.72rem; }
+            .game-tabs button { font-size: 0.7rem; padding: 6px 10px; }
         }
     </style>
 </head>
@@ -1183,11 +1214,12 @@
     <div class="main-container theme-gomoku" id="gameUI">
         <h1>🎮 游戏合集</h1>
 
-        <!-- 顶部操作栏：标签 + 全屏按钮 -->
+        <!-- 顶部操作栏 -->
         <div class="top-bar">
             <div class="game-tabs" id="gameTabs">
                 <button id="tabGomoku" class="active">♟️ 五子棋</button>
                 <button id="tabSudoku">🧩 数独</button>
+                <button id="tabXiangqi">🏹 象棋</button>
             </div>
             <button class="fullscreen-btn" id="fullscreenBtn">⛶ 全屏</button>
         </div>
@@ -1242,6 +1274,36 @@
 
             <div class="footer-note">
                 💡 蓝色数字是您填入的 | 点击格子后点击数字修改 | 双击清空
+            </div>
+        </div>
+
+        <!-- ===== 象棋面板 ===== -->
+        <div class="game-panel" id="xiangqiPanel">
+            <div class="xiangqi-app">
+                <div class="xiangqi-mode-bar">
+                    <div class="xiangqi-mode-buttons">
+                        <button class="xiangqi-mode-btn active" id="xiangqiModeTeach">📖 教学</button>
+                        <button class="xiangqi-mode-btn" id="xiangqiModePlay">⚔️ 实战</button>
+                    </div>
+                </div>
+
+                <div class="xiangqi-board-wrapper">
+                    <canvas id="xiangqiCanvas" width="600" height="600"></canvas>
+                </div>
+
+                <div class="capture-bar" id="captureBar">
+                    <span class="empty-capture">暂无吃子记录</span>
+                </div>
+
+                <div class="xiangqi-tip-panel" id="xiangqiTipPanel">
+                    <span id="xiangqiTipMain">点击棋子查看走法</span>
+                    <div class="rule-text" id="xiangqiRuleText"></div>
+                </div>
+
+                <div class="xiangqi-status-bar">
+                    <div class="xiangqi-turn-indicator" id="xiangqiTurnIndicator">红方走棋</div>
+                    <button class="xiangqi-reset-btn" id="xiangqiResetBtn">🔄 重开</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1342,7 +1404,7 @@
     <script>
         (function() {
             // ============================================================
-            // 全局：老板键开关
+            // 全局：老板键
             // ============================================================
             const bossMode = document.getElementById('bossMode');
             const gameUI = document.getElementById('gameUI');
@@ -1381,7 +1443,7 @@
             setTimeout(showBossHint, 1000);
 
             // ============================================================
-            // 全屏功能
+            // 全屏
             // ============================================================
             const fullscreenBtn = document.getElementById('fullscreenBtn');
             const bodyEl = document.body;
@@ -1400,50 +1462,36 @@
                     fullscreenBtn.classList.remove('active');
                     bodyEl.classList.remove('fullscreen-active');
                 }
-                // 全屏状态变化后，重绘五子棋（canvas尺寸可能因CSS变化而需要重绘）
                 setTimeout(() => {
                     if (window._redrawGomoku) window._redrawGomoku();
+                    if (window._redrawXiangqi) window._redrawXiangqi();
                 }, 50);
             }
 
             function toggleFullscreen() {
                 const docEl = document.documentElement;
-
                 if (!document.fullscreenElement && !document.webkitFullscreenElement &&
                     !document.mozFullScreenElement && !document.msFullscreenElement) {
-                    // 进入全屏
-                    if (docEl.requestFullscreen) {
-                        docEl.requestFullscreen().catch(() => {});
-                    } else if (docEl.webkitRequestFullscreen) {
-                        docEl.webkitRequestFullscreen();
-                    } else if (docEl.mozRequestFullScreen) {
-                        docEl.mozRequestFullScreen();
-                    } else if (docEl.msRequestFullscreen) {
-                        docEl.msRequestFullscreen();
-                    }
+                    if (docEl.requestFullscreen) docEl.requestFullscreen().catch(() => {});
+                    else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen();
+                    else if (docEl.mozRequestFullScreen) docEl.mozRequestFullScreen();
+                    else if (docEl.msRequestFullscreen) docEl.msRequestFullscreen();
                 } else {
-                    // 退出全屏
-                    if (document.exitFullscreen) {
-                        document.exitFullscreen().catch(() => {});
-                    } else if (document.webkitExitFullscreen) {
-                        document.webkitExitFullscreen();
-                    } else if (document.mozCancelFullScreen) {
-                        document.mozCancelFullScreen();
-                    } else if (document.msExitFullscreen) {
-                        document.msExitFullscreen();
-                    }
+                    if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+                    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+                    else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
+                    else if (document.msExitFullscreen) document.msExitFullscreen();
                 }
             }
 
             fullscreenBtn.addEventListener('click', toggleFullscreen);
-
             document.addEventListener('fullscreenchange', updateFullscreenUI);
             document.addEventListener('webkitfullscreenchange', updateFullscreenUI);
             document.addEventListener('mozfullscreenchange', updateFullscreenUI);
             document.addEventListener('MSFullscreenChange', updateFullscreenUI);
 
             // ============================================================
-            // 胜利弹窗控制
+            // 胜利弹窗
             // ============================================================
             const winOverlay = document.getElementById('winOverlay');
             const winEmoji = document.getElementById('winEmoji');
@@ -1456,11 +1504,8 @@
                 winEmoji.textContent = config.emoji || '🎉';
                 winTitle.textContent = config.title || '胜利！';
                 winSubtitle.textContent = config.subtitle || '';
-                if (config.sudokuTheme) {
-                    winBtn.classList.add('sudoku');
-                } else {
-                    winBtn.classList.remove('sudoku');
-                }
+                if (config.sudokuTheme) winBtn.classList.add('sudoku');
+                else winBtn.classList.remove('sudoku');
                 winBtnCallback = config.onButton || null;
                 winOverlay.classList.add('show');
             }
@@ -1491,43 +1536,67 @@
             });
 
             // ============================================================
-            // 主题切换 & 游戏标签
+            // 游戏标签 & 主题切换
             // ============================================================
             const mainContainer = document.getElementById('gameUI');
             const gameTabs = document.getElementById('gameTabs');
             const tabGomoku = document.getElementById('tabGomoku');
             const tabSudoku = document.getElementById('tabSudoku');
+            const tabXiangqi = document.getElementById('tabXiangqi');
             const gomokuPanel = document.getElementById('gomokuPanel');
             const sudokuPanel = document.getElementById('sudokuPanel');
+            const xiangqiPanel = document.getElementById('xiangqiPanel');
 
             function switchToGomoku() {
-                mainContainer.classList.remove('theme-sudoku');
+                mainContainer.classList.remove('theme-sudoku', 'theme-xiangqi');
                 mainContainer.classList.add('theme-gomoku');
-                gameTabs.classList.remove('sudoku-active');
+                gameTabs.classList.remove('sudoku-active', 'xiangqi-active');
                 tabGomoku.classList.add('active');
                 tabSudoku.classList.remove('active');
+                tabXiangqi.classList.remove('active');
                 gomokuPanel.classList.add('active');
                 sudokuPanel.classList.remove('active');
+                xiangqiPanel.classList.remove('active');
                 setTimeout(() => {
                     if (window._redrawGomoku) window._redrawGomoku();
                 }, 50);
             }
 
             function switchToSudoku() {
-                mainContainer.classList.remove('theme-gomoku');
+                mainContainer.classList.remove('theme-gomoku', 'theme-xiangqi');
                 mainContainer.classList.add('theme-sudoku');
                 gameTabs.classList.add('sudoku-active');
+                gameTabs.classList.remove('xiangqi-active');
                 tabSudoku.classList.add('active');
                 tabGomoku.classList.remove('active');
+                tabXiangqi.classList.remove('active');
                 sudokuPanel.classList.add('active');
                 gomokuPanel.classList.remove('active');
+                xiangqiPanel.classList.remove('active');
+            }
+
+            function switchToXiangqi() {
+                mainContainer.classList.remove('theme-gomoku', 'theme-sudoku');
+                mainContainer.classList.add('theme-xiangqi');
+                gameTabs.classList.add('xiangqi-active');
+                gameTabs.classList.remove('sudoku-active');
+                tabXiangqi.classList.add('active');
+                tabGomoku.classList.remove('active');
+                tabSudoku.classList.remove('active');
+                xiangqiPanel.classList.add('active');
+                gomokuPanel.classList.remove('active');
+                sudokuPanel.classList.remove('active');
+                setTimeout(() => {
+                    if (window._redrawXiangqi) window._redrawXiangqi();
+                }, 50);
             }
 
             tabGomoku.addEventListener('click', switchToGomoku);
             tabSudoku.addEventListener('click', switchToSudoku);
+            tabXiangqi.addEventListener('click', switchToXiangqi);
 
             // ============================================================
-            // 五子棋游戏逻辑 (人机对战) - 带电脑落子光晕和胜利弹窗
+            // 五子棋 (人机对战 + 光晕 + 胜利弹窗)
             // ============================================================
             (function() {
                 const BOARD_SIZE = 15;
@@ -1535,9 +1604,7 @@
                 const RADIUS = CELL_SIZE * 0.42;
                 const LINE_COLOR = '#4a3620';
                 const BOARD_COLOR = '#f0e0c0';
-
-                const PLAYER = 1;
-                const COMPUTER = 2;
+                const PLAYER = 1, COMPUTER = 2;
 
                 const canvas = document.getElementById('gobanCanvas');
                 const ctx = canvas.getContext('2d');
@@ -1546,36 +1613,22 @@
                 const gomokuMessage = document.getElementById('gomokuMessage');
                 const resetGomokuBtn = document.getElementById('resetGomokuBtn');
 
-                let board = [];
-                let currentPlayer = PLAYER;
-                let gameOver = false;
-                let winner = null;
-                let winningLine = [];
-                let isComputerThinking = false;
-
-                // 电脑最近落子的位置 (用于光晕高亮)
-                let lastComputerMove = null;
+                let board = [], currentPlayer = PLAYER, gameOver = false, winner = null;
+                let winningLine = [], isComputerThinking = false, lastComputerMove = null;
 
                 function initBoardData() {
                     board = Array.from({ length: BOARD_SIZE }, () => Array(BOARD_SIZE).fill(0));
-                    currentPlayer = PLAYER;
-                    gameOver = false;
-                    winner = null;
-                    winningLine = [];
-                    isComputerThinking = false;
-                    lastComputerMove = null;
+                    currentPlayer = PLAYER; gameOver = false; winner = null;
+                    winningLine = []; isComputerThinking = false; lastComputerMove = null;
                 }
 
-                // 绘制光晕 (指定位置)
                 function drawGlow(row, col, color, radiusMul = 2.2) {
                     const x = col * CELL_SIZE + CELL_SIZE / 2;
                     const y = row * CELL_SIZE + CELL_SIZE / 2;
                     const glowRadius = RADIUS * radiusMul;
-
                     const gradient = ctx.createRadialGradient(x, y, RADIUS * 0.5, x, y, glowRadius);
                     gradient.addColorStop(0, color);
                     gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-
                     ctx.beginPath();
                     ctx.arc(x, y, glowRadius, 0, 2 * Math.PI);
                     ctx.fillStyle = gradient;
@@ -1585,25 +1638,17 @@
                 function renderBoard() {
                     ctx.fillStyle = BOARD_COLOR;
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                    ctx.lineWidth = 1.8;
-                    ctx.strokeStyle = LINE_COLOR;
-
+                    ctx.lineWidth = 1.8; ctx.strokeStyle = LINE_COLOR;
                     for (let i = 0; i < BOARD_SIZE; i++) {
                         const pos = i * CELL_SIZE + CELL_SIZE / 2;
-                        ctx.beginPath();
-                        ctx.moveTo(pos, CELL_SIZE / 2);
-                        ctx.lineTo(pos, canvas.height - CELL_SIZE / 2);
-                        ctx.stroke();
+                        ctx.beginPath(); ctx.moveTo(pos, CELL_SIZE / 2);
+                        ctx.lineTo(pos, canvas.height - CELL_SIZE / 2); ctx.stroke();
                     }
                     for (let i = 0; i < BOARD_SIZE; i++) {
                         const pos = i * CELL_SIZE + CELL_SIZE / 2;
-                        ctx.beginPath();
-                        ctx.moveTo(CELL_SIZE / 2, pos);
-                        ctx.lineTo(canvas.width - CELL_SIZE / 2, pos);
-                        ctx.stroke();
+                        ctx.beginPath(); ctx.moveTo(CELL_SIZE / 2, pos);
+                        ctx.lineTo(canvas.width - CELL_SIZE / 2, pos); ctx.stroke();
                     }
-
                     const starPoints = [3, 7, 11];
                     ctx.fillStyle = LINE_COLOR;
                     for (let r of starPoints) {
@@ -1611,90 +1656,50 @@
                             if ((r === 7 && c === 7) || (r === 3 && c === 3) || (r === 3 && c === 11) || (r === 11 && c === 3) || (r === 11 && c === 11)) {
                                 const x = c * CELL_SIZE + CELL_SIZE / 2;
                                 const y = r * CELL_SIZE + CELL_SIZE / 2;
-                                ctx.beginPath();
-                                ctx.arc(x, y, CELL_SIZE * 0.12, 0, 2 * Math.PI);
-                                ctx.fillStyle = '#4a3620';
-                                ctx.fill();
+                                ctx.beginPath(); ctx.arc(x, y, CELL_SIZE * 0.12, 0, 2 * Math.PI);
+                                ctx.fillStyle = '#4a3620'; ctx.fill();
                             }
                         }
                     }
-
-                    // 绘制所有棋子
                     for (let row = 0; row < BOARD_SIZE; row++) {
                         for (let col = 0; col < BOARD_SIZE; col++) {
                             const stone = board[row][col];
                             if (stone === 0) continue;
-
                             const x = col * CELL_SIZE + CELL_SIZE / 2;
                             const y = row * CELL_SIZE + CELL_SIZE / 2;
-
-                            // 先画光晕 (如果是电脑最近落子，且不是胜利高亮)
                             if (lastComputerMove && lastComputerMove.row === row && lastComputerMove.col === col && winningLine.length === 0) {
                                 drawGlow(row, col, 'rgba(80, 180, 255, 0.85)', 2.4);
                             }
-
-                            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-                            ctx.shadowBlur = 8;
-                            ctx.shadowOffsetX = 2;
-                            ctx.shadowOffsetY = 2;
-
+                            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)'; ctx.shadowBlur = 8;
+                            ctx.shadowOffsetX = 2; ctx.shadowOffsetY = 2;
                             const gradient = ctx.createRadialGradient(
-                                x - RADIUS * 0.3, y - RADIUS * 0.3, RADIUS * 0.2,
-                                x, y, RADIUS
-                            );
-
+                                x - RADIUS * 0.3, y - RADIUS * 0.3, RADIUS * 0.2, x, y, RADIUS);
                             if (stone === 1) {
-                                gradient.addColorStop(0, '#2b2b2b');
-                                gradient.addColorStop(0.7, '#111111');
-                                gradient.addColorStop(1, '#000000');
+                                gradient.addColorStop(0, '#2b2b2b'); gradient.addColorStop(0.7, '#111111'); gradient.addColorStop(1, '#000000');
                             } else {
-                                gradient.addColorStop(0, '#ffffff');
-                                gradient.addColorStop(0.6, '#f0f0f0');
-                                gradient.addColorStop(1, '#c0c0c0');
+                                gradient.addColorStop(0, '#ffffff'); gradient.addColorStop(0.6, '#f0f0f0'); gradient.addColorStop(1, '#c0c0c0');
                             }
-
-                            ctx.beginPath();
-                            ctx.arc(x, y, RADIUS, 0, 2 * Math.PI);
-                            ctx.fillStyle = gradient;
-                            ctx.fill();
-
-                            ctx.shadowBlur = 0;
-                            ctx.shadowOffsetX = 0;
-                            ctx.shadowOffsetY = 0;
-                            ctx.strokeStyle = stone === 1 ? '#444' : '#aaa';
-                            ctx.lineWidth = 0.8;
-                            ctx.stroke();
-
-                            ctx.beginPath();
-                            ctx.arc(x - RADIUS * 0.25, y - RADIUS * 0.25, RADIUS * 0.15, 0, 2 * Math.PI);
-                            ctx.fillStyle = stone === 1 ? '#777' : '#ffffff';
-                            ctx.fill();
+                            ctx.beginPath(); ctx.arc(x, y, RADIUS, 0, 2 * Math.PI);
+                            ctx.fillStyle = gradient; ctx.fill();
+                            ctx.shadowBlur = 0; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0;
+                            ctx.strokeStyle = stone === 1 ? '#444' : '#aaa'; ctx.lineWidth = 0.8; ctx.stroke();
+                            ctx.beginPath(); ctx.arc(x - RADIUS * 0.25, y - RADIUS * 0.25, RADIUS * 0.15, 0, 2 * Math.PI);
+                            ctx.fillStyle = stone === 1 ? '#777' : '#ffffff'; ctx.fill();
                         }
                     }
-
-                    // 绘制胜利高亮
                     if (winningLine.length > 0) {
-                        ctx.shadowColor = '#f7d44a';
-                        ctx.shadowBlur = 16;
-                        ctx.shadowOffsetX = 0;
-                        ctx.shadowOffsetY = 0;
+                        ctx.shadowColor = '#f7d44a'; ctx.shadowBlur = 16;
+                        ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0;
                         for (const [r, c] of winningLine) {
                             const x = c * CELL_SIZE + CELL_SIZE / 2;
                             const y = r * CELL_SIZE + CELL_SIZE / 2;
-                            ctx.beginPath();
-                            ctx.arc(x, y, RADIUS + 3, 0, 2 * Math.PI);
-                            ctx.strokeStyle = '#ffbb2e';
-                            ctx.lineWidth = 3.5;
-                            ctx.stroke();
-                            ctx.beginPath();
-                            ctx.arc(x, y, RADIUS + 6, 0, 2 * Math.PI);
-                            ctx.strokeStyle = '#ffe28a';
-                            ctx.lineWidth = 2;
-                            ctx.stroke();
+                            ctx.beginPath(); ctx.arc(x, y, RADIUS + 3, 0, 2 * Math.PI);
+                            ctx.strokeStyle = '#ffbb2e'; ctx.lineWidth = 3.5; ctx.stroke();
+                            ctx.beginPath(); ctx.arc(x, y, RADIUS + 6, 0, 2 * Math.PI);
+                            ctx.strokeStyle = '#ffe28a'; ctx.lineWidth = 2; ctx.stroke();
                         }
                         ctx.shadowBlur = 0;
                     }
-
                     updateGomokuUI();
                 }
 
@@ -1721,7 +1726,6 @@
                         }
                         return;
                     }
-
                     if (currentPlayer === PLAYER) {
                         turnText.textContent = '黑棋落子 (你)';
                         gomokuMessage.textContent = '⚫ 你的回合';
@@ -1740,23 +1744,18 @@
                 function checkWin(row, col, player) {
                     const directions = [[1, 0], [0, 1], [1, 1], [1, -1]];
                     for (const [dx, dy] of directions) {
-                        let count = 1;
-                        const line = [[row, col]];
+                        let count = 1; const line = [[row, col]];
                         for (let step = 1; step < 5; step++) {
-                            const nr = row + dx * step;
-                            const nc = col + dy * step;
+                            const nr = row + dx * step, nc = col + dy * step;
                             if (nr < 0 || nr >= BOARD_SIZE || nc < 0 || nc >= BOARD_SIZE) break;
                             if (board[nr][nc] !== player) break;
-                            count++;
-                            line.push([nr, nc]);
+                            count++; line.push([nr, nc]);
                         }
                         for (let step = 1; step < 5; step++) {
-                            const nr = row - dx * step;
-                            const nc = col - dy * step;
+                            const nr = row - dx * step, nc = col - dy * step;
                             if (nr < 0 || nr >= BOARD_SIZE || nc < 0 || nc >= BOARD_SIZE) break;
                             if (board[nr][nc] !== player) break;
-                            count++;
-                            line.push([nr, nc]);
+                            count++; line.push([nr, nc]);
                         }
                         if (count >= 5) return line;
                     }
@@ -1771,39 +1770,13 @@
                 }
 
                 function showGomokuWinModal(player) {
-                    const isPlayerWin = player === PLAYER;
-                    const isDraw = player === 0;
-
+                    const isPlayerWin = player === PLAYER, isDraw = player === 0;
                     if (isDraw) {
-                        showWinModal({
-                            emoji: '🤝',
-                            title: '平局',
-                            subtitle: '棋盘已满，势均力敌！',
-                            sudokuTheme: false,
-                            onButton: () => {
-                                resetGomokuGame();
-                            }
-                        });
+                        showWinModal({ emoji: '🤝', title: '平局', subtitle: '棋盘已满，势均力敌！', sudokuTheme: false, onButton: () => resetGomokuGame() });
                     } else if (isPlayerWin) {
-                        showWinModal({
-                            emoji: '🏆',
-                            title: '你赢了！',
-                            subtitle: '黑棋五子连珠，击败电脑！',
-                            sudokuTheme: false,
-                            onButton: () => {
-                                resetGomokuGame();
-                            }
-                        });
+                        showWinModal({ emoji: '🏆', title: '你赢了！', subtitle: '黑棋五子连珠，击败电脑！', sudokuTheme: false, onButton: () => resetGomokuGame() });
                     } else {
-                        showWinModal({
-                            emoji: '🤖',
-                            title: '电脑赢了',
-                            subtitle: '白棋五子连珠，再接再厉！',
-                            sudokuTheme: false,
-                            onButton: () => {
-                                resetGomokuGame();
-                            }
-                        });
+                        showWinModal({ emoji: '🤖', title: '电脑赢了', subtitle: '白棋五子连珠，再接再厉！', sudokuTheme: false, onButton: () => resetGomokuGame() });
                     }
                 }
 
@@ -1811,107 +1784,52 @@
                     if (gameOver) return false;
                     if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) return false;
                     if (board[row][col] !== 0) return false;
-
                     board[row][col] = player;
-
-                    if (player === COMPUTER) {
-                        lastComputerMove = { row, col };
-                    }
-
+                    if (player === COMPUTER) lastComputerMove = { row, col };
                     const winLine = checkWin(row, col, player);
                     if (winLine) {
-                        gameOver = true;
-                        winner = player;
-                        winningLine = winLine;
+                        gameOver = true; winner = player; winningLine = winLine;
                         renderBoard();
-                        setTimeout(() => {
-                            showGomokuWinModal(player);
-                        }, 100);
+                        setTimeout(() => showGomokuWinModal(player), 100);
                         return true;
                     }
-
                     if (isBoardFull()) {
-                        gameOver = true;
-                        winner = null;
-                        winningLine = [];
+                        gameOver = true; winner = null; winningLine = [];
                         renderBoard();
-                        setTimeout(() => {
-                            showGomokuWinModal(0);
-                        }, 100);
+                        setTimeout(() => showGomokuWinModal(0), 100);
                         return true;
                     }
-
                     currentPlayer = (player === PLAYER) ? COMPUTER : PLAYER;
                     renderBoard();
                     return true;
                 }
 
                 function handleCanvasClick(e) {
-                    if (gameOver) return;
-                    if (currentPlayer !== PLAYER) return;
-                    if (isComputerThinking) return;
-
+                    if (gameOver || currentPlayer !== PLAYER || isComputerThinking) return;
                     const rect = canvas.getBoundingClientRect();
-                    const scaleX = canvas.width / rect.width;
-                    const scaleY = canvas.height / rect.height;
-
+                    const scaleX = canvas.width / rect.width, scaleY = canvas.height / rect.height;
                     let clientX, clientY;
-                    if (e.touches) {
-                        clientX = e.touches[0].clientX;
-                        clientY = e.touches[0].clientY;
-                        e.preventDefault();
-                    } else {
-                        clientX = e.clientX;
-                        clientY = e.clientY;
-                    }
-
-                    const mouseX = (clientX - rect.left) * scaleX;
-                    const mouseY = (clientY - rect.top) * scaleY;
-
-                    const col = Math.floor(mouseX / CELL_SIZE);
-                    const row = Math.floor(mouseY / CELL_SIZE);
-
+                    if (e.touches) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; e.preventDefault(); }
+                    else { clientX = e.clientX; clientY = e.clientY; }
+                    const mouseX = (clientX - rect.left) * scaleX, mouseY = (clientY - rect.top) * scaleY;
+                    const col = Math.floor(mouseX / CELL_SIZE), row = Math.floor(mouseY / CELL_SIZE);
                     if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) return;
-
-                    const centerX = col * CELL_SIZE + CELL_SIZE / 2;
-                    const centerY = row * CELL_SIZE + CELL_SIZE / 2;
-                    const dist = Math.hypot(mouseX - centerX, mouseY - centerY);
-                    if (dist > CELL_SIZE * 0.7) return;
-
-                    const success = placeStone(row, col, PLAYER);
-                    if (success && !gameOver && currentPlayer === COMPUTER) {
-                        scheduleComputerMove();
-                    }
+                    const centerX = col * CELL_SIZE + CELL_SIZE / 2, centerY = row * CELL_SIZE + CELL_SIZE / 2;
+                    if (Math.hypot(mouseX - centerX, mouseY - centerY) > CELL_SIZE * 0.7) return;
+                    if (placeStone(row, col, PLAYER) && !gameOver && currentPlayer === COMPUTER) scheduleComputerMove();
                 }
 
                 function scheduleComputerMove() {
-                    if (gameOver) return;
-                    if (currentPlayer !== COMPUTER) return;
-                    if (isComputerThinking) return;
-
+                    if (gameOver || currentPlayer !== COMPUTER || isComputerThinking) return;
                     isComputerThinking = true;
                     gomokuMessage.textContent = '⚪ 电脑思考中...';
                     turnText.textContent = '白棋落子 (电脑)';
-
                     setTimeout(() => {
-                        if (gameOver || currentPlayer !== COMPUTER) {
-                            isComputerThinking = false;
-                            return;
-                        }
-
+                        if (gameOver || currentPlayer !== COMPUTER) { isComputerThinking = false; return; }
                         const move = findBestMove();
-                        if (move) {
-                            const { row, col } = move;
-                            if (board[row][col] === 0) {
-                                placeStone(row, col, COMPUTER);
-                            }
-                        }
-
+                        if (move && board[move.row][move.col] === 0) placeStone(move.row, move.col, COMPUTER);
                         isComputerThinking = false;
-
-                        if (!gameOver && currentPlayer === PLAYER) {
-                            renderBoard();
-                        }
+                        if (!gameOver && currentPlayer === PLAYER) renderBoard();
                     }, 120);
                 }
 
@@ -1919,142 +1837,77 @@
                     let hasStone = false;
                     for (let r = 0; r < BOARD_SIZE; r++) {
                         for (let c = 0; c < BOARD_SIZE; c++) {
-                            if (board[r][c] !== 0) {
-                                hasStone = true;
-                                break;
-                            }
+                            if (board[r][c] !== 0) { hasStone = true; break; }
                         }
                         if (hasStone) break;
                     }
                     if (!hasStone) return { row: 7, col: 7 };
-
-                    let bestScore = -1;
-                    let candidates = [];
-
+                    let bestScore = -1, candidates = [];
                     for (let r = 0; r < BOARD_SIZE; r++) {
                         for (let c = 0; c < BOARD_SIZE; c++) {
                             if (board[r][c] !== 0) continue;
-
                             const compScore = evaluatePosition(r, c, COMPUTER);
                             const playerScore = evaluatePosition(r, c, PLAYER);
-                            const total = compScore * 1.5 + playerScore * 1.2;
-                            const randomFactor = Math.random() * 0.01;
-                            const finalScore = total + randomFactor;
-
-                            if (finalScore > bestScore) {
-                                bestScore = finalScore;
-                                candidates = [{ row: r, col: c }];
-                            } else if (Math.abs(finalScore - bestScore) < 0.001) {
-                                candidates.push({ row: r, col: c });
-                            }
+                            const total = compScore * 1.5 + playerScore * 1.2 + Math.random() * 0.01;
+                            if (total > bestScore) { bestScore = total; candidates = [{ row: r, col: c }]; }
+                            else if (Math.abs(total - bestScore) < 0.001) candidates.push({ row: r, col: c });
                         }
                     }
-
-                    if (candidates.length > 0) {
-                        const randomIndex = Math.floor(Math.random() * candidates.length);
-                        return candidates[randomIndex];
-                    }
-                    return null;
+                    return candidates.length > 0 ? candidates[Math.floor(Math.random() * candidates.length)] : null;
                 }
 
                 function evaluatePosition(row, col, player) {
                     const dirs = [[1, 0], [0, 1], [1, 1], [1, -1]];
                     let totalScore = 0;
-
                     for (const [dx, dy] of dirs) {
-                        let count = 1;
-                        let block = 0;
-
+                        let count = 1, block = 0;
                         for (let step = 1; step < 5; step++) {
-                            const nr = row + dx * step;
-                            const nc = col + dy * step;
-                            if (nr < 0 || nr >= BOARD_SIZE || nc < 0 || nc >= BOARD_SIZE) {
-                                block++;
-                                break;
-                            }
+                            const nr = row + dx * step, nc = col + dy * step;
+                            if (nr < 0 || nr >= BOARD_SIZE || nc < 0 || nc >= BOARD_SIZE) { block++; break; }
                             const stone = board[nr][nc];
-                            if (stone === player) {
-                                count++;
-                            } else if (stone === 0) {
-                                break;
-                            } else {
-                                block++;
-                                break;
-                            }
+                            if (stone === player) count++; else if (stone === 0) break; else { block++; break; }
                         }
-
                         for (let step = 1; step < 5; step++) {
-                            const nr = row - dx * step;
-                            const nc = col - dy * step;
-                            if (nr < 0 || nr >= BOARD_SIZE || nc < 0 || nc >= BOARD_SIZE) {
-                                block++;
-                                break;
-                            }
+                            const nr = row - dx * step, nc = col - dy * step;
+                            if (nr < 0 || nr >= BOARD_SIZE || nc < 0 || nc >= BOARD_SIZE) { block++; break; }
                             const stone = board[nr][nc];
-                            if (stone === player) {
-                                count++;
-                            } else if (stone === 0) {
-                                break;
-                            } else {
-                                block++;
-                                break;
-                            }
+                            if (stone === player) count++; else if (stone === 0) break; else { block++; break; }
                         }
-
-                        if (count >= 5) {
-                            totalScore += 100000;
-                        } else if (count === 4) {
-                            if (block === 0) totalScore += 10000;
-                            else if (block === 1) totalScore += 5000;
-                            else totalScore += 1000;
+                        if (count >= 5) totalScore += 100000;
+                        else if (count === 4) {
+                            if (block === 0) totalScore += 10000; else if (block === 1) totalScore += 5000; else totalScore += 1000;
                         } else if (count === 3) {
-                            if (block === 0) totalScore += 1000;
-                            else if (block === 1) totalScore += 500;
-                            else totalScore += 100;
+                            if (block === 0) totalScore += 1000; else if (block === 1) totalScore += 500; else totalScore += 100;
                         } else if (count === 2) {
-                            if (block === 0) totalScore += 100;
-                            else if (block === 1) totalScore += 50;
-                            else totalScore += 10;
-                        } else if (count === 1) {
-                            totalScore += 1;
-                        }
+                            if (block === 0) totalScore += 100; else if (block === 1) totalScore += 50; else totalScore += 10;
+                        } else if (count === 1) totalScore += 1;
                     }
-
                     return totalScore;
                 }
 
                 function resetGomokuGame() {
-                    isComputerThinking = false;
-                    hideWinModal();
-                    initBoardData();
-                    renderBoard();
+                    isComputerThinking = false; hideWinModal(); initBoardData(); renderBoard();
                 }
 
-                // 暴露给全局，供全屏切换时重绘
                 window._redrawGomoku = renderBoard;
                 window._resetGomokuGame = resetGomokuGame;
 
                 function initGomoku() {
-                    initBoardData();
-                    renderBoard();
+                    initBoardData(); renderBoard();
                     canvas.addEventListener('click', handleCanvasClick);
                     canvas.addEventListener('touchstart', handleCanvasClick, { passive: false });
                     resetGomokuBtn.addEventListener('click', resetGomokuGame);
                 }
-
                 initGomoku();
             })();
 
             // ============================================================
-            // 数独游戏逻辑 (玩家填入数字为醒目蓝色 + 胜利弹窗)
+            // 数独
             // ============================================================
             (function() {
-                let boardSize = 9;
-                let difficulty = 'medium';
-                let board = [];
-                let fixedCells = [];
-                let selectedRow = -1, selectedCol = -1;
-                let gameOver = false;
+                let boardSize = 9, difficulty = 'medium';
+                let board = [], fixedCells = [];
+                let selectedRow = -1, selectedCol = -1, gameOver = false;
 
                 const CONFIG = {
                     9: { boxRows: 3, boxCols: 3, numCount: 9, class: 'board-9' },
@@ -2069,41 +1922,26 @@
                 const sudokuMessage = document.getElementById('sudokuMessage');
                 const numbersPad = document.getElementById('numbersPad');
 
-                function getConfig() {
-                    return CONFIG[boardSize];
-                }
-
-                function getBoxDims() {
-                    return boardSize === 9 ? { rows: 3, cols: 3 } : { rows: 2, cols: 3 };
-                }
-
-                function emptyBoard(n) {
-                    return Array.from({ length: n }, () => Array(n).fill(0));
-                }
-
-                function cloneBoard(b) {
-                    return b.map(row => [...row]);
-                }
+                function getConfig() { return CONFIG[boardSize]; }
+                function getBoxDims() { return boardSize === 9 ? { rows: 3, cols: 3 } : { rows: 2, cols: 3 }; }
+                function emptyBoard(n) { return Array.from({ length: n }, () => Array(n).fill(0)); }
+                function cloneBoard(b) { return b.map(row => [...row]); }
 
                 function generateFullSolution(n) {
                     const b = emptyBoard(n);
                     const { rows: br, cols: bc } = n === 9 ? { rows: 3, cols: 3 } : { rows: 2, cols: 3 };
-
                     function isValid(r, c, num) {
                         for (let j = 0; j < n; j++) if (b[r][j] === num) return false;
                         for (let i = 0; i < n; i++) if (b[i][c] === num) return false;
-                        const sr = Math.floor(r / br) * br;
-                        const sc = Math.floor(c / bc) * bc;
+                        const sr = Math.floor(r / br) * br, sc = Math.floor(c / bc) * bc;
                         for (let i = sr; i < sr + br; i++)
                             for (let j = sc; j < sc + bc; j++)
                                 if (b[i][j] === num) return false;
                         return true;
                     }
-
                     function solve(pos = 0) {
                         if (pos === n * n) return true;
-                        const row = Math.floor(pos / n);
-                        const col = pos % n;
+                        const row = Math.floor(pos / n), col = pos % n;
                         if (b[row][col] !== 0) return solve(pos + 1);
                         const nums = Array.from({ length: n }, (_, i) => i + 1);
                         for (let i = nums.length - 1; i > 0; i--) {
@@ -2124,31 +1962,22 @@
                 }
 
                 function generatePuzzle(fullBoard, size, diff) {
-                    const n = size;
-                    const puzzle = cloneBoard(fullBoard);
-                    const totalCells = n * n;
+                    const n = size, puzzle = cloneBoard(fullBoard), totalCells = n * n;
                     let removeCount;
                     if (diff === 'easy') removeCount = Math.floor(totalCells * 0.45);
                     else if (diff === 'medium') removeCount = Math.floor(totalCells * 0.60);
                     else removeCount = Math.floor(totalCells * 0.72);
                     removeCount = Math.min(removeCount, totalCells - 10);
-
                     const positions = [];
-                    for (let r = 0; r < n; r++)
-                        for (let c = 0; c < n; c++)
-                            positions.push([r, c]);
+                    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) positions.push([r, c]);
                     for (let i = positions.length - 1; i > 0; i--) {
                         const j = Math.floor(Math.random() * (i + 1));
                         [positions[i], positions[j]] = [positions[j], positions[i]];
                     }
-
                     let removed = 0;
                     for (const [r, c] of positions) {
                         if (removed >= removeCount) break;
-                        if (puzzle[r][c] !== 0) {
-                            puzzle[r][c] = 0;
-                            removed++;
-                        }
+                        if (puzzle[r][c] !== 0) { puzzle[r][c] = 0; removed++; }
                     }
                     return puzzle;
                 }
@@ -2161,13 +1990,10 @@
                 }
 
                 function isValidPlacement(r, c, num) {
-                    for (let j = 0; j < boardSize; j++)
-                        if (j !== c && board[r][j] === num) return false;
-                    for (let i = 0; i < boardSize; i++)
-                        if (i !== r && board[i][c] === num) return false;
+                    for (let j = 0; j < boardSize; j++) if (j !== c && board[r][j] === num) return false;
+                    for (let i = 0; i < boardSize; i++) if (i !== r && board[i][c] === num) return false;
                     const { rows: br, cols: bc } = getBoxDims();
-                    const sr = Math.floor(r / br) * br;
-                    const sc = Math.floor(c / bc) * bc;
+                    const sr = Math.floor(r / br) * br, sc = Math.floor(c / bc) * bc;
                     for (let i = sr; i < sr + br; i++)
                         for (let j = sc; j < sc + bc; j++) {
                             if (i === r && j === c) continue;
@@ -2187,24 +2013,16 @@
 
                 function showSudokuWinModal() {
                     showWinModal({
-                        emoji: '🎉',
-                        title: '数独完成！',
-                        subtitle: '你成功解开了这道数独！',
-                        sudokuTheme: true,
-                        onButton: () => {
-                            newSudokuGame();
-                        }
+                        emoji: '🎉', title: '数独完成！', subtitle: '你成功解开了这道数独！',
+                        sudokuTheme: true, onButton: () => newSudokuGame()
                     });
                 }
 
                 function renderSudokuBoard() {
-                    const n = boardSize;
-                    const cfg = getConfig();
-
+                    const n = boardSize, cfg = getConfig();
                     boardEl.style.gridTemplateColumns = `repeat(${n}, minmax(0, 1fr))`;
                     boardEl.className = cfg.class;
                     boardEl.innerHTML = '';
-
                     const { rows: br, cols: bc } = getBoxDims();
                     const selBoxR = selectedRow >= 0 ? Math.floor(selectedRow / br) : -1;
                     const selBoxC = selectedCol >= 0 ? Math.floor(selectedCol / bc) : -1;
@@ -2216,49 +2034,27 @@
                             cell.dataset.row = r;
                             cell.dataset.col = c;
                             cell.textContent = board[r][c] === 0 ? '' : board[r][c];
-
-                            if (fixedCells[r][c]) {
-                                cell.classList.add('fixed');
-                            } else if (board[r][c] !== 0) {
-                                cell.classList.add('user-filled');
-                            }
-
+                            if (fixedCells[r][c]) cell.classList.add('fixed');
+                            else if (board[r][c] !== 0) cell.classList.add('user-filled');
                             if (selectedRow >= 0 && selectedCol >= 0) {
                                 if (r === selectedRow && c === selectedCol) {
-                                    // 选中格子
                                 } else {
                                     if (r === selectedRow) cell.classList.add('highlight-row');
                                     if (c === selectedCol) cell.classList.add('highlight-col');
-                                    const curBoxR = Math.floor(r / br);
-                                    const curBoxC = Math.floor(c / bc);
-                                    if (curBoxR === selBoxR && curBoxC === selBoxC) {
-                                        cell.classList.add('highlight-box');
-                                    }
+                                    if (Math.floor(r / br) === selBoxR && Math.floor(c / bc) === selBoxC) cell.classList.add('highlight-box');
                                 }
                             }
-
-                            if (r === selectedRow && c === selectedCol) {
-                                cell.classList.add('selected');
-                            }
-
-                            if (board[r][c] !== 0 && !fixedCells[r][c] && !isValidPlacement(r, c, board[r][c])) {
-                                cell.classList.add('error');
-                            }
-
+                            if (r === selectedRow && c === selectedCol) cell.classList.add('selected');
+                            if (board[r][c] !== 0 && !fixedCells[r][c] && !isValidPlacement(r, c, board[r][c])) cell.classList.add('error');
                             cell.addEventListener('click', () => onSudokuCellClick(r, c));
                             cell.addEventListener('dblclick', (e) => {
                                 e.preventDefault();
                                 if (fixedCells[r][c] || gameOver) return;
-                                board[r][c] = 0;
-                                selectedRow = r;
-                                selectedCol = c;
-                                renderSudokuBoard();
+                                board[r][c] = 0; selectedRow = r; selectedCol = c; renderSudokuBoard();
                             });
-
                             boardEl.appendChild(cell);
                         }
                     }
-
                     renderNumbersPad();
                     updateSudokuMessage();
                 }
@@ -2277,13 +2073,9 @@
                 }
 
                 function updateSudokuMessage() {
-                    if (gameOver) {
-                        sudokuMessage.textContent = '🎉 恭喜！数独完成！';
-                        return;
-                    }
+                    if (gameOver) { sudokuMessage.textContent = '🎉 恭喜！数独完成！'; return; }
                     if (selectedRow >= 0 && selectedCol >= 0) {
-                        const rowDisplay = selectedRow + 1;
-                        const colDisplay = selectedCol + 1;
+                        const rowDisplay = selectedRow + 1, colDisplay = selectedCol + 1;
                         const val = board[selectedRow][selectedCol];
                         if (val !== 0) {
                             const isFixed = fixedCells[selectedRow][selectedCol];
@@ -2298,73 +2090,46 @@
 
                 function onSudokuCellClick(r, c) {
                     if (gameOver) return;
-                    selectedRow = r;
-                    selectedCol = c;
-                    renderSudokuBoard();
+                    selectedRow = r; selectedCol = c; renderSudokuBoard();
                 }
 
                 function onSudokuNumberClick(num) {
                     if (gameOver) return;
-                    if (selectedRow < 0 || selectedCol < 0) {
-                        sudokuMessage.textContent = '请先点击一个空格子！';
-                        return;
-                    }
-                    if (fixedCells[selectedRow][selectedCol]) {
-                        sudokuMessage.textContent = '这个格子是题目给定的，不能修改';
-                        return;
-                    }
-
+                    if (selectedRow < 0 || selectedCol < 0) { sudokuMessage.textContent = '请先点击一个空格子！'; return; }
+                    if (fixedCells[selectedRow][selectedCol]) { sudokuMessage.textContent = '这个格子是题目给定的，不能修改'; return; }
                     board[selectedRow][selectedCol] = num;
-
                     if (isBoardComplete() && validateFullBoard()) {
-                        gameOver = true;
-                        renderSudokuBoard();
+                        gameOver = true; renderSudokuBoard();
                         sudokuMessage.textContent = '🎉 恭喜！数独完成！';
-                        setTimeout(() => {
-                            showSudokuWinModal();
-                        }, 100);
+                        setTimeout(() => showSudokuWinModal(), 100);
                         return;
                     }
-
                     if (!isValidPlacement(selectedRow, selectedCol, num)) {
                         sudokuMessage.textContent = `❌ 数字 ${num} 在行、列或宫中重复`;
                     } else {
                         sudokuMessage.textContent = `已填入 ${num}`;
                     }
-
                     renderSudokuBoard();
                 }
 
                 function newSudokuGame() {
                     boardSize = parseInt(sizeSelect.value, 10);
                     difficulty = difficultySelect.value;
-
                     const full = generateFullSolution(boardSize);
                     board = generatePuzzle(full, boardSize, difficulty);
                     fixedCells = board.map(row => row.map(v => v !== 0));
-
-                    selectedRow = -1;
-                    selectedCol = -1;
-                    gameOver = false;
-                    hideWinModal();
-
-                    renderSudokuBoard();
+                    selectedRow = -1; selectedCol = -1; gameOver = false;
+                    hideWinModal(); renderSudokuBoard();
                     sudokuMessage.textContent = `${boardSize}宫格 · ${difficulty === 'easy' ? '简单' : difficulty === 'medium' ? '中等' : '困难'}`;
                 }
 
                 function checkSudokuBoard() {
-                    if (gameOver) {
-                        sudokuMessage.textContent = '🎉 已经完成啦！';
-                        return;
-                    }
+                    if (gameOver) { sudokuMessage.textContent = '🎉 已经完成啦！'; return; }
                     if (isBoardComplete()) {
                         if (validateFullBoard()) {
-                            gameOver = true;
-                            renderSudokuBoard();
+                            gameOver = true; renderSudokuBoard();
                             sudokuMessage.textContent = '🎉 恭喜！数独完成！';
-                            setTimeout(() => {
-                                showSudokuWinModal();
-                            }, 100);
+                            setTimeout(() => showSudokuWinModal(), 100);
                         } else {
                             sudokuMessage.textContent = '❌ 有错误，请检查红色格子';
                         }
@@ -2372,18 +2137,11 @@
                         let hasError = false;
                         for (let r = 0; r < boardSize; r++) {
                             for (let c = 0; c < boardSize; c++) {
-                                if (board[r][c] !== 0 && !isValidPlacement(r, c, board[r][c])) {
-                                    hasError = true;
-                                    break;
-                                }
+                                if (board[r][c] !== 0 && !isValidPlacement(r, c, board[r][c])) { hasError = true; break; }
                             }
                             if (hasError) break;
                         }
-                        if (hasError) {
-                            sudokuMessage.textContent = '❌ 有冲突，红色格子需要修改';
-                        } else {
-                            sudokuMessage.textContent = '✅ 目前没有错误，继续填写吧';
-                        }
+                        sudokuMessage.textContent = hasError ? '❌ 有冲突，红色格子需要修改' : '✅ 目前没有错误，继续填写吧';
                         renderSudokuBoard();
                     }
                 }
@@ -2395,8 +2153,549 @@
                     difficultySelect.addEventListener('change', newSudokuGame);
                     newSudokuGame();
                 }
-
                 initSudoku();
+            })();
+
+            // ============================================================
+            // 象棋 (融合原逻辑)
+            // ============================================================
+            (function() {
+                const COLS = 9, ROWS = 10;
+                const PIECE_NAMES = {
+                    'r': { '车': '車', '马': '馬', '象': '相', '士': '仕', '将': '帥', '炮': '炮', '卒': '兵' },
+                    'b': { '车': '車', '马': '馬', '象': '象', '士': '士', '将': '將', '炮': '砲', '卒': '卒' }
+                };
+                const PIECE_RULES = {
+                    '车': { rule: '直线行走，不限步数，不能越子。', goal: '控制直线，吃子或将军。' },
+                    '马': { rule: '走“日”字，若蹩马腿则不能走。', goal: '灵活跳跃，攻击或牵制。' },
+                    '象': { rule: '走“田”字，塞象眼则不能走，不能过河。', goal: '防守，保护己方阵地。' },
+                    '士': { rule: '斜走一步，不能出九宫。', goal: '贴身保护将帅。' },
+                    '将': { rule: '上下左右一步，不能出九宫。', goal: '保住性命，伺机助攻。' },
+                    '炮': { rule: '直线行走，吃子需隔一子（炮架）。', goal: '远程打击，隔山打牛。' },
+                    '卒': { rule: '向前一步，过河后可左右，不能后退。', goal: '前进骚扰，逼近九宫。' }
+                };
+
+                let board = [], selected = null, currentPlayer = 'r';
+                let gameOver = false, mode = 'teach', isComputerThinking = false;
+                let captureHistory = [];
+
+                const canvas = document.getElementById('xiangqiCanvas');
+                const ctx = canvas.getContext('2d');
+                const tipPanel = document.getElementById('xiangqiTipPanel');
+                const tipMain = document.getElementById('xiangqiTipMain');
+                const ruleText = document.getElementById('xiangqiRuleText');
+                const turnIndicator = document.getElementById('xiangqiTurnIndicator');
+                const captureBar = document.getElementById('captureBar');
+                const resetBtn = document.getElementById('xiangqiResetBtn');
+                const modeTeach = document.getElementById('xiangqiModeTeach');
+                const modePlay = document.getElementById('xiangqiModePlay');
+
+                const cellSize = 600 / 10;
+                const pieceRadius = 24;
+
+                function initBoard() {
+                    const b = Array(ROWS).fill().map(() => Array(COLS).fill(null));
+                    const blackBack = ['车','马','象','士','将','士','象','马','车'];
+                    for (let c = 0; c < COLS; c++) b[0][c] = { type: blackBack[c], color: 'b' };
+                    b[2][1] = { type: '炮', color: 'b' };
+                    b[2][7] = { type: '炮', color: 'b' };
+                    for (let c = 0; c < COLS; c += 2) b[3][c] = { type: '卒', color: 'b' };
+                    const redBack = ['车','马','象','士','将','士','象','马','车'];
+                    for (let c = 0; c < COLS; c++) b[9][c] = { type: redBack[c], color: 'r' };
+                    b[7][1] = { type: '炮', color: 'r' };
+                    b[7][7] = { type: '炮', color: 'r' };
+                    for (let c = 0; c < COLS; c += 2) b[6][c] = { type: '卒', color: 'r' };
+                    return b;
+                }
+
+                function inBoard(row, col) { return row >= 0 && row < ROWS && col >= 0 && col < COLS; }
+                function isRedHalf(row) { return row >= 5; }
+                function isBlackHalf(row) { return row <= 4; }
+
+                function getMoves(row, col, boardState) {
+                    const piece = boardState[row][col];
+                    if (!piece) return [];
+                    const { type, color } = piece;
+                    const moves = [];
+                    const add = (r, c) => {
+                        if (!inBoard(r, c)) return false;
+                        const target = boardState[r][c];
+                        if (target && target.color === color) return false;
+                        moves.push({ row: r, col: c });
+                        return true;
+                    };
+                    switch (type) {
+                        case '车':
+                            for (let d of [[1,0],[-1,0],[0,1],[0,-1]]) {
+                                for (let step = 1; step < 10; step++) {
+                                    const nr = row + d[0]*step, nc = col + d[1]*step;
+                                    if (!inBoard(nr, nc)) break;
+                                    const target = boardState[nr][nc];
+                                    if (!target) moves.push({ row: nr, col: nc });
+                                    else { if (target.color !== color) moves.push({ row: nr, col: nc }); break; }
+                                }
+                            }
+                            break;
+                        case '马':
+                            const horseDirs = [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]];
+                            for (let [dr, dc] of horseDirs) {
+                                const nr = row + dr, nc = col + dc;
+                                if (!inBoard(nr, nc)) continue;
+                                let legR = row, legC = col;
+                                if (Math.abs(dr) === 2) { legR = row + (dr > 0 ? 1 : -1); legC = col; }
+                                else { legR = row; legC = col + (dc > 0 ? 1 : -1); }
+                                if (boardState[legR][legC]) continue;
+                                const target = boardState[nr][nc];
+                                if (!target || target.color !== color) moves.push({ row: nr, col: nc });
+                            }
+                            break;
+                        case '象':
+                            for (let [dr, dc] of [[-2,-2],[-2,2],[2,-2],[2,2]]) {
+                                const nr = row + dr, nc = col + dc;
+                                if (!inBoard(nr, nc)) continue;
+                                if (color === 'r' && !isRedHalf(nr)) continue;
+                                if (color === 'b' && !isBlackHalf(nr)) continue;
+                                const eyeR = row + dr/2, eyeC = col + dc/2;
+                                if (boardState[eyeR][eyeC]) continue;
+                                const target = boardState[nr][nc];
+                                if (!target || target.color !== color) moves.push({ row: nr, col: nc });
+                            }
+                            break;
+                        case '士':
+                            for (let [dr, dc] of [[-1,-1],[-1,1],[1,-1],[1,1]]) {
+                                const nr = row + dr, nc = col + dc;
+                                if (!inBoard(nr, nc)) continue;
+                                if (color === 'r') { if (nr < 7 || nr > 9 || nc < 3 || nc > 5) continue; }
+                                else { if (nr < 0 || nr > 2 || nc < 3 || nc > 5) continue; }
+                                const target = boardState[nr][nc];
+                                if (!target || target.color !== color) moves.push({ row: nr, col: nc });
+                            }
+                            break;
+                        case '将':
+                            for (let [dr, dc] of [[-1,0],[1,0],[0,-1],[0,1]]) {
+                                const nr = row + dr, nc = col + dc;
+                                if (!inBoard(nr, nc)) continue;
+                                if (color === 'r') { if (nr < 7 || nr > 9 || nc < 3 || nc > 5) continue; }
+                                else { if (nr < 0 || nr > 2 || nc < 3 || nc > 5) continue; }
+                                const target = boardState[nr][nc];
+                                if (!target || target.color !== color) moves.push({ row: nr, col: nc });
+                            }
+                            break;
+                        case '炮':
+                            for (let d of [[1,0],[-1,0],[0,1],[0,-1]]) {
+                                let hasBlock = false;
+                                for (let step = 1; step < 10; step++) {
+                                    const nr = row + d[0]*step, nc = col + d[1]*step;
+                                    if (!inBoard(nr, nc)) break;
+                                    const target = boardState[nr][nc];
+                                    if (!hasBlock) {
+                                        if (!target) moves.push({ row: nr, col: nc });
+                                        else hasBlock = true;
+                                    } else {
+                                        if (target) {
+                                            if (target.color !== color) moves.push({ row: nr, col: nc });
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+                        case '卒':
+                            let forward = color === 'r' ? -1 : 1;
+                            let fr = row + forward;
+                            if (inBoard(fr, col)) {
+                                const target = boardState[fr][col];
+                                if (!target || target.color !== color) moves.push({ row: fr, col: col });
+                            }
+                            const crossed = (color === 'r' && row <= 4) || (color === 'b' && row >= 5);
+                            if (crossed) {
+                                for (let dc of [-1, 1]) {
+                                    const nc = col + dc;
+                                    if (inBoard(row, nc)) {
+                                        const target = boardState[row][nc];
+                                        if (!target || target.color !== color) moves.push({ row: row, col: nc });
+                                    }
+                                }
+                            }
+                            break;
+                    }
+                    return moves;
+                }
+
+                function isKingInCheck(boardState, color) {
+                    let kingRow = -1, kingCol = -1;
+                    for (let r = 0; r < ROWS; r++) {
+                        for (let c = 0; c < COLS; c++) {
+                            const p = boardState[r][c];
+                            if (p && p.type === '将' && p.color === color) { kingRow = r; kingCol = c; break; }
+                        }
+                        if (kingRow !== -1) break;
+                    }
+                    if (kingRow === -1) return false;
+                    const enemy = color === 'r' ? 'b' : 'r';
+                    for (let r = 0; r < ROWS; r++) {
+                        for (let c = 0; c < COLS; c++) {
+                            const p = boardState[r][c];
+                            if (p && p.color === enemy) {
+                                const moves = getMoves(r, c, boardState);
+                                if (moves.some(m => m.row === kingRow && m.col === kingCol)) return true;
+                            }
+                        }
+                    }
+                    return false;
+                }
+
+                function findAIMove() {
+                    const color = 'b';
+                    let bestMove = null, bestScore = -Infinity;
+                    const allMoves = [];
+                    for (let r = 0; r < ROWS; r++) {
+                        for (let c = 0; c < COLS; c++) {
+                            const p = board[r][c];
+                            if (p && p.color === color) {
+                                const moves = getMoves(r, c, board);
+                                for (let m of moves) allMoves.push({ fromR: r, fromC: c, toR: m.row, toC: m.col });
+                            }
+                        }
+                    }
+                    if (allMoves.length === 0) return null;
+                    for (let move of allMoves) {
+                        const newBoard = board.map(row => row.map(cell => cell ? { ...cell } : null));
+                        const piece = newBoard[move.fromR][move.fromC];
+                        const captured = newBoard[move.toR][move.toC];
+                        newBoard[move.toR][move.toC] = piece;
+                        newBoard[move.fromR][move.fromC] = null;
+                        let score = 0;
+                        const value = { '将': 1000, '车': 100, '马': 50, '炮': 50, '象': 20, '士': 20, '卒': 10 };
+                        if (captured) {
+                            score += value[captured.type] || 10;
+                            if (captured.type === '将') score += 10000;
+                        }
+                        if (isKingInCheck(newBoard, color)) score -= 500;
+                        const centerBonus = (4 - Math.abs(move.toC - 4)) * 2;
+                        score += centerBonus;
+                        score += Math.random() * 5;
+                        if (score > bestScore) { bestScore = score; bestMove = move; }
+                    }
+                    return bestMove;
+                }
+
+                function computerMove() {
+                    if (gameOver) return;
+                    const move = findAIMove();
+                    if (!move) {
+                        gameOver = true;
+                        tipMain.innerText = '🏆 红方胜利！黑方无棋可走。';
+                        turnIndicator.innerText = '游戏结束';
+                        renderXiangqi();
+                        return;
+                    }
+                    executeMove(move.fromR, move.fromC, move.toR, move.toC, true);
+                }
+
+                function executeMove(fromRow, fromCol, toRow, toCol, isAI = false) {
+                    const piece = board[fromRow][fromCol];
+                    if (!piece) return;
+                    const capturedPiece = board[toRow][toCol];
+                    if (capturedPiece) {
+                        captureHistory.push({
+                            eater: { type: piece.type, color: piece.color },
+                            eaten: { type: capturedPiece.type, color: capturedPiece.color },
+                            moveText: `${PIECE_NAMES[piece.color][piece.type]} 吃 ${PIECE_NAMES[capturedPiece.color][capturedPiece.type]}`
+                        });
+                        renderCaptureBar();
+                        if (mode === 'teach') {
+                            tipMain.innerHTML = `⚔️ ${piece.color === 'r' ? '红方' : '黑方'} ${PIECE_NAMES[piece.color][piece.type]} 吃掉了 ${capturedPiece.color === 'r' ? '红方' : '黑方'} ${PIECE_NAMES[capturedPiece.color][capturedPiece.type]}！`;
+                        }
+                    }
+                    board[toRow][toCol] = piece;
+                    board[fromRow][fromCol] = null;
+                    selected = null;
+
+                    let redKingAlive = false, blackKingAlive = false;
+                    for (let r = 0; r < ROWS; r++) {
+                        for (let c = 0; c < COLS; c++) {
+                            const p = board[r][c];
+                            if (p && p.type === '将') {
+                                if (p.color === 'r') redKingAlive = true;
+                                else blackKingAlive = true;
+                            }
+                        }
+                    }
+                    if (!redKingAlive || !blackKingAlive) {
+                        gameOver = true;
+                        const winner = redKingAlive ? '红方' : '黑方';
+                        tipMain.innerText = `🏆 ${winner} 胜利！`;
+                        turnIndicator.innerText = '游戏结束';
+                        renderXiangqi();
+                        return;
+                    }
+
+                    currentPlayer = currentPlayer === 'r' ? 'b' : 'r';
+                    let checkMsg = '';
+                    if (isKingInCheck(board, currentPlayer)) checkMsg = ' 将军！';
+                    if (!gameOver) {
+                        turnIndicator.innerText = (currentPlayer === 'r' ? '红方走棋' : '黑方走棋') + (checkMsg ? ' ·' + checkMsg : '');
+                    }
+
+                    if (mode === 'teach') {
+                        if (!capturedPiece) {
+                            if (selected) {
+                                const piece2 = board[selected.row][selected.col];
+                                if (piece2) {
+                                    const moves = getMoves(selected.row, selected.col, board);
+                                    tipMain.innerText = `${PIECE_NAMES[piece2.color][piece2.type]} 可走 ${moves.length} 步`;
+                                    showRuleForPiece(piece2);
+                                } else {
+                                    tipMain.innerText = '点击棋子查看走法';
+                                    ruleText.innerText = '';
+                                }
+                            } else {
+                                tipMain.innerText = '点击棋子查看走法';
+                                ruleText.innerText = '';
+                            }
+                        }
+                    } else {
+                        if (!capturedPiece) {
+                            tipMain.innerText = checkMsg ? '⚠️ 被将军！' : '选择棋子';
+                        }
+                        ruleText.innerText = '';
+                    }
+                    renderXiangqi();
+
+                    if (!gameOver && currentPlayer === 'b' && !isAI) {
+                        isComputerThinking = true;
+                        if (mode === 'teach') {
+                            if (!capturedPiece) tipMain.innerText = '🤖 电脑思考中...';
+                        } else {
+                            tipMain.innerText = '🤖 电脑思考中...';
+                        }
+                        turnIndicator.innerText = '黑方走棋';
+                        setTimeout(() => {
+                            computerMove();
+                            isComputerThinking = false;
+                        }, 200);
+                    }
+                }
+
+                function showRuleForPiece(piece) {
+                    const ruleInfo = PIECE_RULES[piece.type];
+                    if (ruleInfo) ruleText.innerText = `📌 ${ruleInfo.rule} 🎯 ${ruleInfo.goal}`;
+                    else ruleText.innerText = '';
+                }
+
+                function renderCaptureBar() {
+                    if (captureHistory.length === 0) {
+                        captureBar.innerHTML = '<span class="empty-capture">暂无吃子记录</span>';
+                        return;
+                    }
+                    const recent = captureHistory.slice(-6).reverse();
+                    captureBar.innerHTML = recent.map(item => {
+                        const eaterColorClass = item.eater.color === 'r' ? 'red' : 'black';
+                        const eatenColorClass = item.eaten.color === 'r' ? 'red' : 'black';
+                        const eaterName = PIECE_NAMES[item.eater.color][item.eater.type];
+                        const eatenName = PIECE_NAMES[item.eaten.color][item.eaten.type];
+                        const eaterSide = item.eater.color === 'r' ? '红' : '黑';
+                        const eatenSide = item.eaten.color === 'r' ? '红' : '黑';
+                        return `<span class="capture-item ${item.eater.color === 'r' ? 'red-captured' : 'black-captured'}">
+                            <span class="capture-char ${eaterColorClass}">${eaterName}</span>
+                            <span class="capture-arrow">✕</span>
+                            <span class="capture-char ${eatenColorClass}">${eatenName}</span>
+                            <span style="font-size:0.65rem;color:#7a623e;">(${eaterSide}吃${eatenSide})</span>
+                        </span>`;
+                    }).join('');
+                }
+
+                function renderXiangqi() {
+                    ctx.clearRect(0, 0, 600, 600);
+                    drawBoardBackground();
+                    drawPieces();
+                    drawSelectionAndHints();
+                }
+
+                function drawBoardBackground() {
+                    ctx.fillStyle = '#ecceaa';
+                    ctx.fillRect(0, 0, 600, 600);
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = '#5a3e2a';
+                    const offsetX = (600 - (COLS-1) * cellSize) / 2;
+                    const offsetY = (600 - (ROWS-1) * cellSize) / 2;
+                    for (let c = 0; c < COLS; c++) {
+                        const x = offsetX + c * cellSize;
+                        ctx.beginPath(); ctx.moveTo(x, offsetY);
+                        ctx.lineTo(x, offsetY + (ROWS-1)*cellSize); ctx.stroke();
+                    }
+                    for (let r = 0; r < ROWS; r++) {
+                        const y = offsetY + r * cellSize;
+                        ctx.beginPath(); ctx.moveTo(offsetX, y);
+                        ctx.lineTo(offsetX + (COLS-1)*cellSize, y); ctx.stroke();
+                    }
+                    ctx.beginPath();
+                    const palaceX1 = offsetX + 3*cellSize, palaceX2 = offsetX + 5*cellSize;
+                    const palaceY1 = offsetY, palaceY2 = offsetY + 2*cellSize;
+                    ctx.moveTo(palaceX1, palaceY1); ctx.lineTo(palaceX2, palaceY2);
+                    ctx.moveTo(palaceX2, palaceY1); ctx.lineTo(palaceX1, palaceY2);
+                    const redPalaceY1 = offsetY + 7*cellSize, redPalaceY2 = offsetY + 9*cellSize;
+                    ctx.moveTo(palaceX1, redPalaceY1); ctx.lineTo(palaceX2, redPalaceY2);
+                    ctx.moveTo(palaceX2, redPalaceY1); ctx.lineTo(palaceX1, redPalaceY2);
+                    ctx.stroke();
+                    ctx.font = 'bold 28px "KaiTi", "楷体", serif';
+                    ctx.fillStyle = '#5a3e2a';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    const riverY = offsetY + 4.5 * cellSize;
+                    ctx.fillText('楚 河', offsetX + 2*cellSize, riverY);
+                    ctx.fillText('汉 界', offsetX + 6*cellSize, riverY);
+                }
+
+                function getCanvasCoords(row, col) {
+                    const offsetX = (600 - (COLS-1) * cellSize) / 2;
+                    const offsetY = (600 - (ROWS-1) * cellSize) / 2;
+                    return { x: offsetX + col * cellSize, y: offsetY + row * cellSize };
+                }
+
+                function drawPieces() {
+                    for (let r = 0; r < ROWS; r++) {
+                        for (let c = 0; c < COLS; c++) {
+                            const piece = board[r][c];
+                            if (!piece) continue;
+                            const { x, y } = getCanvasCoords(r, c);
+                            ctx.beginPath(); ctx.arc(x, y, pieceRadius, 0, 2 * Math.PI);
+                            ctx.fillStyle = piece.color === 'r' ? '#f5e6d3' : '#d9b382';
+                            ctx.fill();
+                            ctx.shadowColor = 'rgba(0,0,0,0.4)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 3;
+                            ctx.strokeStyle = '#3e2c1a'; ctx.lineWidth = 2.5; ctx.stroke();
+                            ctx.shadowColor = 'transparent';
+                            ctx.font = `bold ${pieceRadius*1.2}px "KaiTi", "楷体", "华文楷体", serif`;
+                            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                            ctx.fillStyle = piece.color === 'r' ? '#b22222' : '#1a1a1a';
+                            const displayName = PIECE_NAMES[piece.color][piece.type] || piece.type;
+                            ctx.fillText(displayName, x, y-1);
+                        }
+                    }
+                }
+
+                function drawSelectionAndHints() {
+                    if (selected) {
+                        const { row, col } = selected;
+                        const { x, y } = getCanvasCoords(row, col);
+                        ctx.beginPath(); ctx.arc(x, y, pieceRadius + 4, 0, 2 * Math.PI);
+                        ctx.strokeStyle = '#f5d742'; ctx.lineWidth = 4; ctx.stroke();
+                    }
+                    if (mode === 'teach' && selected && !gameOver && currentPlayer === 'r') {
+                        const piece = board[selected.row][selected.col];
+                        if (piece && piece.color === currentPlayer) {
+                            const moves = getMoves(selected.row, selected.col, board);
+                            for (let m of moves) {
+                                const { x, y } = getCanvasCoords(m.row, m.col);
+                                if (board[m.row][m.col]) {
+                                    ctx.beginPath(); ctx.arc(x, y, pieceRadius - 2, 0, 2 * Math.PI);
+                                    ctx.strokeStyle = '#e63946'; ctx.lineWidth = 4; ctx.stroke();
+                                    ctx.beginPath();
+                                    ctx.moveTo(x - 8, y - 8); ctx.lineTo(x + 8, y + 8);
+                                    ctx.moveTo(x + 8, y - 8); ctx.lineTo(x - 8, y + 8);
+                                    ctx.strokeStyle = '#e63946'; ctx.lineWidth = 3; ctx.stroke();
+                                } else {
+                                    ctx.beginPath(); ctx.arc(x, y, 8, 0, 2 * Math.PI);
+                                    ctx.fillStyle = '#e63946'; ctx.fill();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                function getBoardFromCanvas(clientX, clientY) {
+                    const rect = canvas.getBoundingClientRect();
+                    const scaleX = 600 / rect.width, scaleY = 600 / rect.height;
+                    const canvasX = (clientX - rect.left) * scaleX;
+                    const canvasY = (clientY - rect.top) * scaleY;
+                    const offsetX = (600 - (COLS-1) * cellSize) / 2;
+                    const offsetY = (600 - (ROWS-1) * cellSize) / 2;
+                    const col = Math.round((canvasX - offsetX) / cellSize);
+                    const row = Math.round((canvasY - offsetY) / cellSize);
+                    if (row >= 0 && row < ROWS && col >= 0 && col < COLS) return { row, col };
+                    return null;
+                }
+
+                function handleXiangqiClick(e) {
+                    if (gameOver || isComputerThinking || currentPlayer !== 'r') return;
+                    let clientX, clientY;
+                    if (e.touches) { e.preventDefault(); clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
+                    else { clientX = e.clientX; clientY = e.clientY; }
+                    const pos = getBoardFromCanvas(clientX, clientY);
+                    if (!pos) return;
+                    const { row, col } = pos;
+                    const piece = board[row][col];
+                    if (selected) {
+                        const moves = getMoves(selected.row, selected.col, board);
+                        const move = moves.find(m => m.row === row && m.col === col);
+                        if (move) {
+                            executeMove(selected.row, selected.col, row, col);
+                            return;
+                        }
+                        if (piece && piece.color === currentPlayer) {
+                            selected = { row, col };
+                            if (mode === 'teach') {
+                                const moves2 = getMoves(row, col, board);
+                                tipMain.innerText = `${PIECE_NAMES[piece.color][piece.type]} 可走 ${moves2.length} 步`;
+                                showRuleForPiece(piece);
+                            } else {
+                                tipMain.innerText = '点击目标位置移动';
+                            }
+                        } else {
+                            selected = null;
+                            tipMain.innerText = mode === 'teach' ? '点击棋子查看走法' : '选择棋子';
+                            ruleText.innerText = '';
+                        }
+                    } else {
+                        if (piece && piece.color === currentPlayer) {
+                            selected = { row, col };
+                            if (mode === 'teach') {
+                                const moves = getMoves(row, col, board);
+                                tipMain.innerText = `${PIECE_NAMES[piece.color][piece.type]} 可走 ${moves.length} 步`;
+                                showRuleForPiece(piece);
+                            } else {
+                                tipMain.innerText = '点击目标位置移动';
+                            }
+                        } else {
+                            tipMain.innerText = mode === 'teach' ? '点击棋子查看走法' : '选择棋子';
+                            ruleText.innerText = '';
+                        }
+                    }
+                    renderXiangqi();
+                }
+
+                function resetXiangqiGame() {
+                    board = initBoard();
+                    currentPlayer = 'r'; selected = null; gameOver = false;
+                    isComputerThinking = false; captureHistory = [];
+                    renderCaptureBar();
+                    tipMain.innerText = mode === 'teach' ? '点击棋子查看走法' : '选择棋子';
+                    ruleText.innerText = '';
+                    turnIndicator.innerText = '红方走棋';
+                    renderXiangqi();
+                }
+
+                function setXiangqiMode(newMode) {
+                    mode = newMode;
+                    modeTeach.classList.toggle('active', mode === 'teach');
+                    modePlay.classList.toggle('active', mode === 'play');
+                    resetXiangqiGame();
+                }
+
+                window._redrawXiangqi = renderXiangqi;
+
+                function initXiangqi() {
+                    board = initBoard();
+                    renderCaptureBar();
+                    renderXiangqi();
+                    canvas.addEventListener('click', handleXiangqiClick);
+                    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); handleXiangqiClick(e); }, { passive: false });
+                    modeTeach.addEventListener('click', () => setXiangqiMode('teach'));
+                    modePlay.addEventListener('click', () => setXiangqiMode('play'));
+                    resetBtn.addEventListener('click', resetXiangqiGame);
+                }
+                initXiangqi();
             })();
 
         })();
