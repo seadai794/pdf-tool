@@ -300,7 +300,7 @@
             box-shadow: inset 0 1px 3px #2d1f0e;
         }
 
-        /* ========== 数独样式 (蓝紫色系) ========== */
+        /* ========== 数独样式 ========== */
         .controls {
             display: flex;
             flex-wrap: wrap;
@@ -385,6 +385,20 @@
             box-shadow: 0 2px 0 #3b4e5a, 0 6px 12px rgba(0, 0, 0, 0.4);
         }
 
+        /* 疑问数字切换按钮 */
+        .sudoku-btn.tentative {
+            background: #c77a2a;
+            border-color: #e8a050;
+            box-shadow: 0 6px 0 #8a4e16, 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+        .sudoku-btn.tentative:hover {
+            background: #d98b3a;
+        }
+        .sudoku-btn.tentative.active {
+            background: #e89a3a;
+            box-shadow: 0 6px 0 #8a4e16, 0 0 0 3px #fff5e0, 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+
         .sudoku-board-wrapper {
             background: #9fb0d0;
             background: linear-gradient(135deg, #b5c5e2, #9fb0d0);
@@ -424,6 +438,7 @@
             border: 1px solid #9aabcc;
             box-sizing: border-box;
             text-shadow: 1px 1px 0 #dde6f5;
+            position: relative;
         }
 
         .cell.fixed {
@@ -434,12 +449,36 @@
             text-shadow: 1px 1px 0 #eef3fc;
         }
 
+        /* 最终确定的数字：蓝色 */
         .cell.user-filled {
             color: #0d5ec7;
             font-weight: 800;
             font-size: 1.5rem;
             text-shadow: 0 0 1px #7fb3f0;
             letter-spacing: -0.5px;
+        }
+
+        /* 疑问/推测的数字：橙色，与蓝色形成鲜明对比 */
+        .cell.tentative {
+            color: #d97a00;
+            font-weight: 800;
+            font-size: 1.5rem;
+            text-shadow: 0 0 1px #ffc880;
+            letter-spacing: -0.5px;
+            background: #fff8ee;
+        }
+
+        /* 疑问数字的小标记（右上角小问号） */
+        .cell.tentative::after {
+            content: '?';
+            position: absolute;
+            top: 2px;
+            right: 4px;
+            font-size: 0.55rem;
+            color: #d97a00;
+            font-weight: 900;
+            opacity: 0.85;
+            line-height: 1;
         }
 
         .cell.highlight-row,
@@ -460,11 +499,14 @@
             background: #f7d98a !important;
             box-shadow: inset 0 0 0 3px #b8862c !important;
             z-index: 2;
-            position: relative;
         }
 
         .cell.selected.user-filled {
             color: #0d5ec7;
+        }
+
+        .cell.selected.tentative {
+            color: #d97a00;
         }
 
         .cell.selected.fixed {
@@ -485,6 +527,10 @@
             color: #a11;
         }
 
+        .cell.error.tentative {
+            color: #a11;
+        }
+
         .board-6 .cell {
             width: 52px;
             height: 52px;
@@ -497,11 +543,13 @@
             font-size: 1.3rem;
         }
 
-        .board-6 .cell.user-filled {
+        .board-6 .cell.user-filled,
+        .board-6 .cell.tentative {
             font-size: 1.9rem;
         }
 
-        .board-9 .cell.user-filled {
+        .board-9 .cell.user-filled,
+        .board-9 .cell.tentative {
             font-size: 1.5rem;
         }
 
@@ -553,6 +601,17 @@
             background: #d5e0f2;
         }
 
+        /* 疑问模式下的数字键盘 */
+        .num-btn.tentative-mode {
+            background: #f0d4b0;
+            border-color: #d97a00;
+            color: #8a4e16;
+            box-shadow: 0 5px 0 #8a4e16, 0 5px 10px rgba(0, 0, 0, 0.3);
+        }
+        .num-btn.tentative-mode:hover {
+            background: #f8e0c4;
+        }
+
         .status-bar {
             display: flex;
             width: 100%;
@@ -583,6 +642,26 @@
             letter-spacing: 0.5px;
             text-shadow: 1px 1px 0 #d4dff2;
             text-align: center;
+            line-height: 1.6;
+        }
+
+        .footer-note .blue-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #0d5ec7;
+            margin: 0 3px;
+            vertical-align: middle;
+        }
+        .footer-note .orange-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #d97a00;
+            margin: 0 3px;
+            vertical-align: middle;
         }
 
         /* ========== 象棋样式 ========== */
@@ -1142,8 +1221,10 @@
             .fullscreen-active .cell { width: 36px !important; height: 36px !important; font-size: 1.05rem !important; }
             .fullscreen-active .board-6 .cell { width: 44px !important; height: 44px !important; font-size: 1.3rem !important; }
             .fullscreen-active .board-9 .cell { width: 36px !important; height: 36px !important; font-size: 1.05rem !important; }
-            .fullscreen-active .board-9 .cell.user-filled { font-size: 1.2rem !important; }
-            .fullscreen-active .board-6 .cell.user-filled { font-size: 1.45rem !important; }
+            .fullscreen-active .board-9 .cell.user-filled,
+            .fullscreen-active .board-9 .cell.tentative { font-size: 1.2rem !important; }
+            .fullscreen-active .board-6 .cell.user-filled,
+            .fullscreen-active .board-6 .cell.tentative { font-size: 1.45rem !important; }
             .fullscreen-active .num-btn { width: 38px; height: 38px; font-size: 1.05rem; }
         }
 
@@ -1170,8 +1251,10 @@
             .cell { width: 34px !important; height: 34px !important; font-size: 1rem !important; }
             .board-6 .cell { width: 40px !important; height: 40px !important; font-size: 1.2rem !important; }
             .board-9 .cell { width: 34px !important; height: 34px !important; font-size: 1rem !important; }
-            .board-9 .cell.user-filled { font-size: 1.15rem !important; }
-            .board-6 .cell.user-filled { font-size: 1.35rem !important; }
+            .board-9 .cell.user-filled,
+            .board-9 .cell.tentative { font-size: 1.15rem !important; }
+            .board-6 .cell.user-filled,
+            .board-6 .cell.tentative { font-size: 1.35rem !important; }
             .num-btn { width: 36px; height: 36px; font-size: 1rem; }
             .numbers-pad { gap: 6px; }
             .sudoku-message-box { font-size: 0.78rem; padding: 6px 14px; }
@@ -1197,8 +1280,10 @@
             .cell { width: 30px !important; height: 30px !important; font-size: 0.9rem !important; }
             .board-6 .cell { width: 34px !important; height: 34px !important; font-size: 1rem !important; }
             .board-9 .cell { width: 30px !important; height: 30px !important; font-size: 0.9rem !important; }
-            .board-9 .cell.user-filled { font-size: 1rem !important; }
-            .board-6 .cell.user-filled { font-size: 1.1rem !important; }
+            .board-9 .cell.user-filled,
+            .board-9 .cell.tentative { font-size: 1rem !important; }
+            .board-6 .cell.user-filled,
+            .board-6 .cell.tentative { font-size: 1.1rem !important; }
             .num-btn { width: 32px; height: 32px; font-size: 0.9rem; }
             h1 { font-size: 1.05rem; }
             .turn-indicator { padding: 3px 10px 3px 8px; }
@@ -1214,7 +1299,6 @@
     <div class="main-container theme-gomoku" id="gameUI">
         <h1>🎮 游戏合集</h1>
 
-        <!-- 顶部操作栏 -->
         <div class="top-bar">
             <div class="game-tabs" id="gameTabs">
                 <button id="tabGomoku" class="active">♟️ 五子棋</button>
@@ -1260,6 +1344,7 @@
                 </div>
                 <button id="newSudokuBtn" class="sudoku-btn">✨ 新游戏</button>
                 <button id="checkSudokuBtn" class="sudoku-btn secondary">✅ 检查</button>
+                <button id="tentativeModeBtn" class="sudoku-btn tentative">❓ 疑问</button>
             </div>
 
             <div class="sudoku-board-wrapper">
@@ -1273,7 +1358,9 @@
             </div>
 
             <div class="footer-note">
-                💡 蓝色数字是您填入的 | 点击格子后点击数字修改 | 双击清空
+                <span class="blue-dot"></span> 蓝色 = 确定数字 &nbsp;|&nbsp;
+                <span class="orange-dot"></span> 橙色 = 疑问数字（点击 ❓ 疑问 按钮切换）<br>
+                点击格子后点击数字填入 | 双击清空
             </div>
         </div>
 
@@ -1398,7 +1485,6 @@
         </div>
     </div>
 
-    <!-- 老板键提示 -->
     <div class="boss-hint" id="bossHint">按 Ctrl+Q 快速切换</div>
 
     <script>
@@ -1596,8 +1682,7 @@
             tabXiangqi.addEventListener('click', switchToXiangqi);
 
             // ============================================================
-            // 五子棋 (人机对战 + 光晕 + 胜利弹窗)
-            // ============================================================
+            // 五子棋            // ============================================================
             (function() {
                 const BOARD_SIZE = 15;
                 const CELL_SIZE = 540 / BOARD_SIZE;
@@ -1902,12 +1987,15 @@
             })();
 
             // ============================================================
-            // 数独
+            // 数独（支持疑问数字标记）
             // ============================================================
             (function() {
                 let boardSize = 9, difficulty = 'medium';
                 let board = [], fixedCells = [];
+                // tentativeCells: 记录哪些格子是疑问数字
+                let tentativeCells = [];
                 let selectedRow = -1, selectedCol = -1, gameOver = false;
+                let tentativeMode = false; // 当前是否处于疑问输入模式
 
                 const CONFIG = {
                     9: { boxRows: 3, boxCols: 3, numCount: 9, class: 'board-9' },
@@ -1919,6 +2007,7 @@
                 const difficultySelect = document.getElementById('difficultySelect');
                 const newSudokuBtn = document.getElementById('newSudokuBtn');
                 const checkSudokuBtn = document.getElementById('checkSudokuBtn');
+                const tentativeModeBtn = document.getElementById('tentativeModeBtn');
                 const sudokuMessage = document.getElementById('sudokuMessage');
                 const numbersPad = document.getElementById('numbersPad');
 
@@ -2034,8 +2123,16 @@
                             cell.dataset.row = r;
                             cell.dataset.col = c;
                             cell.textContent = board[r][c] === 0 ? '' : board[r][c];
-                            if (fixedCells[r][c]) cell.classList.add('fixed');
-                            else if (board[r][c] !== 0) cell.classList.add('user-filled');
+                            if (fixedCells[r][c]) {
+                                cell.classList.add('fixed');
+                            } else if (board[r][c] !== 0) {
+                                // 区分疑问数字和确定数字
+                                if (tentativeCells[r][c]) {
+                                    cell.classList.add('tentative');
+                                } else {
+                                    cell.classList.add('user-filled');
+                                }
+                            }
                             if (selectedRow >= 0 && selectedCol >= 0) {
                                 if (r === selectedRow && c === selectedCol) {
                                 } else {
@@ -2050,7 +2147,10 @@
                             cell.addEventListener('dblclick', (e) => {
                                 e.preventDefault();
                                 if (fixedCells[r][c] || gameOver) return;
-                                board[r][c] = 0; selectedRow = r; selectedCol = c; renderSudokuBoard();
+                                board[r][c] = 0;
+                                tentativeCells[r][c] = false;
+                                selectedRow = r; selectedCol = c;
+                                renderSudokuBoard();
                             });
                             boardEl.appendChild(cell);
                         }
@@ -2065,7 +2165,7 @@
                     numbersPad.innerHTML = '';
                     nums.forEach(num => {
                         const btn = document.createElement('div');
-                        btn.className = 'num-btn';
+                        btn.className = 'num-btn' + (tentativeMode ? ' tentative-mode' : '');
                         btn.textContent = num;
                         btn.addEventListener('click', () => onSudokuNumberClick(num));
                         numbersPad.appendChild(btn);
@@ -2079,36 +2179,58 @@
                         const val = board[selectedRow][selectedCol];
                         if (val !== 0) {
                             const isFixed = fixedCells[selectedRow][selectedCol];
-                            sudokuMessage.textContent = `第${rowDisplay}行第${colDisplay}列 当前:${val}${isFixed ? ' (固定)' : ' (可改)'}`;
+                            const isTentative = tentativeCells[selectedRow][selectedCol];
+                            const tag = isFixed ? ' (固定)' : (isTentative ? ' (疑问)' : ' (确定)');
+                            sudokuMessage.textContent = `第${rowDisplay}行第${colDisplay}列 当前:${val}${tag}`;
                         } else {
-                            sudokuMessage.textContent = `第${rowDisplay}行第${colDisplay}列 点击数字填入`;
+                            const modeHint = tentativeMode ? ' [疑问模式]' : '';
+                            sudokuMessage.textContent = `第${rowDisplay}行第${colDisplay}列 点击数字填入${modeHint}`;
                         }
                     } else {
-                        sudokuMessage.textContent = '点击格子选择，再点击数字填入';
+                        sudokuMessage.textContent = tentativeMode ? '❓ 疑问模式：点击格子后填入' : '点击格子选择，再点击数字填入';
                     }
                 }
 
                 function onSudokuCellClick(r, c) {
                     if (gameOver) return;
-                    selectedRow = r; selectedCol = c; renderSudokuBoard();
+                    selectedRow = r; selectedCol = c;
+                    renderSudokuBoard();
                 }
 
                 function onSudokuNumberClick(num) {
                     if (gameOver) return;
-                    if (selectedRow < 0 || selectedCol < 0) { sudokuMessage.textContent = '请先点击一个空格子！'; return; }
-                    if (fixedCells[selectedRow][selectedCol]) { sudokuMessage.textContent = '这个格子是题目给定的，不能修改'; return; }
+                    if (selectedRow < 0 || selectedCol < 0) {
+                        sudokuMessage.textContent = '请先点击一个空格子！';
+                        return;
+                    }
+                    if (fixedCells[selectedRow][selectedCol]) {
+                        sudokuMessage.textContent = '这个格子是题目给定的，不能修改';
+                        return;
+                    }
+
                     board[selectedRow][selectedCol] = num;
+                    // 根据当前模式标记是否为疑问数字
+                    tentativeCells[selectedRow][selectedCol] = tentativeMode;
+
                     if (isBoardComplete() && validateFullBoard()) {
-                        gameOver = true; renderSudokuBoard();
+                        // 全部填对，清除所有疑问标记（因为答案已正确）
+                        for (let r = 0; r < boardSize; r++)
+                            for (let c = 0; c < boardSize; c++)
+                                tentativeCells[r][c] = false;
+                        gameOver = true;
+                        renderSudokuBoard();
                         sudokuMessage.textContent = '🎉 恭喜！数独完成！';
                         setTimeout(() => showSudokuWinModal(), 100);
                         return;
                     }
+
                     if (!isValidPlacement(selectedRow, selectedCol, num)) {
                         sudokuMessage.textContent = `❌ 数字 ${num} 在行、列或宫中重复`;
                     } else {
-                        sudokuMessage.textContent = `已填入 ${num}`;
+                        const tag = tentativeMode ? '（疑问）' : '（确定）';
+                        sudokuMessage.textContent = `已填入 ${num} ${tag}`;
                     }
+
                     renderSudokuBoard();
                 }
 
@@ -2118,8 +2240,12 @@
                     const full = generateFullSolution(boardSize);
                     board = generatePuzzle(full, boardSize, difficulty);
                     fixedCells = board.map(row => row.map(v => v !== 0));
+                    tentativeCells = board.map(row => row.map(() => false));
                     selectedRow = -1; selectedCol = -1; gameOver = false;
-                    hideWinModal(); renderSudokuBoard();
+                    tentativeMode = false;
+                    tentativeModeBtn.classList.remove('active');
+                    hideWinModal();
+                    renderSudokuBoard();
                     sudokuMessage.textContent = `${boardSize}宫格 · ${difficulty === 'easy' ? '简单' : difficulty === 'medium' ? '中等' : '困难'}`;
                 }
 
@@ -2127,7 +2253,11 @@
                     if (gameOver) { sudokuMessage.textContent = '🎉 已经完成啦！'; return; }
                     if (isBoardComplete()) {
                         if (validateFullBoard()) {
-                            gameOver = true; renderSudokuBoard();
+                            for (let r = 0; r < boardSize; r++)
+                                for (let c = 0; c < boardSize; c++)
+                                    tentativeCells[r][c] = false;
+                            gameOver = true;
+                            renderSudokuBoard();
                             sudokuMessage.textContent = '🎉 恭喜！数独完成！';
                             setTimeout(() => showSudokuWinModal(), 100);
                         } else {
@@ -2146,9 +2276,22 @@
                     }
                 }
 
+                // 切换疑问模式
+                function toggleTentativeMode() {
+                    tentativeMode = !tentativeMode;
+                    tentativeModeBtn.classList.toggle('active', tentativeMode);
+                    if (tentativeMode) {
+                        sudokuMessage.textContent = '❓ 疑问模式已开启：填入的数字将标记为疑问（橙色）';
+                    } else {
+                        sudokuMessage.textContent = '✅ 确定模式：填入的数字将标记为确定（蓝色）';
+                    }
+                    renderNumbersPad();
+                }
+
                 function initSudoku() {
                     newSudokuBtn.addEventListener('click', newSudokuGame);
                     checkSudokuBtn.addEventListener('click', checkSudokuBoard);
+                    tentativeModeBtn.addEventListener('click', toggleTentativeMode);
                     sizeSelect.addEventListener('change', newSudokuGame);
                     difficultySelect.addEventListener('change', newSudokuGame);
                     newSudokuGame();
@@ -2157,7 +2300,7 @@
             })();
 
             // ============================================================
-            // 象棋 (融合原逻辑)
+            // 象棋
             // ============================================================
             (function() {
                 const COLS = 9, ROWS = 10;
