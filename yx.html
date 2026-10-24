@@ -70,6 +70,16 @@
             text-shadow: 2px 2px 0 #d4dff2, 0 4px 8px rgba(0, 0, 0, 0.15);
         }
 
+        /* 顶部操作栏：标签 + 全屏按钮 */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
         /* 游戏切换标签 */
         .game-tabs {
             display: flex;
@@ -78,7 +88,6 @@
             padding: 5px;
             border-radius: 60px;
             box-shadow: inset 0 3px 8px #9a7d5a, 0 4px 8px rgba(0, 0, 0, 0.2);
-            margin-bottom: 16px;
             transition: background 0.3s, box-shadow 0.3s;
         }
 
@@ -124,6 +133,37 @@
 
         .game-tabs.sudoku-active button:not(.active):hover {
             background: rgba(240, 245, 255, 0.5);
+        }
+
+        /* 全屏按钮 */
+        .fullscreen-btn {
+            background: #5a4a36;
+            color: #f0e0c0;
+            border: 2px solid #b3936b;
+            border-radius: 50px;
+            padding: 8px 18px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #2d1f0e, 0 4px 10px rgba(0, 0, 0, 0.3);
+            transition: all 0.1s ease;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .fullscreen-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #2d1f0e, 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .fullscreen-btn:hover {
+            background: #6f5a42;
+        }
+
+        .fullscreen-btn.active {
+            background: #3d5a6b;
+            border-color: #8fb0c0;
+            box-shadow: 0 4px 0 #1e2e3a, 0 4px 10px rgba(0, 0, 0, 0.3);
         }
 
         /* 游戏面板 */
@@ -392,11 +432,13 @@
             text-shadow: 1px 1px 0 #eef3fc;
         }
 
-        /* 玩家自己填入的数字：蓝色，方便识别和修改 */
+        /* 玩家自己填入的数字：醒目的蓝色，加粗放大 */
         .cell.user-filled {
-            color: #1a6ab0;
-            font-weight: 700;
-            text-shadow: none;
+            color: #0d5ec7;
+            font-weight: 800;
+            font-size: 1.5rem;
+            text-shadow: 0 0 1px #7fb3f0;
+            letter-spacing: -0.5px;
         }
 
         .cell.highlight-row,
@@ -418,10 +460,13 @@
             box-shadow: inset 0 0 0 3px #b8862c !important;
             z-index: 2;
             position: relative;
-            color: #1a6ab0;
         }
 
-        .cell.fixed.selected {
+        .cell.selected.user-filled {
+            color: #0d5ec7;
+        }
+
+        .cell.selected.fixed {
             color: #1a2b4a;
         }
 
@@ -449,6 +494,14 @@
             width: 44px;
             height: 44px;
             font-size: 1.3rem;
+        }
+
+        .board-6 .cell.user-filled {
+            font-size: 1.9rem;
+        }
+
+        .board-9 .cell.user-filled {
+            font-size: 1.5rem;
         }
 
         .board-9 .cell[data-row="2"], .board-9 .cell[data-row="5"] {
@@ -529,6 +582,100 @@
             letter-spacing: 0.5px;
             text-shadow: 1px 1px 0 #d4dff2;
             text-align: center;
+        }
+
+        /* ========== 胜利弹窗 ========== */
+        .win-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 5000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .win-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .win-modal {
+            background: #fff;
+            border-radius: 32px;
+            padding: 36px 40px 28px 40px;
+            text-align: center;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+            max-width: 360px;
+            width: 90%;
+            transform: scale(0.85);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .win-overlay.show .win-modal {
+            transform: scale(1);
+        }
+
+        .win-emoji {
+            font-size: 4rem;
+            line-height: 1;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .win-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #2d2a1e;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .win-subtitle {
+            font-size: 0.95rem;
+            color: #666;
+            margin-bottom: 22px;
+            font-weight: 500;
+        }
+
+        .win-btn {
+            background: #6b4f31;
+            color: #f0e0c0;
+            border: none;
+            padding: 12px 36px;
+            border-radius: 40px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 0 #3f2e1b, 0 8px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.1s ease;
+            letter-spacing: 1px;
+        }
+
+        .win-btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #3f2e1b, 0 8px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .win-btn:hover {
+            background: #7f5f3d;
+        }
+
+        .win-btn.sudoku {
+            background: #3f5680;
+            box-shadow: 0 8px 0 #2a3b5c, 0 8px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .win-btn.sudoku:hover {
+            background: #526a99;
+        }
+
+        .win-btn.sudoku:active {
+            box-shadow: 0 2px 0 #2a3b5c, 0 8px 15px rgba(0, 0, 0, 0.3);
         }
 
         /* ========== 老板键 · Word 伪装界面 ========== */
@@ -743,6 +890,92 @@
             opacity: 1;
         }
 
+        /* ========== 全屏模式下的布局优化 ========== */
+        /* 全屏时 body 背景保持深色 */
+        .fullscreen-active body {
+            background: #1a1a1a;
+            padding: 0;
+        }
+
+        .fullscreen-active .main-container {
+            max-width: 100%;
+            border-radius: 0;
+            padding: 10px 10px 8px 10px;
+            min-height: 100vh;
+            justify-content: flex-start;
+            background-image: none;
+        }
+
+        .fullscreen-active .main-container.theme-gomoku {
+            background: #d4c0a0;
+        }
+
+        .fullscreen-active .main-container.theme-sudoku {
+            background: #b8c6e0;
+        }
+
+        .fullscreen-active .board-wrapper {
+            max-width: 100%;
+        }
+
+        .fullscreen-active .sudoku-board-wrapper {
+            max-width: 100%;
+        }
+
+        .fullscreen-active .controls {
+            max-width: 100%;
+        }
+
+        .fullscreen-active h1 {
+            font-size: 1.1rem;
+            margin-bottom: 6px;
+        }
+
+        .fullscreen-active .top-bar {
+            margin-bottom: 8px;
+        }
+
+        /* 手机全屏时五子棋棋盘尽可能大 */
+        @media (max-width: 600px) {
+            .fullscreen-active #gobanCanvas {
+                border-radius: 12px;
+            }
+            .fullscreen-active .board-wrapper {
+                padding: 6px;
+                border-radius: 20px;
+            }
+            .fullscreen-active .sudoku-board-wrapper {
+                padding: 6px;
+                border-radius: 16px;
+            }
+            .fullscreen-active .cell {
+                width: 36px !important;
+                height: 36px !important;
+                font-size: 1.05rem !important;
+            }
+            .fullscreen-active .board-6 .cell {
+                width: 44px !important;
+                height: 44px !important;
+                font-size: 1.3rem !important;
+            }
+            .fullscreen-active .board-9 .cell {
+                width: 36px !important;
+                height: 36px !important;
+                font-size: 1.05rem !important;
+            }
+            .fullscreen-active .board-9 .cell.user-filled {
+                font-size: 1.2rem !important;
+            }
+            .fullscreen-active .board-6 .cell.user-filled {
+                font-size: 1.45rem !important;
+            }
+            .fullscreen-active .num-btn {
+                width: 38px;
+                height: 38px;
+                font-size: 1.05rem;
+            }
+        }
+
         /* ========== 手机适配 ========== */
         @media (max-width: 600px) {
             body {
@@ -760,6 +993,10 @@
             .game-tabs button {
                 font-size: 0.85rem;
                 padding: 8px 16px;
+            }
+            .fullscreen-btn {
+                font-size: 0.78rem;
+                padding: 6px 14px;
             }
             .board-wrapper {
                 padding: 10px;
@@ -828,6 +1065,12 @@
                 height: 34px !important;
                 font-size: 1rem !important;
             }
+            .board-9 .cell.user-filled {
+                font-size: 1.15rem !important;
+            }
+            .board-6 .cell.user-filled {
+                font-size: 1.35rem !important;
+            }
             .num-btn {
                 width: 36px;
                 height: 36px;
@@ -871,6 +1114,23 @@
                 font-size: 0.65rem;
                 padding: 5px 10px;
             }
+            .win-modal {
+                padding: 24px 20px 20px 20px;
+                border-radius: 24px;
+            }
+            .win-emoji {
+                font-size: 3rem;
+            }
+            .win-title {
+                font-size: 1.2rem;
+            }
+            .win-subtitle {
+                font-size: 0.85rem;
+            }
+            .win-btn {
+                padding: 10px 28px;
+                font-size: 0.95rem;
+            }
         }
 
         /* 超小屏幕 */
@@ -889,6 +1149,12 @@
                 width: 30px !important;
                 height: 30px !important;
                 font-size: 0.9rem !important;
+            }
+            .board-9 .cell.user-filled {
+                font-size: 1rem !important;
+            }
+            .board-6 .cell.user-filled {
+                font-size: 1.1rem !important;
             }
             .num-btn {
                 width: 32px;
@@ -917,10 +1183,13 @@
     <div class="main-container theme-gomoku" id="gameUI">
         <h1>🎮 游戏合集</h1>
 
-        <!-- 游戏切换标签 -->
-        <div class="game-tabs" id="gameTabs">
-            <button id="tabGomoku" class="active">♟️ 五子棋</button>
-            <button id="tabSudoku">🧩 数独</button>
+        <!-- 顶部操作栏：标签 + 全屏按钮 -->
+        <div class="top-bar">
+            <div class="game-tabs" id="gameTabs">
+                <button id="tabGomoku" class="active">♟️ 五子棋</button>
+                <button id="tabSudoku">🧩 数独</button>
+            </div>
+            <button class="fullscreen-btn" id="fullscreenBtn">⛶ 全屏</button>
         </div>
 
         <!-- ===== 五子棋面板 ===== -->
@@ -974,6 +1243,16 @@
             <div class="footer-note">
                 💡 蓝色数字是您填入的 | 点击格子后点击数字修改 | 双击清空
             </div>
+        </div>
+    </div>
+
+    <!-- ================= 胜利弹窗 ================= -->
+    <div class="win-overlay" id="winOverlay">
+        <div class="win-modal">
+            <span class="win-emoji" id="winEmoji">🎉</span>
+            <div class="win-title" id="winTitle">胜利！</div>
+            <div class="win-subtitle" id="winSubtitle"></div>
+            <button class="win-btn" id="winBtn">再来一局</button>
         </div>
     </div>
 
@@ -1102,6 +1381,116 @@
             setTimeout(showBossHint, 1000);
 
             // ============================================================
+            // 全屏功能
+            // ============================================================
+            const fullscreenBtn = document.getElementById('fullscreenBtn');
+            const bodyEl = document.body;
+
+            function updateFullscreenUI() {
+                const isFull = !!document.fullscreenElement ||
+                               !!document.webkitFullscreenElement ||
+                               !!document.mozFullScreenElement ||
+                               !!document.msFullscreenElement;
+                if (isFull) {
+                    fullscreenBtn.textContent = '⛶ 退出全屏';
+                    fullscreenBtn.classList.add('active');
+                    bodyEl.classList.add('fullscreen-active');
+                } else {
+                    fullscreenBtn.textContent = '⛶ 全屏';
+                    fullscreenBtn.classList.remove('active');
+                    bodyEl.classList.remove('fullscreen-active');
+                }
+                // 全屏状态变化后，重绘五子棋（canvas尺寸可能因CSS变化而需要重绘）
+                setTimeout(() => {
+                    if (window._redrawGomoku) window._redrawGomoku();
+                }, 50);
+            }
+
+            function toggleFullscreen() {
+                const docEl = document.documentElement;
+
+                if (!document.fullscreenElement && !document.webkitFullscreenElement &&
+                    !document.mozFullScreenElement && !document.msFullscreenElement) {
+                    // 进入全屏
+                    if (docEl.requestFullscreen) {
+                        docEl.requestFullscreen().catch(() => {});
+                    } else if (docEl.webkitRequestFullscreen) {
+                        docEl.webkitRequestFullscreen();
+                    } else if (docEl.mozRequestFullScreen) {
+                        docEl.mozRequestFullScreen();
+                    } else if (docEl.msRequestFullscreen) {
+                        docEl.msRequestFullscreen();
+                    }
+                } else {
+                    // 退出全屏
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen().catch(() => {});
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    } else if (document.mozCancelFullScreen) {
+                        document.mozCancelFullScreen();
+                    } else if (document.msExitFullscreen) {
+                        document.msExitFullscreen();
+                    }
+                }
+            }
+
+            fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+            document.addEventListener('fullscreenchange', updateFullscreenUI);
+            document.addEventListener('webkitfullscreenchange', updateFullscreenUI);
+            document.addEventListener('mozfullscreenchange', updateFullscreenUI);
+            document.addEventListener('MSFullscreenChange', updateFullscreenUI);
+
+            // ============================================================
+            // 胜利弹窗控制
+            // ============================================================
+            const winOverlay = document.getElementById('winOverlay');
+            const winEmoji = document.getElementById('winEmoji');
+            const winTitle = document.getElementById('winTitle');
+            const winSubtitle = document.getElementById('winSubtitle');
+            const winBtn = document.getElementById('winBtn');
+            let winBtnCallback = null;
+
+            function showWinModal(config) {
+                winEmoji.textContent = config.emoji || '🎉';
+                winTitle.textContent = config.title || '胜利！';
+                winSubtitle.textContent = config.subtitle || '';
+                if (config.sudokuTheme) {
+                    winBtn.classList.add('sudoku');
+                } else {
+                    winBtn.classList.remove('sudoku');
+                }
+                winBtnCallback = config.onButton || null;
+                winOverlay.classList.add('show');
+            }
+
+            function hideWinModal() {
+                winOverlay.classList.remove('show');
+                winBtnCallback = null;
+            }
+
+            winBtn.addEventListener('click', () => {
+                hideWinModal();
+                if (winBtnCallback) {
+                    const cb = winBtnCallback;
+                    winBtnCallback = null;
+                    cb();
+                }
+            });
+
+            winOverlay.addEventListener('click', (e) => {
+                if (e.target === winOverlay) {
+                    hideWinModal();
+                    if (winBtnCallback) {
+                        const cb = winBtnCallback;
+                        winBtnCallback = null;
+                        cb();
+                    }
+                }
+            });
+
+            // ============================================================
             // 主题切换 & 游戏标签
             // ============================================================
             const mainContainer = document.getElementById('gameUI');
@@ -1119,6 +1508,9 @@
                 tabSudoku.classList.remove('active');
                 gomokuPanel.classList.add('active');
                 sudokuPanel.classList.remove('active');
+                setTimeout(() => {
+                    if (window._redrawGomoku) window._redrawGomoku();
+                }, 50);
             }
 
             function switchToSudoku() {
@@ -1135,7 +1527,7 @@
             tabSudoku.addEventListener('click', switchToSudoku);
 
             // ============================================================
-            // 五子棋游戏逻辑 (人机对战)
+            // 五子棋游戏逻辑 (人机对战) - 带电脑落子光晕和胜利弹窗
             // ============================================================
             (function() {
                 const BOARD_SIZE = 15;
@@ -1161,6 +1553,9 @@
                 let winningLine = [];
                 let isComputerThinking = false;
 
+                // 电脑最近落子的位置 (用于光晕高亮)
+                let lastComputerMove = null;
+
                 function initBoardData() {
                     board = Array.from({ length: BOARD_SIZE }, () => Array(BOARD_SIZE).fill(0));
                     currentPlayer = PLAYER;
@@ -1168,6 +1563,23 @@
                     winner = null;
                     winningLine = [];
                     isComputerThinking = false;
+                    lastComputerMove = null;
+                }
+
+                // 绘制光晕 (指定位置)
+                function drawGlow(row, col, color, radiusMul = 2.2) {
+                    const x = col * CELL_SIZE + CELL_SIZE / 2;
+                    const y = row * CELL_SIZE + CELL_SIZE / 2;
+                    const glowRadius = RADIUS * radiusMul;
+
+                    const gradient = ctx.createRadialGradient(x, y, RADIUS * 0.5, x, y, glowRadius);
+                    gradient.addColorStop(0, color);
+                    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+                    ctx.beginPath();
+                    ctx.arc(x, y, glowRadius, 0, 2 * Math.PI);
+                    ctx.fillStyle = gradient;
+                    ctx.fill();
                 }
 
                 function renderBoard() {
@@ -1207,6 +1619,7 @@
                         }
                     }
 
+                    // 绘制所有棋子
                     for (let row = 0; row < BOARD_SIZE; row++) {
                         for (let col = 0; col < BOARD_SIZE; col++) {
                             const stone = board[row][col];
@@ -1214,6 +1627,11 @@
 
                             const x = col * CELL_SIZE + CELL_SIZE / 2;
                             const y = row * CELL_SIZE + CELL_SIZE / 2;
+
+                            // 先画光晕 (如果是电脑最近落子，且不是胜利高亮)
+                            if (lastComputerMove && lastComputerMove.row === row && lastComputerMove.col === col && winningLine.length === 0) {
+                                drawGlow(row, col, 'rgba(80, 180, 255, 0.85)', 2.4);
+                            }
 
                             ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
                             ctx.shadowBlur = 8;
@@ -1254,6 +1672,7 @@
                         }
                     }
 
+                    // 绘制胜利高亮
                     if (winningLine.length > 0) {
                         ctx.shadowColor = '#f7d44a';
                         ctx.shadowBlur = 16;
@@ -1351,6 +1770,43 @@
                     return true;
                 }
 
+                function showGomokuWinModal(player) {
+                    const isPlayerWin = player === PLAYER;
+                    const isDraw = player === 0;
+
+                    if (isDraw) {
+                        showWinModal({
+                            emoji: '🤝',
+                            title: '平局',
+                            subtitle: '棋盘已满，势均力敌！',
+                            sudokuTheme: false,
+                            onButton: () => {
+                                resetGomokuGame();
+                            }
+                        });
+                    } else if (isPlayerWin) {
+                        showWinModal({
+                            emoji: '🏆',
+                            title: '你赢了！',
+                            subtitle: '黑棋五子连珠，击败电脑！',
+                            sudokuTheme: false,
+                            onButton: () => {
+                                resetGomokuGame();
+                            }
+                        });
+                    } else {
+                        showWinModal({
+                            emoji: '🤖',
+                            title: '电脑赢了',
+                            subtitle: '白棋五子连珠，再接再厉！',
+                            sudokuTheme: false,
+                            onButton: () => {
+                                resetGomokuGame();
+                            }
+                        });
+                    }
+                }
+
                 function placeStone(row, col, player) {
                     if (gameOver) return false;
                     if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) return false;
@@ -1358,12 +1814,19 @@
 
                     board[row][col] = player;
 
+                    if (player === COMPUTER) {
+                        lastComputerMove = { row, col };
+                    }
+
                     const winLine = checkWin(row, col, player);
                     if (winLine) {
                         gameOver = true;
                         winner = player;
                         winningLine = winLine;
                         renderBoard();
+                        setTimeout(() => {
+                            showGomokuWinModal(player);
+                        }, 100);
                         return true;
                     }
 
@@ -1372,6 +1835,9 @@
                         winner = null;
                         winningLine = [];
                         renderBoard();
+                        setTimeout(() => {
+                            showGomokuWinModal(0);
+                        }, 100);
                         return true;
                     }
 
@@ -1559,9 +2025,14 @@
 
                 function resetGomokuGame() {
                     isComputerThinking = false;
+                    hideWinModal();
                     initBoardData();
                     renderBoard();
                 }
+
+                // 暴露给全局，供全屏切换时重绘
+                window._redrawGomoku = renderBoard;
+                window._resetGomokuGame = resetGomokuGame;
 
                 function initGomoku() {
                     initBoardData();
@@ -1575,7 +2046,7 @@
             })();
 
             // ============================================================
-            // 数独游戏逻辑 (玩家填入数字为蓝色)
+            // 数独游戏逻辑 (玩家填入数字为醒目蓝色 + 胜利弹窗)
             // ============================================================
             (function() {
                 let boardSize = 9;
@@ -1714,6 +2185,18 @@
                     return true;
                 }
 
+                function showSudokuWinModal() {
+                    showWinModal({
+                        emoji: '🎉',
+                        title: '数独完成！',
+                        subtitle: '你成功解开了这道数独！',
+                        sudokuTheme: true,
+                        onButton: () => {
+                            newSudokuGame();
+                        }
+                    });
+                }
+
                 function renderSudokuBoard() {
                     const n = boardSize;
                     const cfg = getConfig();
@@ -1737,7 +2220,6 @@
                             if (fixedCells[r][c]) {
                                 cell.classList.add('fixed');
                             } else if (board[r][c] !== 0) {
-                                // 玩家自己填入的数字：添加 user-filled 类（蓝色）
                                 cell.classList.add('user-filled');
                             }
 
@@ -1836,8 +2318,11 @@
 
                     if (isBoardComplete() && validateFullBoard()) {
                         gameOver = true;
-                        sudokuMessage.textContent = '🎉 恭喜！数独完成！';
                         renderSudokuBoard();
+                        sudokuMessage.textContent = '🎉 恭喜！数独完成！';
+                        setTimeout(() => {
+                            showSudokuWinModal();
+                        }, 100);
                         return;
                     }
 
@@ -1861,6 +2346,7 @@
                     selectedRow = -1;
                     selectedCol = -1;
                     gameOver = false;
+                    hideWinModal();
 
                     renderSudokuBoard();
                     sudokuMessage.textContent = `${boardSize}宫格 · ${difficulty === 'easy' ? '简单' : difficulty === 'medium' ? '中等' : '困难'}`;
@@ -1874,8 +2360,11 @@
                     if (isBoardComplete()) {
                         if (validateFullBoard()) {
                             gameOver = true;
-                            sudokuMessage.textContent = '🎉 恭喜！数独完成！';
                             renderSudokuBoard();
+                            sudokuMessage.textContent = '🎉 恭喜！数独完成！';
+                            setTimeout(() => {
+                                showSudokuWinModal();
+                            }, 100);
                         } else {
                             sudokuMessage.textContent = '❌ 有错误，请检查红色格子';
                         }
