@@ -665,7 +665,6 @@
             max-width: 560px;
         }
 
-        /* 象棋顶部信息栏：状态 + 按钮 */
         .xiangqi-top-bar {
             display: flex;
             align-items: center;
@@ -1454,7 +1453,6 @@
         <!-- ===== 象棋面板 ===== -->
         <div class="game-panel" id="xiangqiPanel">
             <div class="xiangqi-app">
-                <!-- 顶部：走棋状态 + 新一局/重开按钮（移到棋盘上方） -->
                 <div class="xiangqi-top-bar">
                     <div class="xiangqi-turn-indicator" id="xiangqiTurnIndicator">红方走棋</div>
                     <div class="xiangqi-btn-group">
@@ -1463,7 +1461,6 @@
                     </div>
                 </div>
 
-                <!-- 模式与难度 -->
                 <div class="xiangqi-mode-bar">
                     <div class="xiangqi-mode-buttons">
                         <button class="xiangqi-mode-btn active" id="xiangqiModeTeach">📖 教学</button>
@@ -2089,7 +2086,7 @@
             })();
 
             // ============================================================
-            // 数独（支持疑问数字标记）
+            // 数独（增强随机性版本 - 每次打开/新游戏都不同）
             // ============================================================
             (function() {
                 let boardSize = 9, difficulty = 'medium';
@@ -2097,6 +2094,8 @@
                 let tentativeCells = [];
                 let selectedRow = -1, selectedCol = -1, gameOver = false;
                 let tentativeMode = false;
+                // 随机种子计数器
+                let seedCounter = 0;
 
                 const CONFIG = {
                     9: { boxRows: 3, boxCols: 3, numCount: 9, class: 'board-9' },
@@ -2117,9 +2116,23 @@
                 function emptyBoard(n) { return Array.from({ length: n }, () => Array(n).fill(0)); }
                 function cloneBoard(b) { return b.map(row => [...row]); }
 
+                // 增强随机种子：时间 + 计数器 + 随机数混合，避免浏览器初始随机序列重复
+                function createSeededRandom() {
+                    seedCounter++;
+                    const timeSeed = Date.now() % 100000;
+                    const mixSeed = (timeSeed * 31 + seedCounter * 997 + Math.random() * 10000) % 100000;
+                    let state = Math.floor(mixSeed) + 1;
+                    return function() {
+                        state = (state * 1103515245 + 12345) & 0x7fffffff;
+                        return state / 0x7fffffff;
+                    };
+                }
+
                 function generateFullSolution(n) {
+                    const rng = createSeededRandom();
                     const b = emptyBoard(n);
                     const { rows: br, cols: bc } = n === 9 ? { rows: 3, cols: 3 } : { rows: 2, cols: 3 };
+
                     function isValid(r, c, num) {
                         for (let j = 0; j < n; j++) if (b[r][j] === num) return false;
                         for (let i = 0; i < n; i++) if (b[i][c] === num) return false;
@@ -2129,13 +2142,15 @@
                                 if (b[i][j] === num) return false;
                         return true;
                     }
+
                     function solve(pos = 0) {
                         if (pos === n * n) return true;
                         const row = Math.floor(pos / n), col = pos % n;
                         if (b[row][col] !== 0) return solve(pos + 1);
                         const nums = Array.from({ length: n }, (_, i) => i + 1);
+                        // 用种子随机打乱
                         for (let i = nums.length - 1; i > 0; i--) {
-                            const j = Math.floor(Math.random() * (i + 1));
+                            const j = Math.floor(rng() * (i + 1));
                             [nums[i], nums[j]] = [nums[j], nums[i]];
                         }
                         for (const num of nums) {
@@ -2152,18 +2167,23 @@
                 }
 
                 function generatePuzzle(fullBoard, size, diff) {
+                    const rng = createSeededRandom();
                     const n = size, puzzle = cloneBoard(fullBoard), totalCells = n * n;
                     let removeCount;
                     if (diff === 'easy') removeCount = Math.floor(totalCells * 0.45);
                     else if (diff === 'medium') removeCount = Math.floor(totalCells * 0.60);
                     else removeCount = Math.floor(totalCells * 0.72);
                     removeCount = Math.min(removeCount, totalCells - 10);
+
                     const positions = [];
                     for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) positions.push([r, c]);
+
+                    // 种子随机打乱位置
                     for (let i = positions.length - 1; i > 0; i--) {
-                        const j = Math.floor(Math.random() * (i + 1));
+                        const j = Math.floor(rng() * (i + 1));
                         [positions[i], positions[j]] = [positions[j], positions[i]];
                     }
+
                     let removed = 0;
                     for (const [r, c] of positions) {
                         if (removed >= removeCount) break;
@@ -2391,13 +2411,16 @@
                     tentativeModeBtn.addEventListener('click', toggleTentativeMode);
                     sizeSelect.addEventListener('change', newSudokuGame);
                     difficultySelect.addEventListener('change', newSudokuGame);
-                    newSudokuGame();
+                    // 增强随机：先消耗若干随机数，避免浏览器初始序列重复
+                    for (let i = 0; i < 50; i++) Math.random();
+                    // 延迟 50ms 生成第一局，让时间种子不同
+                    setTimeout(() => newSudokuGame(), 50);
                 }
                 initSudoku();
             })();
 
             // ============================================================
-            // 象棋（新增：难度级别、状态栏移至上方、减小光晕）
+            // 象棋
             // ============================================================
             (function() {
                 const COLS = 9, ROWS = 10;
@@ -2418,7 +2441,7 @@
                 let board = [], selected = null, currentPlayer = 'r';
                 let gameOver = false, mode = 'teach', isComputerThinking = false;
                 let captureHistory = [];
-                let lastAIMove = null; // { fromR, fromC, toR, toC }
+                let lastAIMove = null;
                 let aiDifficulty = 'medium';
 
                 const canvas = document.getElementById('xiangqiCanvas');
@@ -2806,10 +2829,8 @@
                     }).join('');
                 }
 
-                // 减小光晕：只用细微的渐变 + 细虚线，不影响棋子上的字
                 function drawAIGlow(row, col) {
                     const { x, y } = getCanvasCoords(row, col);
-                    // 外圈柔光，半径小（约1.4倍棋子半径），透明度低
                     const glowRadius = pieceRadius * 1.6;
                     const gradient = ctx.createRadialGradient(x, y, pieceRadius * 0.7, x, y, glowRadius);
                     gradient.addColorStop(0, 'rgba(255, 210, 60, 0.5)');
@@ -2818,7 +2839,6 @@
                     ctx.arc(x, y, glowRadius, 0, 2 * Math.PI);
                     ctx.fillStyle = gradient;
                     ctx.fill();
-                    // 细虚线圆环，半径略大于棋子
                     ctx.beginPath();
                     ctx.arc(x, y, pieceRadius + 4, 0, 2 * Math.PI);
                     ctx.strokeStyle = 'rgba(255, 200, 30, 0.9)';
