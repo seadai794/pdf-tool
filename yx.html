@@ -665,6 +665,87 @@
             max-width: 560px;
         }
 
+        /* 象棋顶部信息栏：状态 + 按钮 */
+        .xiangqi-top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 10px;
+            padding: 0 4px;
+            flex-wrap: wrap;
+        }
+
+        .xiangqi-turn-indicator {
+            background: #2b1b0e;
+            color: #f0e2c5;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .xiangqi-btn-group {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .xiangqi-reset-btn {
+            background: #5a3e2a;
+            border: none;
+            color: #f0e2c5;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: 0.1s;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .xiangqi-reset-btn:active {
+            transform: scale(0.95);
+            background: #3e2c1a;
+        }
+
+        .xiangqi-newgame-btn {
+            background: #3f6a4a;
+            border: none;
+            color: #e8f5e0;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: 0.1s;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .xiangqi-newgame-btn:active {
+            transform: scale(0.95);
+            background: #2a4a32;
+        }
+
+        .xiangqi-newgame-btn:hover {
+            background: #4f7a5a;
+        }
+
         .xiangqi-mode-bar {
             display: flex;
             align-items: center;
@@ -705,7 +786,6 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.25), inset 0 1px 2px white;
         }
 
-        /* 难度选择器 */
         .xiangqi-difficulty-group {
             display: flex;
             align-items: center;
@@ -849,85 +929,6 @@
             width: 100%;
             margin-top: 2px;
             font-weight: 400;
-        }
-
-        .xiangqi-status-bar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            padding: 0 6px;
-            flex-wrap: wrap;
-        }
-
-        .xiangqi-turn-indicator {
-            background: #2b1b0e;
-            color: #f0e2c5;
-            padding: 8px 18px;
-            border-radius: 40px;
-            font-weight: 600;
-            font-size: 0.95rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            flex: 1;
-            text-align: center;
-            min-width: 100px;
-        }
-
-        .xiangqi-btn-group {
-            display: flex;
-            gap: 8px;
-            flex-shrink: 0;
-        }
-
-        .xiangqi-reset-btn {
-            background: #5a3e2a;
-            border: none;
-            color: #f0e2c5;
-            padding: 8px 18px;
-            border-radius: 40px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            transition: 0.1s;
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .xiangqi-reset-btn:active {
-            transform: scale(0.95);
-            background: #3e2c1a;
-        }
-
-        .xiangqi-newgame-btn {
-            background: #3f6a4a;
-            border: none;
-            color: #e8f5e0;
-            padding: 8px 18px;
-            border-radius: 40px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            transition: 0.1s;
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .xiangqi-newgame-btn:active {
-            transform: scale(0.95);
-            background: #2a4a32;
-        }
-
-        .xiangqi-newgame-btn:hover {
-            background: #4f7a5a;
         }
 
         /* ========== 胜利弹窗 ========== */
@@ -1356,6 +1357,7 @@
             .xiangqi-difficulty-group { padding: 3px 8px 3px 8px; }
             .xiangqi-difficulty-group label { font-size: 0.7rem; }
             .xiangqi-difficulty-select { font-size: 0.72rem; padding: 4px 20px 4px 8px; }
+            .xiangqi-top-bar { gap: 6px; }
         }
 
         @media (max-width: 380px) {
@@ -1452,6 +1454,16 @@
         <!-- ===== 象棋面板 ===== -->
         <div class="game-panel" id="xiangqiPanel">
             <div class="xiangqi-app">
+                <!-- 顶部：走棋状态 + 新一局/重开按钮（移到棋盘上方） -->
+                <div class="xiangqi-top-bar">
+                    <div class="xiangqi-turn-indicator" id="xiangqiTurnIndicator">红方走棋</div>
+                    <div class="xiangqi-btn-group">
+                        <button class="xiangqi-newgame-btn" id="xiangqiNewGameBtn">✨ 新一局</button>
+                        <button class="xiangqi-reset-btn" id="xiangqiResetBtn">🔄 重开</button>
+                    </div>
+                </div>
+
+                <!-- 模式与难度 -->
                 <div class="xiangqi-mode-bar">
                     <div class="xiangqi-mode-buttons">
                         <button class="xiangqi-mode-btn active" id="xiangqiModeTeach">📖 教学</button>
@@ -1478,14 +1490,6 @@
                 <div class="xiangqi-tip-panel" id="xiangqiTipPanel">
                     <span id="xiangqiTipMain">点击棋子查看走法</span>
                     <div class="rule-text" id="xiangqiRuleText"></div>
-                </div>
-
-                <div class="xiangqi-status-bar">
-                    <div class="xiangqi-turn-indicator" id="xiangqiTurnIndicator">红方走棋</div>
-                    <div class="xiangqi-btn-group">
-                        <button class="xiangqi-newgame-btn" id="xiangqiNewGameBtn">✨ 新一局</button>
-                        <button class="xiangqi-reset-btn" id="xiangqiResetBtn">🔄 重开</button>
-                    </div>
                 </div>
             </div>
         </div>
@@ -2393,7 +2397,7 @@
             })();
 
             // ============================================================
-            // 象棋（新增：难度级别 简单/中等/困难）
+            // 象棋（新增：难度级别、状态栏移至上方、减小光晕）
             // ============================================================
             (function() {
                 const COLS = 9, ROWS = 10;
@@ -2415,7 +2419,6 @@
                 let gameOver = false, mode = 'teach', isComputerThinking = false;
                 let captureHistory = [];
                 let lastAIMove = null; // { fromR, fromC, toR, toC }
-                // 难度：'easy' | 'medium' | 'hard'，默认中等
                 let aiDifficulty = 'medium';
 
                 const canvas = document.getElementById('xiangqiCanvas');
@@ -2586,7 +2589,6 @@
                     return false;
                 }
 
-                // 根据难度选择AI走法
                 function findAIMove() {
                     const color = 'b';
                     let bestMove = null, bestScore = -Infinity;
@@ -2602,14 +2604,13 @@
                     }
                     if (allMoves.length === 0) return null;
 
-                    // 根据难度设置随机性和评估权重
                     let randomness = 0;
-                    let checkPenalty = 500; // 被将军惩罚，难度越高惩罚越重
+                    let checkPenalty = 500;
                     let centerBonusWeight = 2;
                     let captureBonusWeight = 1;
                     if (aiDifficulty === 'easy') {
-                        randomness = 40;      // 简单：随机性大，容易走错
-                        checkPenalty = 200;   // 对将军不敏感
+                        randomness = 40;
+                        checkPenalty = 200;
                         centerBonusWeight = 1;
                         captureBonusWeight = 0.8;
                     } else if (aiDifficulty === 'medium') {
@@ -2617,9 +2618,9 @@
                         checkPenalty = 500;
                         centerBonusWeight = 2;
                         captureBonusWeight = 1.2;
-                    } else { // hard
+                    } else {
                         randomness = 5;
-                        checkPenalty = 900;   // 困难：非常在意被将军
+                        checkPenalty = 900;
                         centerBonusWeight = 3;
                         captureBonusWeight = 1.8;
                     }
@@ -2638,11 +2639,10 @@
                             if (captured.type === '将') score += 10000;
                         }
                         if (isKingInCheck(newBoard, color)) score -= checkPenalty;
-                        // 如果走棋后能吃对方将，极大加分
                         if (isKingInCheck(newBoard, 'r')) score += 3000 * captureBonusWeight;
                         const centerBonus = (4 - Math.abs(move.toC - 4)) * centerBonusWeight;
                         score += centerBonus;
-                        score += (Math.random() - 0.5) * randomness * 2; // 随机扰动
+                        score += (Math.random() - 0.5) * randomness * 2;
 
                         if (score > bestScore) {
                             bestScore = score;
@@ -2806,22 +2806,24 @@
                     }).join('');
                 }
 
+                // 减小光晕：只用细微的渐变 + 细虚线，不影响棋子上的字
                 function drawAIGlow(row, col) {
                     const { x, y } = getCanvasCoords(row, col);
-                    const glowRadius = pieceRadius * 2.6;
-                    const gradient = ctx.createRadialGradient(x, y, pieceRadius * 0.4, x, y, glowRadius);
-                    gradient.addColorStop(0, 'rgba(255, 200, 50, 0.9)');
-                    gradient.addColorStop(0.5, 'rgba(255, 180, 0, 0.5)');
+                    // 外圈柔光，半径小（约1.4倍棋子半径），透明度低
+                    const glowRadius = pieceRadius * 1.6;
+                    const gradient = ctx.createRadialGradient(x, y, pieceRadius * 0.7, x, y, glowRadius);
+                    gradient.addColorStop(0, 'rgba(255, 210, 60, 0.5)');
                     gradient.addColorStop(1, 'rgba(255, 200, 0, 0)');
                     ctx.beginPath();
                     ctx.arc(x, y, glowRadius, 0, 2 * Math.PI);
                     ctx.fillStyle = gradient;
                     ctx.fill();
+                    // 细虚线圆环，半径略大于棋子
                     ctx.beginPath();
-                    ctx.arc(x, y, pieceRadius + 8, 0, 2 * Math.PI);
-                    ctx.strokeStyle = '#ffcc33';
-                    ctx.lineWidth = 3;
-                    ctx.setLineDash([5, 4]);
+                    ctx.arc(x, y, pieceRadius + 4, 0, 2 * Math.PI);
+                    ctx.strokeStyle = 'rgba(255, 200, 30, 0.9)';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([3, 3]);
                     ctx.stroke();
                     ctx.setLineDash([]);
                 }
@@ -3015,14 +3017,8 @@
                     resetXiangqiGame();
                 }
 
-                // 难度切换
                 function setDifficulty(newDiff) {
                     aiDifficulty = newDiff;
-                    // 如果游戏正在进行中，切换难度不影响当前对局，只影响后续AI
-                    // 但提示一下
-                    if (!gameOver && currentPlayer === 'b' && !isComputerThinking) {
-                        // 如果轮到电脑，不处理
-                    }
                 }
 
                 window._redrawXiangqi = renderXiangqi;
