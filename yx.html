@@ -27,7 +27,6 @@
             transition: background 0.2s;
         }
 
-        /* ========== 游戏主界面 ========== */
         .main-container {
             background: #e8d5b5;
             background-image: radial-gradient(circle at 30% 20%, #f3e7d0, #cfb991);
@@ -76,7 +75,6 @@
             text-shadow: 2px 2px 0 #d4dff2, 0 4px 8px rgba(0, 0, 0, 0.15);
         }
 
-        /* 顶部操作栏 */
         .top-bar {
             display: flex;
             align-items: center;
@@ -169,7 +167,6 @@
             box-shadow: 0 4px 0 #1e2e3a, 0 4px 10px rgba(0, 0, 0, 0.3);
         }
 
-        /* 游戏面板 */
         .game-panel {
             display: none;
             width: 100%;
@@ -1306,7 +1303,6 @@
             .fullscreen-active .num-btn { width: 38px; height: 38px; font-size: 1.05rem; }
         }
 
-        /* ========== 手机适配 ========== */
         @media (max-width: 600px) {
             body { padding: 8px; align-items: flex-start; }
             .main-container { padding: 14px 12px 12px 12px; border-radius: 32px; }
@@ -1381,7 +1377,6 @@
 </head>
 <body>
 
-    <!-- ================= 主游戏界面 ================= -->
     <div class="main-container theme-gomoku" id="gameUI">
         <h1>🎮 游戏合集</h1>
 
@@ -1674,7 +1669,7 @@
             document.addEventListener('MSFullscreenChange', updateFullscreenUI);
 
             // ============================================================
-            // 胜利弹窗
+            // 胜利弹窗（修复：回调执行前先隐藏弹窗，确保新游戏正常开始）
             // ============================================================
             const winOverlay = document.getElementById('winOverlay');
             const winEmoji = document.getElementById('winEmoji');
@@ -1699,22 +1694,22 @@
                 winBtnCallback = null;
             }
 
+            // 关键：点击按钮时先隐藏弹窗，再执行回调
             winBtn.addEventListener('click', () => {
+                const cb = winBtnCallback;
                 hideWinModal();
-                if (winBtnCallback) {
-                    const cb = winBtnCallback;
-                    winBtnCallback = null;
-                    cb();
+                if (cb) {
+                    // 用 setTimeout 确保弹窗已隐藏、DOM 更新完成后再执行
+                    setTimeout(cb, 50);
                 }
             });
 
             winOverlay.addEventListener('click', (e) => {
                 if (e.target === winOverlay) {
+                    const cb = winBtnCallback;
                     hideWinModal();
-                    if (winBtnCallback) {
-                        const cb = winBtnCallback;
-                        winBtnCallback = null;
-                        cb();
+                    if (cb) {
+                        setTimeout(cb, 50);
                     }
                 }
             });
@@ -2086,7 +2081,7 @@
             })();
 
             // ============================================================
-            // 数独（增强随机性版本 - 每次打开/新游戏都不同）
+            // 数独（修复：胜利弹窗“再来一局”正确开始新游戏）
             // ============================================================
             (function() {
                 let boardSize = 9, difficulty = 'medium';
@@ -2094,7 +2089,6 @@
                 let tentativeCells = [];
                 let selectedRow = -1, selectedCol = -1, gameOver = false;
                 let tentativeMode = false;
-                // 随机种子计数器
                 let seedCounter = 0;
 
                 const CONFIG = {
@@ -2116,7 +2110,6 @@
                 function emptyBoard(n) { return Array.from({ length: n }, () => Array(n).fill(0)); }
                 function cloneBoard(b) { return b.map(row => [...row]); }
 
-                // 增强随机种子：时间 + 计数器 + 随机数混合，避免浏览器初始随机序列重复
                 function createSeededRandom() {
                     seedCounter++;
                     const timeSeed = Date.now() % 100000;
@@ -2148,7 +2141,6 @@
                         const row = Math.floor(pos / n), col = pos % n;
                         if (b[row][col] !== 0) return solve(pos + 1);
                         const nums = Array.from({ length: n }, (_, i) => i + 1);
-                        // 用种子随机打乱
                         for (let i = nums.length - 1; i > 0; i--) {
                             const j = Math.floor(rng() * (i + 1));
                             [nums[i], nums[j]] = [nums[j], nums[i]];
@@ -2178,7 +2170,6 @@
                     const positions = [];
                     for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) positions.push([r, c]);
 
-                    // 种子随机打乱位置
                     for (let i = positions.length - 1; i > 0; i--) {
                         const j = Math.floor(rng() * (i + 1));
                         [positions[i], positions[j]] = [positions[j], positions[i]];
@@ -2224,7 +2215,11 @@
                 function showSudokuWinModal() {
                     showWinModal({
                         emoji: '🎉', title: '数独完成！', subtitle: '你成功解开了这道数独！',
-                        sudokuTheme: true, onButton: () => newSudokuGame()
+                        sudokuTheme: true,
+                        onButton: () => {
+                            // 修复：直接调用 newSudokuGame，弹窗已在回调前隐藏
+                            newSudokuGame();
+                        }
                     });
                 }
 
@@ -2352,17 +2347,24 @@
                     renderSudokuBoard();
                 }
 
+                // 关键函数：开始新游戏，包含隐藏弹窗、重置状态、重新生成题目
                 function newSudokuGame() {
+                    // 先隐藏胜利弹窗
+                    hideWinModal();
+                    // 重置游戏结束标记
+                    gameOver = false;
+                    // 读取当前选择的尺寸和难度
                     boardSize = parseInt(sizeSelect.value, 10);
                     difficulty = difficultySelect.value;
+                    // 生成新题目
                     const full = generateFullSolution(boardSize);
                     board = generatePuzzle(full, boardSize, difficulty);
                     fixedCells = board.map(row => row.map(v => v !== 0));
                     tentativeCells = board.map(row => row.map(() => false));
-                    selectedRow = -1; selectedCol = -1; gameOver = false;
+                    selectedRow = -1; selectedCol = -1;
                     tentativeMode = false;
                     tentativeModeBtn.classList.remove('active');
-                    hideWinModal();
+                    // 重新渲染
                     renderSudokuBoard();
                     sudokuMessage.textContent = `${boardSize}宫格 · ${difficulty === 'easy' ? '简单' : difficulty === 'medium' ? '中等' : '困难'}`;
                 }
@@ -2411,9 +2413,8 @@
                     tentativeModeBtn.addEventListener('click', toggleTentativeMode);
                     sizeSelect.addEventListener('change', newSudokuGame);
                     difficultySelect.addEventListener('change', newSudokuGame);
-                    // 增强随机：先消耗若干随机数，避免浏览器初始序列重复
+                    // 增强随机：消耗初始随机序列
                     for (let i = 0; i < 50; i++) Math.random();
-                    // 延迟 50ms 生成第一局，让时间种子不同
                     setTimeout(() => newSudokuGame(), 50);
                 }
                 initSudoku();
