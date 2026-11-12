@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>题库导入工具 · 智能识别括号内答案</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+        body { background: #f0f4f8; padding: 12px; display: flex; justify-content: center; }
+        .wrap { max-width: 960px; width: 100%; background: #fff; border-radius: 20px; box-shadow: 0 20px 40px -12px rgba(0,0,0,0.2); overflow: hidden; }
+        .head { background: #1e3a8a; color: #fff; padding: 18px 20px; }
+        .head h1 { font-size: 1.2rem; }
+        .head p { font-size: 0.85rem; opacity: 0.85; margin-top: 6px; }
+        .body { padding: 18px 20px; }
+        textarea { width: 100%; min-height: 300px; padding: 14px; border: 2px solid #cbd5e1; border-radius: 12px; font-size: 0.95rem; line-height: 1.6; font-family: ui-monospace, monospace; resize: vertical; }
+        textarea:focus { outline: none; border-color: #1e3a8a; }
+        .row { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+        .btn { padding: 11px 18px; border-radius: 30px; border: none; font-weight: 600; font-size: 0.95rem; cursor: pointer; flex: 1; min-width: 120px; }
+        .btn-primary { background: #1e3a8a; color: #fff; }
+        .btn-primary:hover { background: #1e40af; }
+        .btn-green { background: #10b981; color: #fff; }
+        .btn-green:hover { background: #059669; }
+        .btn-gray { background: #e2e8f0; color: #1e293b; }
+        .btn-gray:hover { background: #cbd5e1; }
+        .result-box { margin-top: 16px; background: #f8fafc; border-radius: 12px; padding: 14px; font-size: 0.9rem; line-height: 1.7; max-height: 360px; overflow: auto; }
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; margin-right: 6px; }
+        .tag-single { background: #dbeafe; color: #1e40af; }
+        .tag-multi { background: #fef3c7; color: #92400e; }
+        .tag-judge { background: #d1fae5; color: #065f46; }
+        .err { color: #ef4444; }
+        .ok { color: #10b981; }
+        .hint { background: #eff6ff; border-radius: 10px; padding: 12px; font-size: 0.85rem; color: #1e40af; line-height: 1.7; margin-bottom: 12px; }
+        .hint code { background: #dbeafe; padding: 1px 5px; border-radius: 4px; }
+        .hint strong { color: #1e3a8a; }
+        @media (max-width: 600px) { .head h1 { font-size: 1.05rem; } .body { padding: 14px; } }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="head">
+        <h1>📥 题库导入工具 · 智能识别括号答案</h1>
+        <p>支持答案写在括号里的格式，自动判断题型，判断题自动去除答案括号</p>
+    </div>
+    <div class="body">
+        <div class="hint">
+            <strong>✅ 支持格式（以下均可混合粘贴）：</strong><br>
+            <strong>1. 选择题（答案在括号内）：</strong><br>
+            <code>1. 施工升降机安装高度大于（A）米时应安装障碍灯。</code><br>
+            <code>A. 50m &nbsp; B. 80m &nbsp; C. 100m &nbsp; D. 120m</code><br>
+            <strong>2. 多选题（括号内多个字母）：</strong><br>
+            <code>2. 以下属于安全装置的有（ABD）。（多选）</code><br>
+            <code>A. 防坠安全器 &nbsp; B. 上限位开关 &nbsp; C. 普通门锁 &nbsp; D. 超载限制器</code><br>
+            <strong>3. 判断题（括号内 √/×/正确/错误，解析后答案括号自动去除）：</strong><br>
+            <code>3. 施工升降机运行中可打开吊笼门观察。（×）</code><br>
+            <code>4. 每班首次运行应空载全程检查。（正确）</code><br>
+            <strong>4. 传统"答案："行格式也兼容。</strong><br>
+            <span style="color:#64748b;">提示：多选题若无"（多选）"标记，答案有2个及以上字母即自动识别为多选。</span>
+        </div>
+        <textarea id="input" placeholder="在此粘贴题目文本，支持以下混合格式：
+
+1. 施工升降机安装高度大于（A）米时应安装障碍灯。
+A. 50m   B. 80m   C. 100m   D. 120m
+解析：安装高度大于50m并超过建筑物高度时应安装。
+
+2. 以下属于安全装置的有（ABD）。（多选）
+A. 防坠安全器
+B. 上限位开关
+C. 普通门锁
+D. 超载限制器
+
+3. 施工升降机运行中可随时打开吊笼门观察。（×）
+解析：运行中严禁打开吊笼门。
+
+4. 施工升降机每3个月需进行超载试验。（正确）"></textarea>
+        <div class="row">
+            <button class="btn btn-primary" onclick="parseAndShow()">🔍 解析并预览</button>
+            <button class="btn btn-green" onclick="mergeAndDownload()">💾 合并下载 bank.js</button>
+            <button class="btn btn-gray" onclick="clearAll()">🗑️ 清空</button>
+        </div>
+        <div id="resultBox" class="result-box" style="display:none;"></div>
+    </div>
+</div>
+
+<script>
+    let parsedQuestions = [];
+
+    // ---------- 答案词表 ----------
+    const TRUE_WORDS = ['正确','对','√','✓','是','T','TRUE','Y','YES','A'];
+    const FALSE_WORDS = ['错误','错','×','✗','否','F','FALSE','N','NO','B'];
+
+    function isTrueWord(s) {
+        s = String(s).trim().toUpperCase();
+        return TRUE_WORDS.some(w => w.toUpperCase() === s);
+    }
+    function isFalseWord(s) {
+        s = String(s).trim().toUpperCase();
+        return FALSE_WORDS.some(w => w.toUpperCase() === s);
+    }
+
+    // ---------- 从题干括号中提取答案 ----------
+    // 返回 { answer, cleanQuestion, ansType: 'single'|'multi'|'judge'|null }
+    // 判断题：整段括号删除；选择题：括号替换为（ ）保留填空位
+    function extractParenAnswer(questionLine) {
+        const regex = /[（(]([^（）()]*)[）)]/g;
+        let matches = [];
+        let m;
+        while ((m = regex.exec(questionLine)) !== null) {
+            matches.push({ full: m[0], content: m[1].trim(), index: m.index });
+        }
+        if (matches.length === 0) return { answer: null, cleanQuestion: questionLine, ansType: null };
+
+        // 从后往前找第一个非空内容的括号
+        for (let i = matches.length - 1; i >= 0; i--) {
+            const content = matches[i].content;
+            if (content.length === 0) continue;
+            const upper = content.toUpperCase();
+
+            // 判断题：整段括号删除（连括号一起）
+            if (isTrueWord(content) || isFalseWord(content)) {
+                return {
+                    answer: content,
+                    cleanQuestion: questionLine.substring(0, matches[i].index) + questionLine.substring(matches[i].index + matches[i].full.length),
+                    ansType: 'judge'
+                };
+            }
+            // 单选：括号替换为（ ）保留填空位
+            if (/^[A-F]$/.test(upper)) {
+                return {
+                    answer: upper,
+                    cleanQuestion: questionLine.substring(0, matches[i].index) + '（ ）' + questionLine.substring(matches[i].index + matches[i].full.length),
+                    ansType: 'single'
+                };
+            }
+            // 多选：括号替换为（ ）保留填空位
+            if (/^[A-F]{2,}$/.test(upper)) {
+                return {
+                    answer: upper,
+                    cleanQuestion: questionLine.substring(0, matches[i].index) + '（ ）' + questionLine.substring(matches[i].index + matches[i].full.length),
+                    ansType: 'multi'
+                };
+            }
+            // 不像答案，继续往前找
+        }
+        return { answer: null, cleanQuestion: questionLine, ansType: null };
+    }
+
+    // ---------- 主解析器 ----------
+    function parseText(text) {
+        const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+        const questions = [];
+        let current = null;
+
+        const isQuestionStart = (line) => /^\d+[\.、\)]/.test(line);
+        const isOptionLine = (line) => /^[A-F][\.、\)]\s*.+/.test(line) || /^[A-F]\s+[^A-F]/.test(line);
+
+        function finalize(q) {
+            if (!q || !q.question) return;
+            let type = q.type;
+            let ansRaw = (q.answerRaw || '').trim();
+            if (q.parenAnswer && !ansRaw) ansRaw = q.parenAnswer;
+
+            // 判断题识别
+            const isJudgeByParen = q.parenAnswer && (isTrueWord(q.parenAnswer) || isFalseWord(q.parenAnswer));
+            const isJudgeByAns = ansRaw && (isTrueWord(ansRaw) || isFalseWord(ansRaw));
+            const isJudgeByText = /（判断）|\(判断\)|判断题/.test(q.question) || (!q.options.length && (isJudgeByParen || isJudgeByAns));
+
+            if (!type) {
+                if (isJudgeByText || isJudgeByParen || isJudgeByAns) type = 'judge';
+                else if (q.options.length > 0) {
+                    const letters = (ansRaw.match(/[A-F]/gi) || []);
+                    type = letters.length >= 2 ? 'multi' : 'single';
+                } else {
+                    type = 'judge';
+                }
+            }
+
+            if (type === 'judge') {
+                let ans = 0;
+                if (isFalseWord(ansRaw)) ans = 1;
+                else if (isTrueWord(ansRaw)) ans = 0;
+                // 判断题题干：去掉题型标记，并去掉残留的空括号
+                let cleanQ = q.question.replace(/（判断）|\(判断\)|判断题/g, '').trim();
+                cleanQ = cleanQ.replace(/[（(]\s*[）)]/g, '').trim();   // 去除空括号
+                questions.push({
+                    type: 'judge',
+                    question: cleanQ,
+                    answer: ans,
+                    explanation: q.explanation || ''
+                });
+            } else if (type === 'multi') {
+                const letters = (ansRaw.match(/[A-F]/gi) || []).map(s => s.toUpperCase());
+                const ansArr = [...new Set(letters)].map(l => l.charCodeAt(0) - 65).filter(n => n >= 0 && n < q.options.length).sort((a,b)=>a-b);
+                if (q.options.length === 0) return;
+                questions.push({
+                    type: 'multi',
+                    question: q.question.replace(/（多选）|\(多选\)|多选题/g, '').trim(),
+                    options: q.options,
+                    answer: ansArr.length ? ansArr : [0],
+                    explanation: q.explanation || ''
+                });
+            } else {
+                const m = ansRaw.match(/[A-F]/i);
+                const ansIdx = m ? m[0].toUpperCase().charCodeAt(0) - 65 : 0;
+                if (q.options.length === 0) return;
+                questions.push({
+                    type: 'single',
+                    question: q.question.replace(/（单选）|\(单选\)|单选题/g, '').trim(),
+                    options: q.options,
+                    answer: (ansIdx >= 0 && ansIdx < q.options.length) ? ansIdx : 0,
+                    explanation: q.explanation || ''
+                });
+            }
+        }
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+
+            // 新题开始
+            if (isQuestionStart(line)) {
+                if (current) finalize(current);
+                let qText = line.replace(/^\d+[\.、\)]\s*/, '');
+                const { answer: parenAns, cleanQuestion, ansType } = extractParenAnswer(qText);
+                current = {
+                    question: cleanQuestion,
+                    options: [],
+                    answerRaw: '',
+                    parenAnswer: parenAns,
+                    type: ansType || null,
+                    explanation: ''
+                };
+                // 题干中的题型标记覆盖
+                if (/（判断）|\(判断\)|判断题/.test(qText)) current.type = 'judge';
+                else if (/（多选）|\(多选\)|多选题/.test(qText)) current.type = 'multi';
+                else if (/（单选）|\(单选\)|单选题/.test(qText)) current.type = 'single';
+                continue;
+            }
+
+            if (!current) continue;
+
+            // 答案行
+            let ansMatch = line.match(/^(?:答案|正确答案|参考答案)\s*[:：]\s*(.+)/i);
+            if (ansMatch) {
+                current.answerRaw = ansMatch[1].trim();
+                continue;
+            }
+            // 解析行
+            let expMatch = line.match(/^(?:解析|说明)\s*[:：]\s*(.+)/i);
+            if (expMatch) {
+                current.explanation = expMatch[1].trim();
+                continue;
+            }
+
+            // 选项行
+            if (isOptionLine(line)) {
+                const parts = line.split(/\s{2,}|(?=[A-F][\.、\)]\s*)/).filter(s => s.trim());
+                if (parts.length >= 2 && parts.filter(p => /^[A-F][\.、\)]/.test(p)).length >= 2) {
+                    parts.forEach(p => {
+                        const m = p.match(/^([A-F])[\.、\)]\s*(.+)/);
+                        if (m) current.options.push(m[2].trim());
+                    });
+                } else {
+                    const m = line.match(/^([A-F])[\.、\)]\s*(.+)/) || line.match(/^([A-F])\s+(.+)/);
+                    if (m) current.options.push(m[2].trim());
+                }
+                continue;
+            }
+
+            // 题干续行：在选项出现前，再尝试提取括号答案
+            if (current.options.length === 0) {
+                const { answer: moreAns, cleanQuestion, ansType } = extractParenAnswer(line);
+                if (moreAns && !current.parenAnswer) {
+                    current.parenAnswer = moreAns;
+                    if (ansType) current.type = ansType;
+                    current.question += ' ' + cleanQuestion;
+                } else {
+                    current.question += ' ' + line;
+                }
+            }
+        }
+        if (current) finalize(current);
+        return questions;
+    }
+
+    // ---------- 预览 ----------
+    function parseAndShow() {
+        const text = document.getElementById('input').value;
+        const box = document.getElementById('resultBox');
+        box.style.display = 'block';
+        if (!text.trim()) {
+            box.innerHTML = '<span class="err">请先粘贴题目文本。</span>';
+            return;
+        }
+        try {
+            parsedQuestions = parseText(text);
+        } catch (e) {
+            box.innerHTML = `<span class="err">解析出错：${e.message}</span>`;
+            return;
+        }
+        if (parsedQuestions.length === 0) {
+            box.innerHTML = '<span class="err">没有解析出题目，请检查格式（题干需以数字编号开头）。</span>';
+            return;
+        }
+        let html = `<div class="ok">✅ 成功解析 ${parsedQuestions.length} 道题：</div><hr style="margin:8px 0;border:none;border-top:1px solid #e2e8f0;">`;
+        parsedQuestions.forEach((q, i) => {
+            const tag = q.type === 'single' ? '<span class="tag tag-single">单选</span>' : q.type === 'multi' ? '<span class="tag tag-multi">多选</span>' : '<span class="tag tag-judge">判断</span>';
+            let ansText = '';
+            if (q.type === 'judge') ansText = q.answer === 0 ? '正确' : '错误';
+            else if (q.type === 'multi') ansText = q.answer.map(a => String.fromCharCode(65+a)).join('、');
+            else ansText = String.fromCharCode(65 + q.answer);
+            html += `<div style="margin-bottom:10px;">${tag}<strong>${i+1}.</strong> ${escapeHtml(q.question)}<br>`;
+            if (q.options) html += `<span style="color:#64748b;">选项：</span>${q.options.map((o,oi)=>String.fromCharCode(65+oi)+'.'+escapeHtml(o)).join('  ')}<br>`;
+            html += `<span style="color:#10b981;">答案：${ansText}</span>`;
+            if (q.explanation) html += ` <span style="color:#64748b;">｜解析：${escapeHtml(q.explanation)}</span>`;
+            html += `</div>`;
+        });
+        box.innerHTML = html;
+    }
+
+    function escapeHtml(s) {
+        return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    }
+
+    // ---------- 生成代码 ----------
+    function toBankCode(list) {
+        return list.map(q => {
+            if (q.type === 'judge') {
+                return `    { type:'judge', question:${JSON.stringify(q.question)}, answer:${q.answer}, explanation:${JSON.stringify(q.explanation||'')} },`;
+            } else if (q.type === 'multi') {
+                return `    { type:'multi', question:${JSON.stringify(q.question)}, options:${JSON.stringify(q.options)}, answer:${JSON.stringify(q.answer)}, explanation:${JSON.stringify(q.explanation||'')} },`;
+            } else {
+                return `    { type:'single', question:${JSON.stringify(q.question)}, options:${JSON.stringify(q.options)}, answer:${q.answer}, explanation:${JSON.stringify(q.explanation||'')} },`;
+            }
+        }).join('\n');
+    }
+
+    // ---------- 合并下载 ----------
+    function mergeAndDownload() {
+        if (!parsedQuestions.length) {
+            const text = document.getElementById('input').value;
+            if (!text.trim()) { alert('请先粘贴题目文本并解析。'); return; }
+            parsedQuestions = parseText(text);
+            if (!parsedQuestions.length) { alert('没有解析出题目。'); return; }
+        }
+
+        let existingQuestions = [];
+        try {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', 'bank.js', false);
+            xhr.send(null);
+            if (xhr.status === 200 || xhr.status === 0) {
+                const existingCode = xhr.responseText;
+                const match = existingCode.match(/const\s+questionBank\s*=\s*\[([\s\S]*?)\];/);
+                if (match) {
+                    try {
+                        const fn = new Function('return [' + match[1] + '];');
+                        existingQuestions = fn();
+                    } catch (e) {
+                        console.warn('现有题库解析失败，将只生成新题库', e);
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn('无法读取现有 bank.js，将只生成新题库', e);
+        }
+
+        const allQuestions = existingQuestions.concat(parsedQuestions);
+        const seen = new Set();
+        const unique = [];
+        allQuestions.forEach(q => {
+            if (!seen.has(q.question)) { seen.add(q.question); unique.push(q); }
+        });
+
+        const header = `// ============================================================\n// 河南建筑电梯司机 · 题库文件（自动生成）\n// 生成时间：${new Date().toLocaleString()}\n// 共 ${unique.length} 题\n// ============================================================\n\nconst questionBank = [\n`;
+        const footer = `\n];\n`;
+        const singles = unique.filter(q => q.type === 'single');
+        const multis = unique.filter(q => q.type === 'multi');
+        const judges = unique.filter(q => q.type === 'judge');
+        let body = '';
+        if (singles.length) body += '    // ---------- 单选题 ----------\n' + toBankCode(singles) + '\n\n';
+        if (multis.length) body += '    // ---------- 多选题 ----------\n' + toBankCode(multis) + '\n\n';
+        if (judges.length) body += '    // ---------- 判断题 ----------\n' + toBankCode(judges) + '\n';
+
+        const content = header + body + footer;
+        const blob = new Blob([content], { type: 'text/javascript;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'bank.js';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        document.getElementById('resultBox').style.display = 'block';
+        document.getElementById('resultBox').innerHTML = `<div class="ok">✅ 已生成并下载 bank.js，共 ${unique.length} 题（原有 ${existingQuestions.length} 题 + 新增 ${parsedQuestions.length} 题，去重后 ${unique.length} 题）。<br>把下载的 bank.js 覆盖到考试目录即可。</div>`;
+    }
+
+    function clearAll() {
+        document.getElementById('input').value = '';
+        document.getElementById('resultBox').style.display = 'none';
+        parsedQuestions = [];
+    }
+</script>
+</body>
+</html>
