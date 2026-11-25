@@ -140,6 +140,7 @@
     padding: 8px 14px; border-radius: 7px; margin-right: 10px; cursor: pointer;
     font-size: 13px; font-weight: 600; font-family: inherit; }
 
+  input[type=range] { width: 100%; accent-color: #2563eb; min-height: 32px; }
   select, input[type=number], input[type=text] { width: 100%; padding: 12px;
     border: 1.5px solid #e2e8f0; border-radius: 9px; background: #fff;
     color: #0f172a; font-size: 16px; transition: all .15s;
@@ -187,8 +188,8 @@
   /* === 关键修复：stage 允许纵向滚动 === */
   .stage { position: relative; width: 100%; overflow: hidden; border-radius: 10px;
     background: #f1f5f9; -webkit-user-select: none; user-select: none;
-    line-height: 0; border: 1px solid #e2e8f0; touch-action: pan-y; overscroll-behavior: contain; }
-  .stage canvas { display: block; width: 100%; touch-action: pan-y; }
+    line-height: 0; border: 1px solid #e2e8f0; touch-action: none; overscroll-behavior: contain; }
+  .stage canvas { display: block; width: 100%; touch-action: none; }
   .stage canvas.overlay { position: absolute; left: 0; top: 0; pointer-events: none; }
   .stage.dragging { touch-action: none; }
 
@@ -629,7 +630,7 @@
     border-radius: 10px;
     background: #0f172a;
     overflow: hidden;
-    touch-action: pan-y;
+    touch-action: none;
     line-height: 0;
     margin-top: 10px;
   }
@@ -637,7 +638,7 @@
     display: block;
     width: 100%;
     height: auto;
-    touch-action: pan-y;
+    touch-action: none;
   }
   .idphoto-crop-stage canvas.overlay {
     position: absolute;
@@ -764,6 +765,13 @@
       <span class="catalog-line"></span>
     </div>
     <div class="catalog-items">
+      <button class="feature-card" data-tab="combine" type="button">
+        <span class="feature-icon">🧩</span>
+        <span class="feature-text">
+          <span class="feature-name">图片合成</span>
+          <span class="feature-desc">双图拼接 · 可调</span>
+        </span>
+      </button>
       <button class="feature-card" data-tab="img2pdf" type="button">
         <span class="feature-icon">🖼️</span>
         <span class="feature-text">
@@ -1121,6 +1129,77 @@
         <div class="btn-row hidden" id="idphotoDownloadRow">
           <button class="btn green big" id="idphotoDownloadBtn" type="button">💾 保存图片</button>
         </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-combine" data-theme="convert">
+      <div class="card">
+        <h2><span class="step-label">第 1 步</span><span class="step-title">选择两张图片</span></h2>
+        <div class="field">
+          <label>图片 A（第一张）</label>
+          <input type="file" id="combineFileA" accept="image/*" />
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label>图片 B（第二张）</label>
+          <input type="file" id="combineFileB" accept="image/*" />
+        </div>
+        <div class="btn-row hidden" id="combineSwapRow" style="margin-top:10px">
+          <button class="btn ghost" id="combineSwap" type="button">⇄ 交换 A / B</button>
+        </div>
+      </div>
+      <div class="card hidden" id="combineOptCard">
+        <h2><span class="step-label">第 2 步</span><span class="step-title">合成设置</span></h2>
+        <div class="field">
+          <label>合成方向</label>
+          <select id="combineDir">
+            <option value="vertical" selected>上下排列（A 上 B 下）</option>
+            <option value="horizontal">左右排列（A 左 B 右）</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>页面大小</label>
+          <select id="combinePage">
+            <option value="a4" selected>A4 纵向</option>
+            <option value="a4l">A4 横向</option>
+            <option value="fit">按内容自适应</option>
+            <option value="custom">自定义（毫米）</option>
+          </select>
+        </div>
+        <div class="field hidden" id="combineCustomWrap">
+          <label>自定义页面尺寸（毫米）</label>
+          <div class="btn-row">
+            <input type="number" id="combineCustomW" value="210" min="10" max="3000" style="flex:1" />
+            <span style="align-self:center; color:#64748b;">×</span>
+            <input type="number" id="combineCustomH" value="297" min="10" max="3000" style="flex:1" />
+          </div>
+        </div>
+        <div class="field">
+          <label>图片间距（像素）</label>
+          <input type="number" id="combineGap" value="20" min="0" max="500" />
+        </div>
+        <div class="field">
+          <label>图片 A 大小：<span id="combineScaleAVal">100</span>%</label>
+          <input type="range" id="combineScaleA" min="10" max="200" value="100" />
+        </div>
+        <div class="field">
+          <label>图片 B 大小：<span id="combineScaleBVal">100</span>%</label>
+          <input type="range" id="combineScaleB" min="10" max="200" value="100" />
+        </div>
+        <div class="btn-row">
+          <button class="btn gray" id="combineReset" type="button">↺ 重置缩放与位置</button>
+        </div>
+      </div>
+      <div class="card hidden" id="combinePreviewCard">
+        <h2><span class="step-label">第 3 步</span><span class="step-title">预览与导出</span></h2>
+        <p class="hint">💡 可直接用手指 / 鼠标在预览图上<b>拖动任意一张图片</b>调整位置；缩放在第 2 步调节。</p>
+        <div class="preview-wrap" style="text-align:center">
+          <canvas id="combineCanvas" style="max-width:100%; touch-action:none; cursor:grab; border:1px solid #e2e8f0; background:#fff;"></canvas>
+        </div>
+        <div class="btn-row" style="margin-top:12px">
+          <button class="btn green" id="combineSaveImg" type="button" style="flex:1">💾 保存图片 PNG</button>
+          <button class="btn purple" id="combineSavePdf" type="button" style="flex:1">📄 生成 PDF</button>
+        </div>
+        <div class="status" id="combineStatus"></div>
       </div>
     </section>
 
@@ -1647,13 +1726,13 @@
     const toolNames = {
       split: '试卷拆分', crop: 'PDF 裁剪', arrange: '页面调整', scan: '扫描文档',
       idcard: '身份证复印件', idphoto: '证件照制作',
-      img2pdf: '图片转 PDF', pdf2img: 'PDF 转图片', word2pdf: 'Word 转 PDF',
+      combine: '图片合成', img2pdf: '图片转 PDF', pdf2img: 'PDF 转图片', word2pdf: 'Word 转 PDF',
       merge: 'PDF 合并', extract: 'PDF 拆分'
     };
     const toolIcons = {
       split: '📝', crop: '✂️', arrange: '📄', scan: '📷',
       idcard: '🪪', idphoto: '👤',
-      img2pdf: '🖼️', pdf2img: '📷', word2pdf: '📘',
+      combine: '🧩', img2pdf: '🖼️', pdf2img: '📷', word2pdf: '📘',
       merge: '🔗', extract: '📑'
     };
 
@@ -2084,6 +2163,26 @@
           sayFn('无法打开新窗口，请使用「🖨 打印 / 存为 PDF」。', true);
         }
       });
+    }
+
+    // 修复：stage 区域 touch-action 已锁死，空白处用手指拖动来滚动页面
+    function makeStageScrollable(stage) {
+      if (!stage) return;
+      let pan = null;
+      stage.addEventListener('pointerdown', (e) => {
+        if (stage.classList.contains('dragging')) return;
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        pan = { x: e.clientX, y: e.clientY, left: window.scrollX, top: window.scrollY, pid: e.pointerId };
+      });
+      stage.addEventListener('pointermove', (e) => {
+        if (!pan || pan.pid !== e.pointerId) return;
+        if (stage.classList.contains('dragging')) { pan = null; return; }
+        window.scrollTo(pan.left - (e.clientX - pan.x), pan.top - (e.clientY - pan.y));
+      });
+      const end = (e) => { if (pan && e.pointerId === pan.pid) pan = null; };
+      stage.addEventListener('pointerup', end);
+      stage.addEventListener('pointercancel', end);
+      stage.addEventListener('lostpointercapture', end);
     }
 
     /* ===== 模块 1：试卷拆分 ===== */
@@ -4508,6 +4607,7 @@
         const c = idphotoCrop.crop;
         idphotoCrop.dragMode = mode;
         idphotoCrop.dragStart = { px: p.x, py: p.y, W: p.w, H: p.h, x: c.x, y: c.y, w: c.w, h: c.h };
+        stage.classList.add('dragging');
         try { stage.setPointerCapture(e.pointerId); } catch (_) {}
         e.preventDefault();
       }, { passive: false });
@@ -4545,6 +4645,7 @@
         if (!idphotoCrop.dragMode) return;
         idphotoCrop.dragMode = null;
         idphotoCrop.dragStart = null;
+        stage.classList.remove('dragging');
         if (e && e.pointerId !== undefined) {
           try { stage.releasePointerCapture(e.pointerId); } catch (_) {}
         }
@@ -5068,6 +5169,293 @@
       document.body.appendChild(toast);
       setTimeout(() => toast.remove(), 3000);
     }
+
+    /* ===== 模块 6.5：图片合成（双图拼接） ===== */
+    async function saveImageBlob(blob, filename, sayFn) {
+      if (isWeChatEnv) {
+        const reader = new FileReader();
+        reader.onload = function (ev) {
+          const modal = $('#saveImgModal');
+          const img = $('#saveImgPreview');
+          if (modal && img) {
+            img.src = ev.target.result;
+            modal.classList.remove('hidden');
+          }
+          if (sayFn) sayFn('请长按图片保存', false, true);
+        };
+        reader.readAsDataURL(blob);
+        return;
+      }
+      if (hasSavePicker && !isMobile) {
+        try {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: filename,
+            types: [{ description: 'PNG 图片', accept: { 'image/png': ['.png'] } }]
+          });
+          const writable = await handle.createWritable();
+          await writable.write(blob);
+          await writable.close();
+          if (sayFn) sayFn('✅ 已保存：' + (handle.name || filename), false, true);
+          return;
+        } catch (err) {
+          if (err && err.name === 'AbortError') { if (sayFn) sayFn('已取消保存'); return; }
+        }
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename; a.rel = 'noopener'; a.target = '_self';
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      try { a.click(); } catch (e) {
+        const evt = document.createEvent('MouseEvents');
+        evt.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0,
+          false, false, false, false, 0, null);
+        a.dispatchEvent(evt);
+      }
+      setTimeout(() => {
+        try { document.body.removeChild(a); } catch (_) {}
+        setTimeout(() => { try { URL.revokeObjectURL(url); } catch (_) {} }, 60000);
+      }, 5000);
+      if (sayFn) sayFn('✅ 已触发下载，请在相册/下载目录查找', false, true);
+    }
+
+    const combine = {
+      a: null, b: null,
+      dir: 'vertical', pageKey: 'a4', gap: 20,
+      customW: 210, customH: 297,
+      dragging: null
+    };
+
+    function combineMm2px(mm) { return Math.round(mm * 96 / 25.4); }
+
+    function combinePagePx(canvasW, canvasH) {
+      const key = combine.pageKey;
+      if (key === 'a4') return [794, 1123];
+      if (key === 'a4l') return [1123, 794];
+      if (key === 'custom') return [combineMm2px(combine.customW), combineMm2px(combine.customH)];
+      return [canvasW, canvasH];
+    }
+
+    function combineSources() {
+      return [combine.a, combine.b].filter(Boolean);
+    }
+
+    function drawCombine() {
+      const srcs = combineSources();
+      if (srcs.length === 0) return;
+      const cv = $('#combineCanvas');
+      const gap = Math.max(0, combine.gap | 0);
+      const dir = combine.dir;
+      const sizes = srcs.map(s => {
+        const k = (s.scale || 100) / 100;
+        return [s.img.naturalWidth * k, s.img.naturalHeight * k];
+      });
+      let pw, ph;
+      const fixed = combine.pageKey !== 'fit';
+      if (dir === 'vertical') {
+        pw = Math.max(sizes[0][0], sizes[1] ? sizes[1][0] : 0);
+        ph = sizes[0][1] + (sizes[1] ? sizes[1][1] + gap : 0);
+      } else {
+        pw = sizes[0][0] + (sizes[1] ? sizes[1][0] + gap : 0);
+        ph = Math.max(sizes[0][1], sizes[1] ? sizes[1][1] : 0);
+      }
+      pw = Math.max(1, Math.ceil(pw));
+      ph = Math.max(1, Math.ceil(ph));
+      const page = combinePagePx(pw, ph);
+      cv.width = page[0];
+      cv.height = page[1];
+      const ctx = cv.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, cv.width, cv.height);
+      srcs.forEach((s, i) => {
+        const w = sizes[i][0], h = sizes[i][1];
+        let dx, dy;
+        if (dir === 'vertical') {
+          dx = (cv.width - w) / 2;
+          dy = (i === 0) ? 0 : sizes[0][1] + gap;
+        } else {
+          dx = (i === 0) ? 0 : sizes[0][0] + gap;
+          dy = (cv.height - h) / 2;
+        }
+        s._dx = dx + (s.x || 0);
+        s._dy = dy + (s.y || 0);
+        s._w = w;
+        s._h = h;
+        ctx.drawImage(s.img, s._dx, s._dy, w, h);
+        ctx.strokeStyle = 'rgba(37,99,235,0.25)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+        ctx.strokeRect(s._dx, s._dy, w, h);
+        ctx.setLineDash([]);
+      });
+    }
+
+    async function combineLoadFile(file, slot) {
+      const dataUrl = await readDataUrl(file);
+      const img = await loadImage(dataUrl);
+      combine[slot] = { img: img, file: file, dataUrl: dataUrl, scale: 100, x: 0, y: 0 };
+      $('#combineOptCard').classList.remove('hidden');
+      $('#combinePreviewCard').classList.remove('hidden');
+      if (combine.a && combine.b) $('#combineSwapRow').classList.remove('hidden');
+      drawCombine();
+      say('#combineStatus', '已载入图片 ' + (slot === 'a' ? 'A' : 'B') + '：' + file.name, false, true);
+    }
+
+    bind('#combineFileA', 'change', async (e) => {
+      const f = e.target.files[0];
+      if (!f) return;
+      try { await combineLoadFile(f, 'a'); }
+      catch (err) { say('#combineStatus', '图片 A 载入失败：' + (err && err.message ? err.message : err), true); }
+    });
+    bind('#combineFileB', 'change', async (e) => {
+      const f = e.target.files[0];
+      if (!f) return;
+      try { await combineLoadFile(f, 'b'); }
+      catch (err) { say('#combineStatus', '图片 B 载入失败：' + (err && err.message ? err.message : err), true); }
+    });
+
+    bind('#combineSwap', 'click', () => {
+      if (!combine.a || !combine.b) return;
+      const ta = combine.a, tb = combine.b;
+      combine.a = { img: tb.img, file: tb.file, dataUrl: tb.dataUrl, scale: ta.scale, x: ta.x, y: ta.y };
+      combine.b = { img: ta.img, file: ta.file, dataUrl: ta.dataUrl, scale: tb.scale, x: tb.x, y: tb.y };
+      drawCombine();
+      say('#combineStatus', '已交换 A / B', false, true);
+    });
+
+    bind('#combineDir', 'change', () => { combine.dir = $('#combineDir').value; drawCombine(); });
+    bind('#combineGap', 'change', () => { combine.gap = parseInt($('#combineGap').value, 10) || 0; drawCombine(); });
+    bind('#combinePage', 'change', () => {
+      combine.pageKey = $('#combinePage').value;
+      $('#combineCustomWrap').classList.toggle('hidden', combine.pageKey !== 'custom');
+      drawCombine();
+    });
+    bind('#combineCustomW', 'change', () => { combine.customW = parseInt($('#combineCustomW').value, 10) || 210; drawCombine(); });
+    bind('#combineCustomH', 'change', () => { combine.customH = parseInt($('#combineCustomH').value, 10) || 297; drawCombine(); });
+    bind('#combineScaleA', 'input', () => {
+      if (combine.a) combine.a.scale = parseInt($('#combineScaleA').value, 10);
+      $('#combineScaleAVal').textContent = $('#combineScaleA').value;
+      drawCombine();
+    });
+    bind('#combineScaleB', 'input', () => {
+      if (combine.b) combine.b.scale = parseInt($('#combineScaleB').value, 10);
+      $('#combineScaleBVal').textContent = $('#combineScaleB').value;
+      drawCombine();
+    });
+    bind('#combineReset', 'click', () => {
+      [combine.a, combine.b].forEach(s => { if (s) { s.scale = 100; s.x = 0; s.y = 0; } });
+      $('#combineScaleA').value = 100; $('#combineScaleAVal').textContent = '100';
+      $('#combineScaleB').value = 100; $('#combineScaleBVal').textContent = '100';
+      drawCombine();
+      say('#combineStatus', '已重置缩放与位置');
+    });
+
+    (function bindCombineDrag() {
+      const cv = $('#combineCanvas');
+      if (!cv) return;
+      const toCanvasPos = (e) => {
+        const rect = cv.getBoundingClientRect();
+        return {
+          x: (e.clientX - rect.left) * cv.width / rect.width,
+          y: (e.clientY - rect.top) * cv.height / rect.height
+        };
+      };
+      cv.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        const p = toCanvasPos(e);
+        const srcs = combineSources();
+        for (let i = srcs.length - 1; i >= 0; i--) {
+          const s = srcs[i];
+          if (p.x >= s._dx && p.x <= s._dx + s._w && p.y >= s._dy && p.y <= s._dy + s._h) {
+            combine.dragging = {
+              target: s,
+              startX: p.x, startY: p.y,
+              origX: s.x || 0, origY: s.y || 0,
+              pid: e.pointerId
+            };
+            try { cv.setPointerCapture(e.pointerId); } catch (_) {}
+            e.preventDefault();
+            return;
+          }
+        }
+      }, { passive: false });
+      cv.addEventListener('pointermove', (e) => {
+        const d = combine.dragging;
+        if (!d || d.pid !== e.pointerId) return;
+        const p = toCanvasPos(e);
+        d.target.x = d.origX + (p.x - d.startX);
+        d.target.y = d.origY + (p.y - d.startY);
+        drawCombine();
+        e.preventDefault();
+      }, { passive: false });
+      const end = (e) => {
+        if (combine.dragging && e.pointerId === combine.dragging.pid) {
+          combine.dragging = null;
+          try { cv.releasePointerCapture(e.pointerId); } catch (_) {}
+        }
+      };
+      cv.addEventListener('pointerup', end);
+      cv.addEventListener('pointercancel', end);
+      cv.addEventListener('contextmenu', (e) => e.preventDefault());
+    })();
+
+    bind('#combineSaveImg', 'click', async () => {
+      const cv = $('#combineCanvas');
+      const btn = $('#combineSaveImg');
+      if (!cv || !cv.width || combineSources().length === 0) {
+        say('#combineStatus', '请先选择图片', true);
+        return;
+      }
+      btn.disabled = true;
+      try {
+        const blob = await new Promise((res, rej) => {
+          cv.toBlob((b) => b ? res(b) : rej(new Error('生成图片失败')), 'image/png');
+        });
+        await saveImageBlob(blob, '图片合成_' + Date.now() + '.png', (t, e2, o2) => say('#combineStatus', t, e2, o2));
+      } catch (err) {
+        say('#combineStatus', '保存失败：' + (err && err.message ? err.message : err), true);
+      } finally { btn.disabled = false; }
+    });
+
+    bind('#combineSavePdf', 'click', async () => {
+      const cv = $('#combineCanvas');
+      const btn = $('#combineSavePdf');
+      const srcs = combineSources();
+      if (!cv || !cv.width || srcs.length === 0) {
+        say('#combineStatus', '请先选择图片', true);
+        return;
+      }
+      btn.disabled = true;
+      say('#combineStatus', '正在生成 PDF…');
+      try {
+        const doc = await PDFDocument.create();
+        const K = 72 / 96;
+        let pwPt, phPt;
+        if (combine.pageKey === 'a4') { pwPt = 595.28; phPt = 841.89; }
+        else if (combine.pageKey === 'a4l') { pwPt = 841.89; phPt = 595.28; }
+        else if (combine.pageKey === 'custom') {
+          pwPt = combine.customW * 2.83465;
+          phPt = combine.customH * 2.83465;
+        } else { pwPt = cv.width * K; phPt = cv.height * K; }
+        const page = doc.addPage([pwPt, phPt]);
+        for (const s of srcs) {
+          const bytes = new Uint8Array(await s.file.arrayBuffer());
+          const isPng = (s.dataUrl || '').indexOf('image/png') === 0;
+          const embedded = isPng ? await doc.embedPng(bytes) : await doc.embedJpg(bytes);
+          page.drawImage(embedded, {
+            x: s._dx * K,
+            y: phPt - (s._dy + s._h) * K,
+            width: s._w * K,
+            height: s._h * K
+          });
+        }
+        const bytes = await doc.save();
+        const filename = '图片合成_' + Date.now() + '.pdf';
+        await sharedSave.saveAsPdf(bytes, filename, (t, e2, o2) => say('#combineStatus', t, e2, o2));
+      } catch (err) {
+        say('#combineStatus', '生成 PDF 失败：' + (err && err.message ? err.message : err), true);
+      } finally { btn.disabled = false; }
+    });
 
     /* ===== 模块 7：图片转 PDF ===== */
     const img2pdf = {
@@ -5607,6 +5995,10 @@
       });
       $('#extractResultCard').classList.remove('hidden');
     }
+
+    makeStageScrollable($('#splitStage'));
+    makeStageScrollable($('#cropStage'));
+    makeStageScrollable($('#idphotoCropStage'));
 
     let rt = null;
     window.addEventListener('resize', () => {
